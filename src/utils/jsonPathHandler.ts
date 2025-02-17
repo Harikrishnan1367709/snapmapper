@@ -6,17 +6,15 @@ export const handleJSONPath = (script: string, data: any): any => {
     // Parse JSON data if it's a string
     const jsonData = typeof data === 'string' ? JSON.parse(data) : data;
 
-    // Handle root access cases
-    if (script === '$' || script === 'jsonPath($,"$")') {
-      return jsonData;
-    }
-
-    // Check if the script includes an explicit array index after the expression
-    const hasExplicitIndex = script.match(/\[(\d+|\-\d+)\]$/);
-    let explicitIndex: number | null = null;
-    if (hasExplicitIndex) {
-      explicitIndex = parseInt(hasExplicitIndex[1]);
-      script = script.slice(0, hasExplicitIndex.index);
+    // Handle direct root property access (SnapLogic style)
+    // e.g., $ACTION should work directly
+    if (script.match(/^\$[A-Za-z]/)) {
+      const propertyName = script.substring(1);
+      if (Array.isArray(jsonData)) {
+        const results = jsonData.map(item => item[propertyName]);
+        return results.length === 1 ? results[0] : results;
+      }
+      return jsonData[propertyName];
     }
 
     // Normalize the expression
@@ -38,24 +36,21 @@ export const handleJSONPath = (script: string, data: any): any => {
     // Handle direct property access (e.g., $ACTION -> $.ACTION)
     normalizedExpression = normalizedExpression.replace(/\$([A-Za-z])/g, '$.$1');
 
-    // Generic array property handling
-    // Look for property access patterns that might be accessing arrays
+    // Handle array properties (like MAST_UPL)
     const propertyAccesses = normalizedExpression.match(/\$\.([^.\[]+)\.?/g);
     if (propertyAccesses) {
       for (const propAccess of propertyAccesses) {
         const prop = propAccess.replace(/^\$\./, '').replace(/\.$/, '');
         // Check if this property exists and is an array in the data
-        const tempResult = JSONPath({ 
-          path: `$['${prop}']`, 
-          json: jsonData 
-        });
-        
-        if (tempResult && Array.isArray(tempResult[0]) && !propAccess.includes('[')) {
-          // If it's an array and doesn't already have array access notation, add [*]
-          normalizedExpression = normalizedExpression.replace(
-            new RegExp(`${prop}\\.`), 
-            `${prop}[*].`
-          );
+        if (Array.isArray(jsonData)) {
+          const firstItem = jsonData[0];
+          if (firstItem && Array.isArray(firstItem[prop]) && !propAccess.includes('[')) {
+            // If it's an array and doesn't already have array access notation, add [*]
+            normalizedExpression = normalizedExpression.replace(
+              new RegExp(`${prop}\\.`),
+              `${prop}[*].`
+            );
+          }
         }
       }
     }
@@ -65,16 +60,11 @@ export const handleJSONPath = (script: string, data: any): any => {
       normalizedExpression = normalizedExpression.replace(/\.\./g, '..');
     }
 
-    // Handle root array access
-    if (!normalizedExpression.startsWith('$[') && Array.isArray(jsonData)) {
-      normalizedExpression = normalizedExpression.replace('$', '$[*]');
-    }
-
     // Execute JSONPath query with options
     const result = JSONPath({
       path: normalizedExpression,
       json: jsonData,
-      wrap: false // Don't wrap single results in an array
+      wrap: false
     });
 
     // Handle empty results
@@ -82,17 +72,7 @@ export const handleJSONPath = (script: string, data: any): any => {
       return null;
     }
 
-    // Handle explicit index access (e.g., [0] at the end of expression)
-    if (explicitIndex !== null) {
-      if (Array.isArray(result)) {
-        // Handle negative indices
-        const actualIndex = explicitIndex < 0 ? result.length + explicitIndex : explicitIndex;
-        return result[actualIndex] ?? null;
-      }
-      return null;
-    }
-
-    // Handle wildcard array results
+    // Handle array results
     if (normalizedExpression.includes('[*]')) {
       return Array.isArray(result) ? result : [result];
     }
