@@ -38,17 +38,30 @@ export const handleJSONPath = (script: string, data: any): any => {
     // Handle direct property access (e.g., $ACTION -> $.ACTION)
     normalizedExpression = normalizedExpression.replace(/\$([A-Za-z])/g, '$.$1');
 
-    // Handle MAST_UPL specific cases
-    if (normalizedExpression.includes('MAST_UPL')) {
-      // Handle array wildcards for MAST_UPL
-      if (!normalizedExpression.includes('[*]')) {
-        normalizedExpression = normalizedExpression.replace(/MAST_UPL\./, 'MAST_UPL[*].');
+    // Generic array property handling
+    // Look for property access patterns that might be accessing arrays
+    const propertyAccesses = normalizedExpression.match(/\$\.([^.\[]+)\.?/g);
+    if (propertyAccesses) {
+      for (const propAccess of propertyAccesses) {
+        const prop = propAccess.replace(/^\$\./, '').replace(/\.$/, '');
+        // Check if this property exists and is an array in the data
+        const tempResult = JSONPath({ 
+          path: `$['${prop}']`, 
+          json: jsonData 
+        });
+        
+        if (tempResult && Array.isArray(tempResult[0]) && !propAccess.includes('[')) {
+          // If it's an array and doesn't already have array access notation, add [*]
+          normalizedExpression = normalizedExpression.replace(
+            new RegExp(`${prop}\\.`), 
+            `${prop}[*].`
+          );
+        }
       }
     }
 
     // Handle recursive search
     if (normalizedExpression.includes('..')) {
-      // Ensure proper format for recursive search
       normalizedExpression = normalizedExpression.replace(/\.\./g, '..');
     }
 
@@ -81,8 +94,6 @@ export const handleJSONPath = (script: string, data: any): any => {
 
     // Handle wildcard array results
     if (normalizedExpression.includes('[*]')) {
-      // If the result is already an array and we used a wildcard,
-      // return the array as is
       return Array.isArray(result) ? result : [result];
     }
 
