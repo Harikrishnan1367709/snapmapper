@@ -6,15 +6,9 @@ export const handleJSONPath = (script: string, data: any): any => {
     // Parse JSON data if it's a string
     const jsonData = typeof data === 'string' ? JSON.parse(data) : data;
 
-    // Handle direct root property access (SnapLogic style)
-    // e.g., $ACTION should work directly
-    if (script.match(/^\$[A-Za-z]/)) {
-      const propertyName = script.substring(1);
-      if (Array.isArray(jsonData)) {
-        const results = jsonData.map(item => item[propertyName]);
-        return results.length === 1 ? results[0] : results;
-      }
-      return jsonData[propertyName];
+    // Handle root access cases
+    if (script === '$' || script === 'jsonPath($,"$")') {
+      return jsonData;
     }
 
     // Normalize the expression
@@ -34,31 +28,49 @@ export const handleJSONPath = (script: string, data: any): any => {
     normalizedExpression = normalizedExpression.replace(/^["'](.+)["']$/, '$1');
 
     // Handle direct property access (e.g., $ACTION -> $.ACTION)
+    if (normalizedExpression.match(/^\$[A-Za-z]/)) {
+      const propertyName = normalizedExpression.substring(1);
+      // If it's a simple property access without filters or wildcards
+      if (!propertyName.includes('[') && !propertyName.includes('*')) {
+        if (Array.isArray(jsonData)) {
+          const results = jsonData.map(item => item[propertyName]);
+          return results.length === 1 ? results[0] : results;
+        }
+        return jsonData[propertyName];
+      }
+    }
+
+    // Convert direct access syntax to JSONPath syntax
     normalizedExpression = normalizedExpression.replace(/\$([A-Za-z])/g, '$.$1');
 
-    // Handle array properties (like MAST_UPL)
+    // Handle array properties
     const propertyAccesses = normalizedExpression.match(/\$\.([^.\[]+)\.?/g);
     if (propertyAccesses) {
       for (const propAccess of propertyAccesses) {
         const prop = propAccess.replace(/^\$\./, '').replace(/\.$/, '');
-        // Check if this property exists and is an array in the data
         if (Array.isArray(jsonData)) {
           const firstItem = jsonData[0];
-          if (firstItem && Array.isArray(firstItem[prop]) && !propAccess.includes('[')) {
-            // If it's an array and doesn't already have array access notation, add [*]
+          // Add [*] for array properties that don't already have array notation
+          if (firstItem && Array.isArray(firstItem[prop]) && !normalizedExpression.includes(`${prop}[`)) {
             normalizedExpression = normalizedExpression.replace(
-              new RegExp(`${prop}\\.`),
-              `${prop}[*].`
+              new RegExp(`${prop}(?=\\.|$)`),
+              `${prop}[*]`
             );
           }
         }
       }
     }
 
-    // Handle recursive search
-    if (normalizedExpression.includes('..')) {
-      normalizedExpression = normalizedExpression.replace(/\.\./g, '..');
+    // Handle filter expressions
+    if (normalizedExpression.includes('?(@')) {
+      // Ensure proper array context for filters
+      normalizedExpression = normalizedExpression.replace(
+        /(\[[^\]]*\])\[\?\(@/g,
+        '$1[?(@'
+      );
     }
+
+    console.log('Normalized expression:', normalizedExpression);
 
     // Execute JSONPath query with options
     const result = JSONPath({
@@ -66,6 +78,8 @@ export const handleJSONPath = (script: string, data: any): any => {
       json: jsonData,
       wrap: false
     });
+
+    console.log('Query result:', result);
 
     // Handle empty results
     if (!result || (Array.isArray(result) && result.length === 0)) {
@@ -86,6 +100,7 @@ export const handleJSONPath = (script: string, data: any): any => {
 
     return result;
   } catch (error) {
+    console.error('JSONPath evaluation error:', error);
     if (error instanceof Error) {
       throw new Error(`JSONPath evaluation failed: ${error.message}`);
     }
