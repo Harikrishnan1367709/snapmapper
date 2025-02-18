@@ -4,8 +4,23 @@ import { useToast } from "@/hooks/use-toast";
 import { handleJSONPath } from "@/utils/jsonPathHandler";
 
 const Index = () => {
-  const [jsonInput, setJsonInput] = useState("");
-  const [scriptInput, setScriptInput] = useState("");
+  const [jsonInput, setJsonInput] = useState(`{
+  "store": {
+    "book": [
+      {
+        "title": "Book 1",
+        "author": "Author 1",
+        "price": 9.99
+      },
+      {
+        "title": "Book 2",
+        "author": "Author 2",
+        "price": 12.99
+      }
+    ]
+  }
+}`);
+  const [scriptInput, setScriptInput] = useState("$store.book[*].author");
   const [output, setOutput] = useState("");
   const { toast } = useToast();
 

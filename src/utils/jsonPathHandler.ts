@@ -16,10 +16,11 @@ export const handleJSONPath = (script: string, data: any): any => {
 
     // First phase: Expression preprocessing
     const components = parseExpression(script);
-    let normalizedExpression = normalizeExpression(components);
+    let normalizedExpression = normalizeExpression(script);
 
     console.log('Original expression:', script);
     console.log('Normalized expression:', normalizedExpression);
+    console.log('Input data:', jsonData);
 
     // Execute JSONPath query with options
     const result = JSONPath({
@@ -49,19 +50,8 @@ function parseExpression(script: string): ExpressionComponents {
     isDirect: false
   };
 
-  // Check if it's a jsonPath function call
-  if (script.startsWith('jsonPath(')) {
-    components.isJsonPathFunc = true;
-    const pathMatch = script.match(/jsonPath\(\$,\s*["'](.+?)["']\)/);
-    if (pathMatch) {
-      components.path = pathMatch[1];
-    } else {
-      throw new Error('Invalid jsonPath function syntax');
-    }
-  }
-
-  // Check for direct property access ($property)
-  if (script.match(/^\$[A-Za-z][^.[\s]*/)) {
+  // Check if expression starts with $ and contains a property name
+  if (script.startsWith('$') && !script.startsWith('$.')) {
     components.isDirect = true;
   }
 
@@ -76,91 +66,68 @@ function parseExpression(script: string): ExpressionComponents {
   return components;
 }
 
-function normalizeExpression(components: ExpressionComponents): string {
-  let normalized = components.path;
-
-  // Handle root access cases
-  if (normalized === '$' || normalized === 'jsonPath($,"$")') {
+function normalizeExpression(script: string): string {
+  // Handle root access
+  if (script === '$') {
     return '$';
   }
 
-  // Remove quotes if present
-  normalized = normalized.replace(/^["'](.+)["']$/, '$1');
-
-  // Handle direct property access ($property -> $.property)
-  if (components.isDirect) {
-    // Split the path into segments
-    const segments = normalized.split(/[\.\[]/).filter(Boolean);
-    let result = '$';
-
-    for (let i = 0; i < segments.length; i++) {
-      const segment = segments[i];
-      
-      // Handle array access
-      if (segment.includes(']')) {
-        result += segment;
-      } else if (segment.startsWith('$')) {
-        // First segment with $ prefix
-        result += '.' + segment.substring(1);
-      } else {
-        // Regular property
-        result += '.' + segment;
-      }
-    }
-
-    normalized = result;
+  // Convert direct property access to standard JSONPath
+  if (script.startsWith('$') && !script.startsWith('$.')) {
+    script = '$.' + script.substring(1);
   }
 
   // Handle array access
-  if (components.hasArrayAccess) {
+  const preserveArrays = (expr: string): string => {
     // Preserve array wildcards
-    normalized = normalized.replace(/\[\*\]/g, '[*]');
-    
+    expr = expr.replace(/\[\*\]/g, '[*]');
     // Preserve array indices
-    normalized = normalized.replace(/\[(\d+)\]/g, '[$1]');
-  }
+    expr = expr.replace(/\[(\d+)\]/g, '[$1]');
+    return expr;
+  };
 
   // Handle filter expressions
-  if (components.hasFilter) {
-    // Ensure filter expressions are preserved exactly
-    const filterMatches = normalized.match(/\[\?\(.*?\)\]/g) || [];
-    for (const filter of filterMatches) {
-      // Temporarily replace filter to protect it during other transformations
-      const placeholder = `__FILTER_${Math.random()}_`;
-      normalized = normalized.replace(filter, placeholder);
-      // Restore the filter after other transformations
-      normalized = normalized.replace(placeholder, filter);
-    }
-  }
+  const preserveFilters = (expr: string): string => {
+    const filters = expr.match(/\[\?\(.*?\)\]/g) || [];
+    let result = expr;
+    filters.forEach((filter, index) => {
+      const placeholder = `__FILTER_${index}_`;
+      result = result.replace(filter, placeholder);
+    });
+    result = preserveArrays(result);
+    filters.forEach((filter, index) => {
+      const placeholder = `__FILTER_${index}_`;
+      result = result.replace(placeholder, filter);
+    });
+    return result;
+  };
 
-  // Ensure proper dot notation
-  normalized = normalized.replace(/([A-Za-z0-9_])\[/g, '$1.[');
+  // Apply all transformations
+  let normalized = script;
+  normalized = preserveFilters(normalized);
+  normalized = preserveArrays(normalized);
 
   return normalized;
 }
 
 function processResult(result: any, components: ExpressionComponents): any {
   // Handle empty results
-  if (result === undefined || result === null || 
-      (Array.isArray(result) && result.length === 0)) {
+  if (result === undefined || result === null) {
     return null;
   }
 
   // Handle array results
-  if (components.hasArrayAccess || components.path.includes('[*]')) {
-    return Array.isArray(result) ? result : [result];
-  }
-
-  // Return single value for non-wildcard queries
-  if (Array.isArray(result) && result.length === 1 && 
-      !components.path.includes('*') && 
-      !components.path.includes('..')) {
-    return result[0];
-  }
-
-  // Handle direct property access results
-  if (components.isDirect && Array.isArray(result) && result.length === 1) {
-    return result[0];
+  if (Array.isArray(result)) {
+    // Return array for wildcard queries or explicit array access
+    if (components.hasArrayAccess || components.path.includes('[*]')) {
+      return result;
+    }
+    // Return single value for non-wildcard queries that happened to return an array
+    if (result.length === 1) {
+      return result[0];
+    }
+    // Return the array if it contains multiple values
+    return result;
   }
 
   return result;
