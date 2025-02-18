@@ -20,17 +20,20 @@ export const handleJSONPath = (script: string, data: any): any => {
 
     console.log('Original expression:', script);
     console.log('Normalized expression:', normalizedExpression);
+    console.log('Expression components:', components);
     console.log('Input data:', jsonData);
 
-    // Execute JSONPath query with options
+    // Execute JSONPath query
     const result = JSONPath({
       path: normalizedExpression,
-      json: jsonData,
-      wrap: false
+      json: jsonData
     });
 
-    console.log('Query result:', result);
-    return processResult(result, components);
+    console.log('Raw query result:', result);
+    const processedResult = processResult(result, components);
+    console.log('Processed result:', processedResult);
+    
+    return processedResult;
 
   } catch (error) {
     console.error('JSONPath evaluation error:', error);
@@ -42,28 +45,16 @@ export const handleJSONPath = (script: string, data: any): any => {
 };
 
 function parseExpression(script: string): ExpressionComponents {
-  const components: ExpressionComponents = {
+  return {
     isJsonPathFunc: false,
     path: script,
-    hasArrayAccess: false,
-    hasFilter: false,
-    isDirect: false
+    hasArrayAccess: script.includes('[') && (
+      script.includes('[*]') || 
+      /\[\d+\]/.test(script)
+    ),
+    hasFilter: script.includes('[?('),
+    isDirect: script === '$' || (script.startsWith('$') && !script.startsWith('$.'))
   };
-
-  // Check if expression starts with $ and contains a property name
-  if (script.startsWith('$') && !script.startsWith('$.')) {
-    components.isDirect = true;
-  }
-
-  // Detect array access and filters
-  components.hasArrayAccess = script.includes('[') && (
-    script.includes('[*]') || 
-    script.match(/\[\d+\]/) !== null
-  );
-  
-  components.hasFilter = script.includes('[?(');
-
-  return components;
 }
 
 function normalizeExpression(script: string): string {
@@ -72,48 +63,62 @@ function normalizeExpression(script: string): string {
     return '$';
   }
 
+  let normalized = script;
+
   // Convert direct property access to standard JSONPath
-  if (script.startsWith('$') && !script.startsWith('$.')) {
-    script = '$.' + script.substring(1);
+  if (normalized.startsWith('$') && !normalized.startsWith('$.')) {
+    const parts = normalized.split(/[.[\]]/).filter(Boolean);
+    normalized = '$';
+    for (let part of parts) {
+      if (part.startsWith('$')) {
+        part = part.substring(1);
+      }
+      if (part) {
+        normalized += '.' + part;
+      }
+    }
   }
 
   // Handle array access
   const preserveArrays = (expr: string): string => {
-    // Preserve array wildcards
-    expr = expr.replace(/\[\*\]/g, '[*]');
-    // Preserve array indices
-    expr = expr.replace(/\[(\d+)\]/g, '[$1]');
-    return expr;
+    return expr.replace(/\[(\*|\d+)\]/g, '[$1]');
   };
 
   // Handle filter expressions
   const preserveFilters = (expr: string): string => {
-    const filters = expr.match(/\[\?\(.*?\)\]/g) || [];
+    const filterRegex = /(\[\?\(.*?\)\])/g;
+    const filters = expr.match(filterRegex) || [];
     let result = expr;
+
     filters.forEach((filter, index) => {
-      const placeholder = `__FILTER_${index}_`;
+      const placeholder = `__FILTER_${index}__`;
       result = result.replace(filter, placeholder);
     });
+
     result = preserveArrays(result);
+
     filters.forEach((filter, index) => {
-      const placeholder = `__FILTER_${index}_`;
+      const placeholder = `__FILTER_${index}__`;
       result = result.replace(placeholder, filter);
     });
+
     return result;
   };
 
-  // Apply all transformations
-  let normalized = script;
   normalized = preserveFilters(normalized);
-  normalized = preserveArrays(normalized);
 
+  console.log('Final normalized expression:', normalized);
   return normalized;
 }
 
 function processResult(result: any, components: ExpressionComponents): any {
-  // Handle empty results
-  if (result === undefined || result === null) {
+  if (result === undefined || result === null || result.length === 0) {
     return null;
+  }
+
+  // Handle root query
+  if (components.path === '$') {
+    return result;
   }
 
   // Handle array results
@@ -122,8 +127,8 @@ function processResult(result: any, components: ExpressionComponents): any {
     if (components.hasArrayAccess || components.path.includes('[*]')) {
       return result;
     }
-    // Return single value for non-wildcard queries that happened to return an array
-    if (result.length === 1) {
+    // Return single value for direct property access that returned an array
+    if (result.length === 1 && !components.hasArrayAccess) {
       return result[0];
     }
     // Return the array if it contains multiple values

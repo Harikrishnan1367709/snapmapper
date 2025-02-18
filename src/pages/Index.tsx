@@ -20,7 +20,7 @@ const Index = () => {
     ]
   }
 }`);
-  const [scriptInput, setScriptInput] = useState("$store.book[*].author");
+  const [scriptInput, setScriptInput] = useState("$.store.book[*].author");
   const [output, setOutput] = useState("");
   const { toast } = useToast();
 
@@ -28,9 +28,11 @@ const Index = () => {
     try {
       // Validate JSON input
       const parsedJson = JSON.parse(jsonInput);
+      console.log('Executing JSONPath with:', { script: scriptInput, data: parsedJson });
       
       // Execute JSONPath
       const result = handleJSONPath(scriptInput, parsedJson);
+      console.log('JSONPath result:', result);
       
       // Format and display result
       setOutput(JSON.stringify(result, null, 2));
@@ -40,6 +42,7 @@ const Index = () => {
         description: "JSONPath executed successfully",
       });
     } catch (error) {
+      console.error('JSONPath execution error:', error);
       toast({
         variant: "destructive",
         title: "Error",
