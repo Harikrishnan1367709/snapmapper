@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #1B4E8D;
+      }
+
+      .cls-2 {
+        fill: none;
+      }
+    </style>
+  </defs>
+  <title>toolbarExpand_2-Active</title>
+  <g id="Layer_2" data-name="Layer 2">
+    <g id="Layer_1-2" data-name="Layer 1">
+      <path class="cls-1" d="M4.35,10.53,16.19,3.68A1.5,1.5,0,0,1,18.44,5V18.65A1.5,1.5,0,0,1,16.19,20L4.35,13.12A1.5,1.5,0,0,1,4.35,10.53Z"/>
+      <rect class="cls-2" width="24" height="24"/>
+    </g>
+  </g>
+</svg>
