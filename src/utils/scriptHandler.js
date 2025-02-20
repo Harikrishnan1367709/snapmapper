@@ -1,3 +1,4 @@
+
 import { JsonPathEvaluator } from './jsonPathEvaluator';
 import { snaplogicHelpers } from './snaplogicHelpers';
 
@@ -20,186 +21,118 @@ export class ScriptHandler {
   }
 
   parseScript(script) {
-    // Handle JSONPath expressions
-    if (script.startsWith('$.')) {
-      return this.jsonPathEvaluator.evaluate(script);
+    // Handle direct JSONPath queries
+    if (script.startsWith('jsonPath(')) {
+      return this.handleJsonPathFunction(script);
     }
 
-    // Handle helper function calls
-    if (script.startsWith('$')) {
-      return this.evaluateHelper(script);
+    // Handle direct variable access ($name or $MAST_UPL)
+    if (script.startsWith('$') && !script.includes('.')) {
+      const varName = script.substring(1);
+      return this.data[varName];
     }
 
-    // Handle object literals
-    if (script.startsWith('{')) {
-      return this.parseObject(script);
+    // Handle chained function calls
+    if (script.includes('.') && script.startsWith('$')) {
+      return this.handleChainedCalls(script);
     }
 
-    // Handle array literals
-    if (script.startsWith('[')) {
-      return this.parseArray(script);
+    // Handle operators and expressions
+    if (this.containsOperators(script)) {
+      return this.evaluateExpression(script);
+    }
+
+    // Handle array or object literals
+    if (script.startsWith('[') || script.startsWith('{')) {
+      return this.parseComplexLiteral(script);
     }
 
     // Handle primitive values
     return this.parsePrimitive(script);
   }
 
-  evaluateHelper(expr) {
-    const match = expr.match(/\$(\w+)\.(\w+)\((.*)\)/s);
+  handleJsonPathFunction(script) {
+    // Extract path from jsonPath($, "$.name") format
+    const match = script.match(/jsonPath\(\$,\s*["'](.+)["']\)/);
     if (!match) {
-      throw new Error(`Invalid helper expression: ${expr}`);
+      throw new Error('Invalid JSONPath function format');
     }
-
-    const [, category, method, argsString] = match;
-    const helper = snaplogicHelpers[category]?.[method];
-    
-    if (!helper) {
-      throw new Error(`Unknown helper method: ${category}.${method}`);
-    }
-
-    const args = this.parseArguments(argsString);
-    return helper(...args);
+    return this.jsonPathEvaluator.evaluate(match[1]);
   }
 
-  parseArguments(argsString) {
-    if (!argsString.trim()) return [];
+  handleChainedCalls(script) {
+    // Remove initial $ and split by dots
+    const parts = script.substring(1).split('.');
+    let result = this.data[parts[0]];
 
-    const args = [];
-    let currentArg = '';
-    let depth = 0;
-    let inString = false;
-    let stringChar = '';
-
-    for (let i = 0; i < argsString.length; i++) {
-      const char = argsString[i];
-
-      if ((char === '"' || char === "'") && argsString[i - 1] !== '\\') {
-        if (!inString) {
-          inString = true;
-          stringChar = char;
-        } else if (char === stringChar) {
-          inString = false;
+    // Apply each function in the chain
+    for (let i = 1; i < parts.length; i++) {
+      const functionCall = parts[i];
+      if (typeof result === 'string') {
+        if (functionCall === 'toUpperCase()') {
+          result = result.toUpperCase();
+        } else if (functionCall === 'toLowerCase()') {
+          result = result.toLowerCase();
+        } else if (functionCall === 'trim()') {
+          result = result.trim();
+        }
+      } else if (Array.isArray(result)) {
+        // Handle array methods
+        if (functionCall === 'length') {
+          result = result.length;
+        } else if (functionCall.startsWith('join')) {
+          const separator = functionCall.match(/join\(['"](.*)["']\)/)?.[1] || ',';
+          result = result.join(separator);
         }
       }
-
-      if (!inString) {
-        if (char === '{' || char === '[') depth++;
-        if (char === '}' || char === ']') depth--;
-      }
-
-      if (char === ',' && depth === 0 && !inString) {
-        args.push(this.parseScript(currentArg.trim()));
-        currentArg = '';
-        continue;
-      }
-
-      currentArg += char;
     }
-
-    if (currentArg.trim()) {
-      args.push(this.parseScript(currentArg.trim()));
-    }
-
-    return args;
-  }
-
-  parseObject(script) {
-    const content = script.slice(1, -1).trim();
-    if (!content) return {};
-
-    const result = {};
-    let currentKey = '';
-    let currentValue = '';
-    let depth = 0;
-    let inString = false;
-    let stringChar = '';
-    let collectingKey = true;
-
-    for (let i = 0; i < content.length; i++) {
-      const char = content[i];
-
-      if ((char === '"' || char === "'") && content[i - 1] !== '\\') {
-        if (!inString) {
-          inString = true;
-          stringChar = char;
-        } else if (char === stringChar) {
-          inString = false;
-        }
-      }
-
-      if (!inString) {
-        if (char === '{' || char === '[') depth++;
-        if (char === '}' || char === ']') depth--;
-      }
-
-      if (char === ':' && depth === 0 && !inString && collectingKey) {
-        collectingKey = false;
-        continue;
-      }
-
-      if (char === ',' && depth === 0 && !inString) {
-        result[currentKey.trim()] = this.parseScript(currentValue.trim());
-        currentKey = '';
-        currentValue = '';
-        collectingKey = true;
-        continue;
-      }
-
-      if (collectingKey) {
-        currentKey += char;
-      } else {
-        currentValue += char;
-      }
-    }
-
-    if (currentKey) {
-      result[currentKey.trim()] = this.parseScript(currentValue.trim());
-    }
-
     return result;
   }
 
-  parseArray(script) {
-    const content = script.slice(1, -1).trim();
-    if (!content) return [];
+  containsOperators(script) {
+    const operators = ['+', '-', '*', '/', '>', '<', '==', '===', '!=', '!==', '&&', '||'];
+    return operators.some(op => script.includes(op));
+  }
 
-    const result = [];
-    let currentValue = '';
-    let depth = 0;
-    let inString = false;
-    let stringChar = '';
+  evaluateExpression(script) {
+    // Replace $variables with their values
+    const processedScript = script.replace(/\$([a-zA-Z_][a-zA-Z0-9_]*)/g, (match, varName) => {
+      const value = this.data[varName];
+      if (typeof value === 'string') return `"${value}"`;
+      return JSON.stringify(value);
+    });
 
-    for (let i = 0; i < content.length; i++) {
-      const char = content[i];
-
-      if ((char === '"' || char === "'") && content[i - 1] !== '\\') {
-        if (!inString) {
-          inString = true;
-          stringChar = char;
-        } else if (char === stringChar) {
-          inString = false;
-        }
-      }
-
-      if (!inString) {
-        if (char === '{' || char === '[') depth++;
-        if (char === '}' || char === ']') depth--;
-      }
-
-      if (char === ',' && depth === 0 && !inString) {
-        result.push(this.parseScript(currentValue.trim()));
-        currentValue = '';
-        continue;
-      }
-
-      currentValue += char;
+    // Handle ternary operators
+    if (processedScript.includes('?')) {
+      const [condition, rest] = processedScript.split('?');
+      const [trueCase, falseCase] = rest.split(':');
+      return this.evaluateExpression(condition) 
+        ? this.parseScript(trueCase.trim())
+        : this.parseScript(falseCase.trim());
     }
 
-    if (currentValue.trim()) {
-      result.push(this.parseScript(currentValue.trim()));
+    // Safely evaluate the expression
+    try {
+      return Function('"use strict";return (' + processedScript + ')')();
+    } catch (error) {
+      throw new Error(`Invalid expression: ${error.message}`);
     }
+  }
 
-    return result;
+  parseComplexLiteral(script) {
+    try {
+      // Handle arrays and objects
+      if (script.startsWith('[') || script.startsWith('{')) {
+        // Replace $variables with their actual values
+        const processedScript = script.replace(/\$([a-zA-Z_][a-zA-Z0-9_]*)/g, (match, varName) => {
+          return JSON.stringify(this.data[varName]);
+        });
+        return JSON.parse(processedScript);
+      }
+      return JSON.parse(script);
+    } catch (error) {
+      throw new Error(`Invalid array/object literal: ${error.message}`);
+    }
   }
 
   parsePrimitive(value) {
