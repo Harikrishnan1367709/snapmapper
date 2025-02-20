@@ -1,4 +1,3 @@
-
 import { JsonPathEvaluator } from './jsonPathEvaluator';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -12,7 +11,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(localizedFormat);
 
-export class SnaplogicFunctionsHandler {
+class SnaplogicFunctionsHandler {
   constructor() {
     this.jsonPathEvaluator = null;
     this.data = null;
@@ -252,3 +251,5 @@ export class SnaplogicFunctionsHandler {
     return value;
   }
 }
+
+export default SnaplogicFunctionsHandler;
