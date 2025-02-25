@@ -14,12 +14,38 @@ const HighlightedScript = ({ content, onChange, activeLineIndex }) => {
       noSuggestionDiagnostics: true
     });
 
-    // Register completion provider for method suggestions
+    // Register completion provider for $ suggestions
     monaco.languages.registerCompletionItemProvider('javascript', {
       provideCompletionItems: (model, position) => {
         const lineContent = model.getLineContent(position.lineNumber);
         const wordUntilPosition = model.getWordUntilPosition(position);
 
+        // Handle $ trigger
+        if (lineContent.charAt(wordUntilPosition.startColumn - 2) === '$') {
+          // Get the available JSON keys from the input
+          try {
+            const jsonInput = JSON.parse(content);
+            const keys = Object.keys(jsonInput);
+            
+            return {
+              suggestions: keys.map(key => ({
+                label: key,
+                kind: monaco.languages.CompletionItemKind.Field,
+                insertText: key,
+                range: {
+                  startLineNumber: position.lineNumber,
+                  endLineNumber: position.lineNumber,
+                  startColumn: wordUntilPosition.startColumn,
+                  endColumn: wordUntilPosition.endColumn
+                }
+              }))
+            };
+          } catch (e) {
+            return { suggestions: [] };
+          }
+        }
+
+        // Handle . trigger (keep existing functionality)
         if (lineContent.charAt(wordUntilPosition.startColumn - 2) === '.') {
           const varName = lineContent.substring(0, wordUntilPosition.startColumn - 2);
           
@@ -48,7 +74,36 @@ const HighlightedScript = ({ content, onChange, activeLineIndex }) => {
         }
         return { suggestions: [] };
       },
-      triggerCharacters: ['.']
+      triggerCharacters: ['.', '$']
+    });
+
+    // Add comment line handling
+    editor.onDidChangeModelContent(() => {
+      const model = editor.getModel();
+      const decorations = [];
+      const lines = model.getLinesContent();
+      
+      lines.forEach((line, index) => {
+        if (line.trim().startsWith('//')) {
+          decorations.push({
+            range: new monaco.Range(index + 1, 1, index + 1, line.length + 1),
+            options: {
+              isWholeLine: true,
+              className: 'commentedLine',
+              inlineClassName: 'commentedText'
+            }
+          });
+        }
+      });
+      
+      editor.deltaDecorations([], decorations);
+      
+      // Skip execution of commented lines
+      const newValue = lines
+        .filter(line => !line.trim().startsWith('//'))
+        .join('\n');
+      
+      onChange(newValue);
     });
 
     // Define custom theme for script syntax highlighting
@@ -56,17 +111,15 @@ const HighlightedScript = ({ content, onChange, activeLineIndex }) => {
       base: 'vs',
       inherit: false,
       rules: [
-        // JSONPath specific rules
         { token: 'jsonpath', foreground: '800000', fontStyle: 'bold' },
         { token: 'delimiter', foreground: '000000' },
         { token: 'property', foreground: '001080' },
-        
-        // General syntax rules
         { token: 'string', foreground: '0451A5' },
         { token: 'number', foreground: '098658' },
         { token: 'operator', foreground: '000000' },
         { token: 'function', foreground: '795E26' },
-        { token: 'variable', foreground: '001080' }
+        { token: 'variable', foreground: '001080' },
+        { token: 'comment', foreground: '008000', fontStyle: 'italic' }
       ],
       colors: {
         'editor.foreground': '#000000',
@@ -79,7 +132,7 @@ const HighlightedScript = ({ content, onChange, activeLineIndex }) => {
       }
     });
 
-    // Configure editor to look like a textarea
+    // Configure editor options
     editor.updateOptions({
       lineNumbers: 'on',
       fontSize: 13,
@@ -167,6 +220,14 @@ const HighlightedScript = ({ content, onChange, activeLineIndex }) => {
           .monaco-editor .squiggly-error,
           .monaco-editor .error-decoration {
             display: none !important;
+          }
+          .commentedLine {
+            opacity: 0.6;
+            background-color: #f5f5f5;
+          }
+          .commentedText {
+            color: #008000 !important;
+            font-style: italic;
           }
         `
       }} />
