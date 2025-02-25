@@ -1,3 +1,4 @@
+<lov-code>
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { JSONPath } from 'jsonpath-plus';
 import { ChevronDown, Upload, Download, Terminal, Book, ChevronLeft } from "lucide-react";
@@ -10,7 +11,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger
-} from "../components/ui/tooltip";
+} from "./ui/tooltip";
 
 import {
   Dialog,
@@ -20,12 +21,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from "../components/ui/dialog";
+} from "./ui/dialog";
 
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Button } from '../components/ui/button';
-import FormatDropdown from '../FormatDropdown';
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Button } from './ui/button';
+import FormatDropdown from './FormatDropdown';
 import { handleJSON } from '../utils/jsonHandler';
 import _ from 'lodash';
 import moment from 'moment';
@@ -702,6 +703,7 @@ const UpdatedCode = () => {
   const handleFormatChange = (newFormat) => {
     setFormat(newFormat);
   };
+  const [newScript, setNewScript] = useState("");
 
   return (
     <div className="flex flex-col h-screen w-screen bg-white overflow-hidden">
@@ -734,24 +736,196 @@ const UpdatedCode = () => {
               strokeWidth="2"
             />
           </svg>
+          <div className="flex items-center space-x-5">
+            <a
+              href={getNavLink('playground')}
+              className={`text-gray-800 hover:text-blue-500 font-bold text-sm ${activeNavItem === 'playground' ? 'active' : ''}`}
+              onClick={() => handleNavClick('playground')}
+            >
+              Playground
+            </a>
+            <a
+              href={getNavLink('blogs')}
+              className="text-gray-600 hover:text-blue-500 text-sm"
+              target="_blank"
+            >
+              Blogs
+            </a>
+            <a
+              href={getNavLink('docs')}
+              className="text-gray-600 hover:text-blue-500 text-sm"
+              target="_blank"
+            >
+              Docs
+            </a>
+            <a
+              href={getNavLink('tutorial')}
+              className="text-gray-600 hover:text-blue-500 text-sm"
+              target="_blank"
+            >
+              Tutorial
+            </a>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-4">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="rounded-md bg-blue-600 text-white px-4 py-2 text-sm font-bold hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                  Sign In
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Coming Soon!</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
 
-      <div className="flex-1 flex">
-        <div style={resizableStyles(leftWidth, 'left')} className="border-r">
-          {/* Panel content */}
+      <div className="flex-1 flex" style={responsiveStyles.mainContainer}>
+        <div
+          style={{ ...resizableStyles(leftWidth, 'left'), ...responsiveStyles.panels }}
+          className="border-r overflow-y-auto"
+        >
+          <div className="flex items-center justify-between p-4 border-b">
+            <h2 className="text-lg font-semibold">Inputs</h2>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline">Add Input</Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Add Input</DialogTitle>
+                  <DialogDescription>
+                    Create a new Input to use in the playground.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="name" className="text-right">
+                      Name
+                    </Label>
+                    <Input id="name" value={newInput} onChange={handleInputChange} className="col-span-3" />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="submit" onClick={handleCreateInput} disabled={isCreateInputDisabled}>Create</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+          <div className="p-4">
+            {isPayloadView ? (
+              <div className="flex items-center space-x-2 mb-4">
+                <Button variant="ghost" onClick={handleBackClick}>
+                  <ChevronLeft className="w-4 h-4 mr-2" />
+                  Back
+                </Button>
+                <h3 className="text-md font-semibold">Payload View</h3>
+              </div>
+            ) : (
+              <h3 className="text-md font-semibold mb-4">Available Inputs</h3>
+            )}
+            {isPayloadView ? (
+              <div className="mb-4">
+                <Label htmlFor="payload" className="block text-sm font-medium text-gray-700 mb-2">
+                  {activeInput}
+                </Label>
+                <Editor
+                  height="30vh"
+                  width="260px"
+                  language="json"
+                  theme="light"
+                  value={payloadContent}
+                  onChange={handlePayloadChange}
+                  options={{
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'on',
+                    wrappingIndent: 'indent'
+                  }}
+                />
+              </div>
+            ) : (
+              <ul>
+                {inputs.map((input, index) => (
+                  <li
+                    key={index}
+                    className={`py-2 px-4 rounded cursor-pointer hover:bg-gray-100 ${activeInput === input ? 'bg-gray-200' : ''}`}
+                    onClick={() => handleInputClick(input, index)}
+                  >
+                    {input}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
 
-        <div style={resizableStyles(middleWidth, 'middle')} className="border-r">
-          {/* Panel content */}
-        </div>
-
-        <div style={resizableStyles(rightWidth, 'right')}>
-          {/* Panel content */}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default UpdatedCode;
+        <div
+          style={{ ...resizableStyles(middleWidth, 'middle'), ...responsiveStyles.panels }}
+          className="border-r flex flex-col"
+        >
+          <div className="flex items-center justify-between p-4 border-b">
+            <h2 className="text-lg font-semibold">Script</h2>
+            <div className="flex items-center space-x-4">
+              <FormatDropdown onFormatChange={handleFormatChange} />
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline">Add Script</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Add Script</DialogTitle>
+                    <DialogDescription>
+                      Create a new Script to use in the playground.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="name" className="text-right">
+                        Name
+                      </Label>
+                      <Input id="name" value={newScript} onChange={handleScriptChange} className="col-span-3" />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit" onClick={handleCreateScript} disabled={isCreateScriptDisabled}>Create</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto relative">
+            <div className="absolute top-0 left-0 w-full h-full flex">
+              <div className="w-12 flex-shrink-0 bg-[#f8f9fa]">
+                {renderLineNumbers(scriptLines)}
+              </div>
+              <canvas ref={canvasRef} width="1" height="100%" style={{ position: 'absolute', left: '48px', top: 0 }} />
+              <Editor
+                height="77vh"
+                width="430px"
+                language="javascript"
+                theme="light"
+                value={scriptContent}
+                onChange={(value) => {
+                  setScriptContent(value);
+                  handleScriptContentChange({ target: { value } });
+                }}
+                options={{
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  wrappingIndent: 'indent'
+                }}
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-between p-4 border-t">
+            <div className="flex items-center space-x-2">
+              <h3 className="text-sm font-semibold">Available Scripts</h3>
+            </div>
+            <div className="flex items-center space-x-2">
+              {scripts.map
