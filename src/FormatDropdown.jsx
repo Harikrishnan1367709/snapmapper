@@ -1,5 +1,6 @@
+
 import { ChevronDown } from 'lucide-react';
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 
 const FormatDropdown = ({ onFormatChange }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,7 +24,7 @@ const FormatDropdown = ({ onFormatChange }) => {
         <span className="font-bold text-gray-600 hover:text-blue-500 text-xs mr-14">{selectedFormat}</span>
         <img
           src="/SnapLogicPlayground1/chevron_down_small.svg"
-          alt="SnapLogic Logo"
+          alt="Chevron Down"
           className="text-gray-500 h-3 w-3"
         />
       </button>

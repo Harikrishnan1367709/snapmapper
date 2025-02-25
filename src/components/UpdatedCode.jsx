@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { JSONPath } from 'jsonpath-plus';
 import { ChevronDown, Upload, Download, Terminal, Book, ChevronLeft } from "lucide-react";
@@ -26,7 +25,7 @@ import {
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Button } from '../components/ui/button';
-import FormatDropdown from './FormatDropdown';
+import FormatDropdown from '../FormatDropdown';
 import { handleJSON } from '../utils/jsonHandler';
 import _ from 'lodash';
 import moment from 'moment';
@@ -38,62 +37,24 @@ import HighlightedActualOutput from '../utils/HighlightedActualOutput';
 import HighlightedExpectedOutput from '../utils/HighlightedExpectedOutput';
 
 const UpdatedCode = () => {
-
-
-
-
-
-
   const [format, setFormat] = useState('json');
- 
   const canvasRef = useRef(null);
   const [activeLineIndex, setActiveLineIndex] = useState(null);
-
-
-
-
   const [activeInput, setActiveInput] = useState('Payload');
-
-
   const [cursorPosition, setCursorPosition] = useState(0);
   const [focusedLine, setFocusedLine] = useState(null);
   const [wasChecked, setWasChecked] = useState(() =>
     localStorage.getItem('wasChecked') === 'true'
-);
-
-
-
-
+  );
   const [selectedFile, setSelectedFile] = useState(null);
-
-
-
-
-
-
-
-
-    const [hoveredLine, setHoveredLine] = useState(null);
-const [highlightedLine, setHighlightedLine] = useState(null);
-
-
-
-
-    const [showInputContainer, setShowInputContainer] = useState(false);
-    const [showScriptContainer, setShowScriptContainer] = useState(false);
-   
-const [inputs, setInputs] = useState(['Payload']);
-
-
-
-
-const [inputContents, setInputContents] = useState({
-  [inputs[0]]: '{}'  // Now we can safely use inputs[0]
-});
-
-
-
-
+  const [hoveredLine, setHoveredLine] = useState(null);
+  const [highlightedLine, setHighlightedLine] = useState(null);
+  const [showInputContainer, setShowInputContainer] = useState(false);
+  const [showScriptContainer, setShowScriptContainer] = useState(false);
+  const [inputs, setInputs] = useState(['Payload']);
+  const [inputContents, setInputContents] = useState({
+    [inputs[0]]: '{}'  // Now we can safely use inputs[0]
+  });
   const [isPayloadView, setIsPayloadView] = useState(false);
   const [selectedInputIndex, setSelectedInputIndex] = useState(null);
   const [payloadContent, setPayloadContent] = useState('{\n\n}');
@@ -103,8 +64,6 @@ const [inputContents, setInputContents] = useState({
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
-  // const [activeInput, setActiveInput] = useState('Payload');
- 
   const [leftWidth, setLeftWidth] = useState(() =>
     parseInt(localStorage.getItem('leftWidth')) || 288
   );
@@ -136,9 +95,7 @@ const [inputContents, setInputContents] = useState({
   const [isDragging, setIsDragging] = useState(false);
   const [isInputDialogOpen, setIsInputDialogOpen] = useState(false);
   const [isScriptDialogOpen, setIsScriptDialogOpen] = useState(false);
- 
   const [newInput, setNewInput] = useState("");
- 
   const [expectedOutput, setExpectedOutput] = useState('');
   const [actualOutput, setActualOutput] = useState('[\n  "Phone"\n]');
   const [scripts, setScripts] = useState([
@@ -149,17 +106,8 @@ const [inputContents, setInputContents] = useState({
       lastModified: new Date()
     }
   ]);
- 
-
-
-
-
-  // const [activeScript, setActiveScript] = useState(scripts[0]);
   const [activeScript, setActiveScript] = useState(null);
-const [scriptContent, setScriptContent] = useState('');
-  const [newScript, setNewScript] = useState("");
-  // const [scriptContent, setScriptContent] = useState(scripts[0].content);
-
+  const [scriptContent, setScriptContent] = useState('');
   useEffect(() => {
     if (scripts.length > 0 && !activeScript) {
       const mainScript = scripts.find(s => s.name === 'main.dwl') || scripts[0];
@@ -188,9 +136,6 @@ const [scriptContent, setScriptContent] = useState('');
     />
   );
 
-
-
-
   useEffect(() => {
     if (isDragging) {
       document.body.style.userSelect = 'none';
@@ -199,9 +144,6 @@ const [scriptContent, setScriptContent] = useState('');
     }
   }, [isDragging]);
 
-
-
-
   const handleMouseDown = (e, isLeft, isBottom) => {
     setIsDragging(true);
    
@@ -209,26 +151,17 @@ const [scriptContent, setScriptContent] = useState('');
       const startY = e.clientY;
       const startHeight = bottomHeight;
 
-
-
-
       const handleMouseMove = (e) => {
         const deltaY = startY - e.clientY;
         const newHeight = startHeight + deltaY;
         setBottomHeight(Math.max(32, Math.min(800, newHeight)));
       };
 
-
-
-
       const handleMouseUp = () => {
         setIsDragging(false);
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
       };
-
-
-
 
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
@@ -237,9 +170,6 @@ const [scriptContent, setScriptContent] = useState('');
     const startX = e.clientX;
     const startLeftWidth = leftWidth;
     const startRightWidth = rightWidth;
-
-
-
 
     const handleMouseMove = (e) => {
       if (isLeft) {
@@ -251,50 +181,34 @@ const [scriptContent, setScriptContent] = useState('');
       }
     };
 
-
-
-
     const handleMouseUp = () => {
       setIsDragging(false);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
 
-
-
-
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
   const [editorLines, setEditorLines] = useState(['']);
  
-  // Convert these direct declarations to useMemo to prevent unnecessary recalculations
   const scriptLines = useMemo(() =>
     scriptContent?.split('\n') || [''],
     [scriptContent]
   );
-
 
   const expectedLines = useMemo(() =>
     expectedOutput?.split('\n') || [''],
     [expectedOutput]
   );
 
-
   const actualLines = useMemo(() =>
     actualOutput?.split('\n') || [''],
     [actualOutput]
   );
 
-
-  // Button disable conditions
   const isCreateInputDisabled = newInput.trim() === "";
   const isCreateScriptDisabled = newScript.trim() === "";
-
-
-
-
-
 
   const renderLineNumbers = (content) => {
     return (
@@ -308,16 +222,10 @@ const [scriptContent, setScriptContent] = useState('');
     );
   };
 
-
-
-
   const handleInputChange = (e) => {
     setNewInput(e.target.value);
     setPayloadContent(e.target.value);
   };
-
-
-
 
   const handleInputClick = (input, index) => {
     setIsPayloadView(true);
@@ -326,13 +234,9 @@ const [scriptContent, setScriptContent] = useState('');
     setPayloadContent(inputContents[input] || '{\n  \n}');
   };
 
-
-
-
   const handleBackClick = () => {
     if (selectedInputIndex !== null) {
       const currentInput = inputs[selectedInputIndex];
-      // Save content only for the current input
       setInputContents(prev => ({
         ...prev,
         [currentInput]: payloadContent
@@ -354,19 +258,12 @@ const [scriptContent, setScriptContent] = useState('');
     }
   };
 
-
-
-
   const handleScriptChange = (e) => {
     setNewScript(e.target.value);
   };
 
-
-
-
   const handleCreateScript = () => {
     if (newScript.trim() !== "") {
-      // Save current script content before creating new one
       if (activeScript) {
         setScripts(prevScripts =>
           prevScripts.map(s =>
@@ -393,11 +290,7 @@ const [scriptContent, setScriptContent] = useState('');
     }
   };
 
-
-
-
   const handleScriptSelect = (script) => {
-    // Save current script content before switching
     if (activeScript) {
       setScripts(prevScripts =>
         prevScripts.map(s =>
@@ -408,13 +301,9 @@ const [scriptContent, setScriptContent] = useState('');
       );
     }
     
-    // Switch to selected script
     setActiveScript(script);
     setScriptContent(script.content);
   };
-
-
-
 
   const handleActualOutputChange = (newValue) => {
     setActualOutput(newValue);
@@ -463,9 +352,6 @@ const [scriptContent, setScriptContent] = useState('');
     return 'general';
   };
 
-
-
-
   useEffect(() => {
     if (activeScript && payloadContent) {
       try {
@@ -483,128 +369,79 @@ const [scriptContent, setScriptContent] = useState('');
     }
   }, [payloadContent, scriptContent]);
 
-
-
-
- 
-const handleScriptContentChange = (e) => {
-  if (!e?.target) {
-    setActualOutput(JSON.stringify({ error: "Invalid event" }, null, 2));
-    return;
-  }
-
-
-
-
-  const newContent = e.target.value || '';
-  setScriptContent(newContent);
-  
-  // Update script content in scripts array immediately
-  setScripts(prevScripts =>
-    prevScripts.map(script =>
-      script.id === activeScript?.id
-        ? { ...script, content: newContent, lastModified: new Date() }
-        : script
-    )
-  );
-
-
-
-
-  try {
-    const handler = new SnapLogicFunctionsHandler();
-   
-    // Handle multiple inputs case
-    if (inputs.length > 1 && newScript.trim() === '$') {
-      setActualOutput("Not valid, access with the help of input name");
+  const handleScriptContentChange = (e) => {
+    if (!e?.target) {
+      setActualOutput(JSON.stringify({ error: "Invalid event" }, null, 2));
       return;
     }
 
+    const newContent = e.target.value || '';
+    setScriptContent(newContent);
+    
+    setScripts(prevScripts =>
+      prevScripts.map(script =>
+        script.id === activeScript?.id
+          ? { ...script, content: newContent, lastModified: new Date() }
+          : script
+      )
+    );
 
-
-
-    // Handle single input case
-    if (inputs.length === 1 && newScript.trim() === '$') {
-      setActualOutput(inputContents[inputs[0]]);
-      return;
-    }
-
-
-
-
-    // For multiple inputs case
-    const inputMatch = newScript.match(/^\$(\w+)/);
-    if (inputMatch) {
-      const requestedInput = inputMatch[1];
-      if (inputContents[requestedInput]) {
-        // Just show input content for $inputName
-        if (newScript === `$${requestedInput}`) {
-          setActualOutput(inputContents[requestedInput]);
-          return;
-        }
-
-
-
-
-        // Execute script with specific input
-        const path = newScript.replace(`$${requestedInput}`, '$');
-        const inputData = JSON.parse(inputContents[requestedInput]);
-        const result = handler.executeScript(path, inputData);
-        setActualOutput(JSON.stringify(result, null, 2));
+    try {
+      const handler = new SnapLogicFunctionsHandler();
+      if (inputs.length > 1 && newScript.trim() === '$') {
+        setActualOutput("Not valid, access with the help of input name");
         return;
       }
-    }
 
+      if (inputs.length === 1 && newScript.trim() === '$') {
+        setActualOutput(inputContents[inputs[0]]);
+        return;
+      }
 
+      const inputMatch = newScript.match(/^\$(\w+)/);
+      if (inputMatch) {
+        const requestedInput = inputMatch[1];
+        if (inputContents[requestedInput]) {
+          if (newScript === `$${requestedInput}`) {
+            setActualOutput(inputContents[requestedInput]);
+            return;
+          }
 
+          const path = newScript.replace(`$${requestedInput}`, '$');
+          const inputData = JSON.parse(inputContents[requestedInput]);
+          const result = handler.executeScript(path, inputData);
+          setActualOutput(JSON.stringify(result, null, 2));
+          return;
+        }
+      }
 
-    // Default to active input
-    const activeInput = inputs[selectedInputIndex] || inputs[0];
-    let inputData;
+      const activeInput = inputs[selectedInputIndex] || inputs[0];
+      let inputData;
    
-    try {
-      inputData = JSON.parse(inputContents[activeInput]);
+      try {
+        inputData = JSON.parse(inputContents[activeInput]);
+      } catch (error) {
+        setActualOutput(JSON.stringify({
+          error: "Invalid Input",
+          message: "Input data must be valid JSON",
+          input: inputContents[activeInput]
+        }, null, 2));
+        return;
+      }
+
+      const result = handler.executeScript(newScript, inputData);
+      setActualOutput(JSON.stringify(result, null, 2));
+
     } catch (error) {
       setActualOutput(JSON.stringify({
-        error: "Invalid Input",
-        message: "Input data must be valid JSON",
-        input: inputContents[activeInput]
+        error: "Transformation Error",
+        message: error.message || "Unknown error occurred",
+        input: newScript,
+        hint: "Check syntax and ensure all referenced paths exist"
       }, null, 2));
-      return;
     }
+  };
 
-
-
-
-    // Execute script with handler
-    const result = handler.executeScript(newScript, inputData);
-    setActualOutput(JSON.stringify(result, null, 2));
-
-
-
-
-  } catch (error) {
-    // console.error("Transformation Error:", error);
-    setActualOutput(JSON.stringify({
-      error: "Transformation Error",
-      message: error.message || "Unknown error occurred",
-      input: newScript,
-      hint: "Check syntax and ensure all referenced paths exist"
-    }, null, 2));
-  }
-};
-
-
-
-
-
-
-
-
-  // useEffect(() => {
-  //   console.log("Actual output updated:", actualOutput) // Debugging log
-  // }, [actualOutput])
- 
   const textAreaStyles = {
     minHeight: '100px',
     lineHeight: '1.5rem',
@@ -614,18 +451,13 @@ const handleScriptContentChange = (e) => {
   const normalizeJSON = (input) => {
     try {
       if (!input) return '';
-     
-      // If input is already an object/array, stringify it
       if (typeof input === 'object') {
         return JSON.stringify(input);
       }
- 
-      // If input is a string, try to parse and re-stringify to normalize
       if (typeof input === 'string') {
         const parsed = JSON.parse(input.trim());
         return JSON.stringify(parsed);
       }
- 
       return String(input);
     } catch (error) {
       console.error('JSON normalization error:', error);
@@ -640,7 +472,6 @@ const handleScriptContentChange = (e) => {
           setOutputMatch(false);
           return;
         }
- 
         const normalizeJSON = (input) => {
           try {
             return JSON.stringify(JSON.parse(input));
@@ -648,25 +479,17 @@ const handleScriptContentChange = (e) => {
             return input;
           }
         };
- 
         const normalizedActual = normalizeJSON(actualOutput);
         const normalizedExpected = normalizeJSON(expectedOutput);
- 
         setOutputMatch(normalizedActual === normalizedExpected);
       } catch (error) {
         console.error('Comparison error:', error);
         setOutputMatch(false);
       }
     };
- 
     compareOutputs();
   }, [actualOutput, expectedOutput]);
- 
 
-
-
-
- 
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file && file.name.endsWith('.zip')) {
@@ -688,28 +511,17 @@ const handleScriptContentChange = (e) => {
     localStorage.getItem('showExportDialog') !== 'false'
   );
 
-
-
-
   const handleExport = async () => {
     try {
-      // Create a new JSZip instance
       const zip = new JSZip();
-  
-      // Add files to the zip
-      // Add scripts
       const scriptsFolder = zip.folder("scripts");
       scripts.forEach(script => {
         scriptsFolder.file(script.name, script.content);
       });
-  
-      // Add inputs
       const inputsFolder = zip.folder("inputs");
       Object.entries(inputContents).forEach(([name, content]) => {
         inputsFolder.file(`${name}.json`, content);
       });
-  
-      // Add metadata
       const metadata = {
         version: "1.0",
         exportDate: new Date().toISOString(),
@@ -721,8 +533,6 @@ const handleScriptContentChange = (e) => {
         expectedOutput: expectedOutput
       };
       zip.file("metadata.json", JSON.stringify(metadata, null, 2));
-  
-      // Generate the zip file
       const content = await zip.generateAsync({
         type: "blob",
         compression: "DEFLATE",
@@ -730,39 +540,26 @@ const handleScriptContentChange = (e) => {
           level: 9
         }
       });
-  
-      // Create download link and trigger download
       const url = window.URL.createObjectURL(content);
       const link = document.createElement('a');
       link.href = url;
       link.download = `snaplogic-playground-export-${moment().format('YYYY-MM-DD-HH-mm')}.zip`;
       document.body.appendChild(link);
       link.click();
-      
-      // Cleanup
       window.URL.revokeObjectURL(url);
       document.body.removeChild(link);
     } catch (error) {
       console.error('Export failed:', error);
-      // Optionally show error to user
       alert('Export failed. Please try again.');
     }
   };
   
- 
   const handleCheckboxChange = () => {
     setIsChecked(!isChecked);
     setWasChecked(true);
     localStorage.setItem('wasChecked', 'true');
     setShowExportDialog(false);
-};
-
-
-
-
-
-
-
+  };
 
   const getNavLink = (item) => {
     const links = {
@@ -773,9 +570,6 @@ const handleScriptContentChange = (e) => {
     };
     return links[item];
   };
-
-
-
 
   const handleNavClick = (item) => {
     if (item === 'playground') {
@@ -789,13 +583,6 @@ const handleScriptContentChange = (e) => {
     setActiveTab(null);
   }, []);
 
-
-
-
-
-
-
-
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas) {
@@ -808,10 +595,6 @@ const handleScriptContentChange = (e) => {
     }
   }, [scriptContent]);
 
-
-
-
-  // Create active line border element
   const ActiveLineBorder = () => {
     const top = 8 + (activeLineIndex * 24); // 24px is line height
     return (
@@ -830,271 +613,87 @@ const handleScriptContentChange = (e) => {
     );
   };
 
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-const getLineCount = (content) => {
-  if (!content) return 1;
-  return content.split('\n').length;
-};
-
-
-
-
-// Add these responsive width calculations
-const getResponsiveWidths = () => {
-  const screenWidth = window.innerWidth;
- 
-  if (screenWidth >= 1024) { // Laptop
-    return {
-      leftWidth: Math.floor(screenWidth * 0.25),
-      middleWidth: Math.floor(screenWidth * 0.45),
-      rightWidth: Math.floor(screenWidth * 0.30)
-    };
-  } else if (screenWidth >= 768) { // Tablet
-    return {
-      leftWidth: Math.floor(screenWidth * 0.30),
-      middleWidth: Math.floor(screenWidth * 0.40),
-      rightWidth: Math.floor(screenWidth * 0.30)
-    };
-  }
-  return { leftWidth, middleWidth, rightWidth }; // Default widths
-};
-
-
-
-
-// Add resize listener
-useEffect(() => {
-  const handleResize = () => {
-    const { leftWidth: newLeft, middleWidth: newMiddle, rightWidth: newRight } = getResponsiveWidths();
-    setLeftWidth(newLeft);
-    setMiddleWidth(newMiddle);
-    setRightWidth(newRight);
+  const getLineCount = (content) => {
+    if (!content) return 1;
+    return content.split('\n').length;
   };
 
-
-
-
-  window.addEventListener('resize', handleResize);
-  return () => window.removeEventListener('resize', handleResize);
-}, []);
-
-
-
-
-// Add responsive styles
-const responsiveStyles = {
-  mainContainer: {
-    minWidth: '768px',
-    maxWidth: '100vw',
-    overflow: 'auto'
-  },
-  panels: {
-    minWidth: '250px'
-  }
- 
-};
-const useMediaQuery = (query) => {
-  const [matches, setMatches] = useState(window.matchMedia(query).matches);
+  const getResponsiveWidths = () => {
+    const screenWidth = window.innerWidth;
+    if (screenWidth >= 1024) { // Laptop
+      return {
+        leftWidth: Math.floor(screenWidth * 0.25),
+        middleWidth: Math.floor(screenWidth * 0.45),
+        rightWidth: Math.floor(screenWidth * 0.30)
+      };
+    } else if (screenWidth >= 768) { // Tablet
+      return {
+        leftWidth: Math.floor(screenWidth * 0.30),
+        middleWidth: Math.floor(screenWidth * 0.40),
+        rightWidth: Math.floor(screenWidth * 0.30)
+      };
+    }
+    return { leftWidth, middleWidth, rightWidth }; // Default widths
+  };
 
   useEffect(() => {
-    const media = window.matchMedia(query);
-    const listener = () => setMatches(media.matches);
-    media.addEventListener('change', listener);
-    return () => media.removeEventListener('change', listener);
-  }, [query]);
+    const handleResize = () => {
+      const { leftWidth: newLeft, middleWidth: newMiddle, rightWidth: newRight } = getResponsiveWidths();
+      setLeftWidth(newLeft);
+      setMiddleWidth(newMiddle);
+      setRightWidth(newRight);
+    };
 
-  return matches;
-};
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-// In your component
-const isTablet = useMediaQuery('(max-width: 1024px)');
+  const responsiveStyles = {
+    mainContainer: {
+      minWidth: '768px',
+      maxWidth: '100vw',
+      overflow: 'auto'
+    },
+    panels: {
+      minWidth: '250px'
+    }
+  };
+  const useMediaQuery = (query) => {
+    const [matches, setMatches] = useState(window.matchMedia(query).matches);
+    useEffect(() => {
+      const media = window.matchMedia(query);
+      const listener = () => setMatches(media.matches);
+      media.addEventListener('change', listener);
+      return () => media.removeEventListener('change', listener);
+    }, [query]);
+    return matches;
+  };
 
+  const isTablet = useMediaQuery('(max-width: 1024px)');
 
-const monacoStyles = `
-  .monaco-editor {
-    padding-top: 8px;
-  }
- 
-  .monaco-editor .margin {
-    background-color: #f8f9fa;
-  }
- 
-  .monaco-editor .line-numbers {
-    color: #3498db !important;
-    font-size: 12px;
-  }
- 
-  .monaco-editor .current-line {
-    border: none !important;
-  }
-
-
-  /* Disable editor widgets that might interfere with typing */
-  .monaco-editor .suggest-widget,
-  .monaco-editor .parameter-hints-widget,
-  .monaco-editor .monaco-hover {
-    display: none !important;
-  }
-`;
-// const [jsonContent, setJsonContent] = useState('{\n  \n}');
-
-
-//   const handleEditorChange = (value) => {
-//     if (value !== undefined) {
-//       setJsonContent(value);
-//     }
-//   };
-
-
-
-
-  // const HighlightedJSON = ({ content, onChange, style }) => {
-  //   const editorRef = useRef(null);
-  //   const initialSetupDone = useRef(false);
-  //   const lastCursorPosition = useRef(null);
- 
-  //   const handleEditorDidMount = (editor, monaco) => {
-  //     editorRef.current = editor;
- 
-  //     monaco.editor.defineTheme('dataweaveTheme', {
-  //       base: 'vs',
-  //       inherit: true,
-  //       rules: [
-  //         { token: 'string.key.json', foreground: '000000' },
-  //         { token: 'string.value.json', foreground: '0000FF' },
-  //         { token: 'number.json', foreground: '098658' },
-  //         { token: 'delimiter.bracket.json', foreground: '000000' },
-  //         { token: 'delimiter.array.json', foreground: '000000' },
-  //         { token: 'delimiter.comma.json', foreground: '000000' }
-  //       ],
-  //       colors: {
-  //         'editor.background': '#FFFFFF',
-  //         'editor.lineHighlightBackground': '#F0F0F0',
-  //         'editorCursor.foreground': '#000000',
-  //         'editor.selectionBackground': '#ADD6FF',
-  //         'editor.inactiveSelectionBackground': '#E5EBF1'
-  //       }
-  //     });
- 
-  //     editor.updateOptions({
-  //       renderLineHighlight: 'all',
-  //       highlightActiveIndentGuide: true,
-  //       fontSize: 13,
-  //       lineHeight: 20,
-  //       padding: { top: 4, bottom: 4 },
-  //       lineNumbers: 'on',
-  //       roundedSelection: false,
-  //       scrollBeyondLastLine: false,
-  //       readOnly: false,
-  //       cursorStyle: 'line',
-  //       automaticLayout: true,
-  //       wordWrap: 'on',
-  //       autoIndent: 'full',
-  //       formatOnPaste: true,
-  //       formatOnType: false,
-  //       suggestOnTriggerCharacters: false,
-  //       quickSuggestions: false,
-  //       autoClosingBrackets: 'never',
-  //       autoClosingQuotes: 'never',
-  //       autoSurround: 'never'
-  //     });
- 
-  //     // Track cursor position changes
-  //     editor.onDidChangeCursorPosition((e) => {
-  //       lastCursorPosition.current = e.position;
-  //     });
- 
-  //     // Handle content changes with proper cursor positioning
-  //     editor.onDidChangeModelContent((event) => {
-  //       const newContent = editor.getValue();
-  //       const currentPosition = editor.getPosition();
-       
-  //       // Only update if content actually changed
-  //       if (newContent !== content) {
-  //         onChange(newContent);
-         
-  //         // Calculate the new cursor position
-  //         if (currentPosition) {
-  //           const newPosition = {
-  //             lineNumber: currentPosition.lineNumber,
-  //             column: currentPosition.column
-  //           };
- 
-  //           // Ensure cursor moves forward after typing
-  //           if (event.changes.length === 1 && event.changes[0].text) {
-  //             newPosition.column = currentPosition.column + 1;
-  //           }
- 
-  //           // Use setTimeout to ensure the position is set after the content update
-  //           setTimeout(() => {
-  //             editor.setPosition(newPosition);
-  //             editor.focus();
-  //           }, 0);
-  //         }
-  //       }
-  //     });
- 
-  //     if (!initialSetupDone.current) {
-  //       setTimeout(() => {
-  //         const model = editor.getModel();
-  //         if (model) {
-  //           const lastLine = model.getLineCount();
-  //           const lastColumn = model.getLineMaxColumn(lastLine - 1);
-  //           editor.setPosition({ lineNumber: lastLine - 1, column: lastColumn - 1 });
-  //           editor.focus();
-  //           initialSetupDone.current = true;
-  //         }
-  //       }, 100);
-  //     }
-  //   };
- 
-  //   return (
-  //     <div className="flex-1 border rounded-sm" style={{ ...style, overflow: 'hidden' }}>
-  //       <Editor
-  //         height="100%"
-  //         defaultLanguage="json"
-  //         value={content}
-  //         onMount={handleEditorDidMount}
-  //         theme="dataweaveTheme"
-  //         options={{
-  //           minimap: { enabled: false },
-  //           overviewRulerLanes: 0,
-  //           hideCursorInOverviewRuler: true,
-  //           overviewRulerBorder: false,
-  //           scrollbar: {
-  //             vertical: 'visible',
-  //             horizontal: 'visible',
-  //             verticalScrollbarSize: 10,
-  //             horizontalScrollbarSize: 10,
-  //             verticalSliderSize: 10,
-  //             horizontalSliderSize: 10,
-  //             useShadows: false
-  //           }
-  //         }}
-  //       />
-  //     </div>
-  //   );
-  // };
-
+  const monacoStyles = `
+    .monaco-editor {
+      padding-top: 8px;
+    }
+    .monaco-editor .margin {
+      background-color: #f8f9fa;
+    }
+    .monaco-editor .line-numbers {
+      color: #3498db !important;
+      font-size: 12px;
+    }
+    .monaco-editor .current-line {
+      border: none !important;
+    }
+    .monaco-editor .suggest-widget,
+    .monaco-editor .parameter-hints-widget,
+    .monaco-editor .monaco-hover {
+      display: none !important;
+    }
+  `;
 
   const handlePayloadChange = (newContent) => {
     setPayloadContent(newContent);
-    // Update the content for the current active input only
     setInputContents(prev => ({
       ...prev,
       [activeInput]: newContent
@@ -1103,8 +702,6 @@ const monacoStyles = `
   const handleFormatChange = (newFormat) => {
     setFormat(newFormat);
   };
- 
-
 
   return (
     <div className="flex flex-col h-screen w-screen bg-white overflow-hidden">
@@ -1140,19 +737,15 @@ const monacoStyles = `
         </div>
       </div>
 
-      {/* Main content area */}
       <div className="flex-1 flex">
-        {/* Left panel */}
         <div style={resizableStyles(leftWidth, 'left')} className="border-r">
           {/* Panel content */}
         </div>
 
-        {/* Middle panel */}
         <div style={resizableStyles(middleWidth, 'middle')} className="border-r">
           {/* Panel content */}
         </div>
 
-        {/* Right panel */}
         <div style={resizableStyles(rightWidth, 'right')}>
           {/* Panel content */}
         </div>
