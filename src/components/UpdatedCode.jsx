@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { JSONPath } from 'jsonpath-plus';
 import { ChevronDown, Upload, Download, Terminal, Book, ChevronLeft } from "lucide-react";
-import { v4 as uuidv4 } from "uuid"
+import { v4 } from "uuid";
 
 import JSZip from 'jszip';
 
@@ -1161,4 +1161,4 @@ const monacoStyles = `
             xmlns="http://www.w3.org/2000/svg"
           >
             <circle cx="50" cy="50" r="50" fill="#0046BE"/>
-            <
+            <path d="M
