@@ -1,15 +1,10 @@
+<lov-code>
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { JSONPath } from 'jsonpath-plus';
 import { ChevronDown, Upload, Download, Terminal, Book, ChevronLeft } from "lucide-react";
 import { v4 } from "uuid";
-
 import JSZip from 'jszip';
-
-
-// import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-// import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Editor from '@monaco-editor/react';
-
 
 import {
   Tooltip,
@@ -149,7 +144,7 @@ const [inputContents, setInputContents] = useState({
   const [isBottomExpanded, setIsBottomExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState(null);
   const [showToast, setShowToast] = useState(true);
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDragging, setIsDragging] = useState(isDragging);
   const [isInputDialogOpen, setIsInputDialogOpen] = useState(false);
   const [isScriptDialogOpen, setIsScriptDialogOpen] = useState(false);
  
