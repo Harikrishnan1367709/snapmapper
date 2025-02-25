@@ -36,7 +36,7 @@ import HighlightedScript from '../utils/HighlightedScript';
 import HighlightedActualOutput from '../utils/HighlightedActualOutput';
 import HighlightedExpectedOutput from '../utils/HighlightedExpectedOutput';
 
-const UpdatedCode = () => {
+function UpdatedCode() {
   const [format, setFormat] = useState('json');
   const canvasRef = useRef(null);
   const [activeLineIndex, setActiveLineIndex] = useState(null);
@@ -53,7 +53,7 @@ const UpdatedCode = () => {
   const [showScriptContainer, setShowScriptContainer] = useState(false);
   const [inputs, setInputs] = useState(['Payload']);
   const [inputContents, setInputContents] = useState({
-    [inputs[0]]: '{}'  // Now we can safely use inputs[0]
+    [inputs[0]]: '{}'
   });
   const [isPayloadView, setIsPayloadView] = useState(false);
   const [selectedInputIndex, setSelectedInputIndex] = useState(null);
@@ -73,21 +73,6 @@ const UpdatedCode = () => {
   const [rightWidth, setRightWidth] = useState(() =>
     parseInt(localStorage.getItem('rightWidth')) || 384
   );
-  const data = {
-    "myarray": [3, 6, 8, 2, 9, 4],
-    "head": [1, 2],
-    "middle": [3, 4],
-    "tail": [5, 6],
-    "names": ["Fred", "Wilma", "Fred", "Betty", "Fred", "Barney"],
-    "Array": [0, 2, 4, 6, 8]
-  };
- 
-  useEffect(() => {
-    localStorage.setItem('leftWidth', leftWidth);
-    localStorage.setItem('middleWidth', middleWidth);
-    localStorage.setItem('rightWidth', rightWidth);
-  }, [leftWidth, middleWidth, rightWidth]);
- 
   const [bottomHeight, setBottomHeight] = useState(32);
   const [isBottomExpanded, setIsBottomExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState(null);
@@ -108,16 +93,26 @@ const UpdatedCode = () => {
   ]);
   const [activeScript, setActiveScript] = useState(null);
   const [scriptContent, setScriptContent] = useState('');
+  const [newScript, setNewScript] = useState("");
+
+  const data = {
+    "myarray": [3, 6, 8, 2, 9, 4],
+    "head": [1, 2],
+    "middle": [3, 4],
+    "tail": [5, 6],
+    "names": ["Fred", "Wilma", "Fred", "Betty", "Fred", "Barney"],
+    "Array": [0, 2, 4, 6, 8]
+  };
+
   useEffect(() => {
-    if (scripts.length > 0 && !activeScript) {
-      const mainScript = scripts.find(s => s.name === 'main.dwl') || scripts[0];
-      setActiveScript(mainScript);
-      setScriptContent(mainScript.content);
-    }
-  }, []);
+    localStorage.setItem('leftWidth', leftWidth);
+    localStorage.setItem('middleWidth', middleWidth);
+    localStorage.setItem('rightWidth', rightWidth);
+  }, [leftWidth, middleWidth, rightWidth]);
+
   const resizableStyles = (width, panelType) => ({
     width: `${width}px`,
-    minWidth: '250px', // Increased minimum width
+    minWidth: '250px',
     position: 'relative',
     cursor: panelType === 'middle' ? 'text' : 'pointer',
     userSelect: 'none'
@@ -251,7 +246,7 @@ const UpdatedCode = () => {
       setInputs(prev => [...prev, newInputName]);
       setInputContents(prev => ({
         ...prev,
-        [newInputName]: '{\n  \n}'  // Initialize with empty object
+        [newInputName]: '{\n  \n}'
       }));
       setNewInput("");
       setIsInputDialogOpen(false);
@@ -278,13 +273,13 @@ const UpdatedCode = () => {
       const newScriptObj = {
         id: Date.now(),
         name: scriptName,
-        content: '',  // Initialize with empty content
+        content: '',
         lastModified: new Date()
       };
       
       setScripts(prev => [...prev, newScriptObj]);
       setActiveScript(newScriptObj);
-      setScriptContent('');  // Clear content for new script
+      setScriptContent('');
       setNewScript("");
       setIsScriptDialogOpen(false);
     }
@@ -702,7 +697,6 @@ const UpdatedCode = () => {
   const handleFormatChange = (newFormat) => {
     setFormat(newFormat);
   };
-  const [newScript, setNewScript] = useState("");
 
   return (
     <div className="flex flex-col h-screen w-screen bg-white overflow-hidden">
@@ -927,4 +921,46 @@ const UpdatedCode = () => {
               <h3 className="text-sm font-semibold">Available Scripts</h3>
             </div>
             <div className="flex items-center space-x-2">
-              {scripts.map
+              {scripts.map(script => (
+                <Button key={script.id} variant="outline" onClick={() => handleScriptSelect(script)}>
+                  {script.name}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{ ...resizableStyles(rightWidth, 'right'), ...responsiveStyles.panels }}
+          className="flex flex-col"
+        >
+          <div className="flex items-center justify-between p-4 border-b">
+            <h2 className="text-lg font-semibold">Output</h2>
+            <Button variant="outline" onClick={handleExport}>Export</Button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            <Label htmlFor="actualOutput" className="block text-sm font-medium text-gray-700 mb-2">
+              Actual Output
+            </Label>
+            <Editor
+              height="30vh"
+              width="100%"
+              language="json"
+              theme="light"
+              value={actualOutput}
+              onChange={handleActualOutputChange}
+              options={{
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                wordWrap: 'on',
+                wrappingIndent: 'indent'
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default UpdatedCode;
