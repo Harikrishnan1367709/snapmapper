@@ -1,42 +1,60 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_SUPABASE_URL : undefined
-const supabaseKey = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_SUPABASE_ANON_KEY : undefined
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 let supabase = null
+let supabaseInitialized = false
 
-if (supabaseUrl && supabaseKey) {
-  supabase = createClient(supabaseUrl, supabaseKey)
+try {
+  if (supabaseUrl && supabaseAnonKey) {
+    supabase = createClient(supabaseUrl, supabaseAnonKey)
+    supabaseInitialized = true
+  }
+} catch (error) {
+  console.error('Supabase initialization error:', error)
+}
+
+export function isSupabaseInitialized() {
+  return supabaseInitialized
 }
 
 export async function saveTransformation(inputData, transformLogic) {
-  if (!supabase) {
-    throw new Error('Supabase client is not initialized. Check your environment variables.')
+  if (!supabaseInitialized) {
+    throw new Error('Supabase is not initialized')
   }
+
   const { data, error } = await supabase
     .from('transformations')
-    .insert([{ input_data: inputData, transform_logic: transformLogic }])
+    .insert([
+      {
+        input_data: inputData,
+        transform_logic: transformLogic,
+        created_at: new Date().toISOString()
+      }
+    ])
+    .select()
 
   if (error) throw error
   return data
 }
 
 export async function loadTransformation() {
-  if (!supabase) {
-    throw new Error('Supabase client is not initialized. Check your environment variables.')
+  if (!supabaseInitialized) {
+    throw new Error('Supabase is not initialized')
   }
+
   const { data, error } = await supabase
     .from('transformations')
-    .select('input_data, transform_logic')
+    .select('*')
     .order('created_at', { ascending: false })
     .limit(1)
     .single()
 
   if (error) throw error
-  return { inputData: data.input_data, transformLogic: data.transform_logic }
-}
 
-export function isSupabaseInitialized() {
-  return !!supabase
+  return {
+    inputData: data.input_data,
+    transformLogic: data.transform_logic
+  }
 }
-
