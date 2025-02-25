@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button"
@@ -23,7 +24,6 @@ export default function UpdatedCode() {
   }, []);
 
   const handleExport = () => {
-    // Placeholder for export functionality
     alert('Export functionality will be implemented here.');
   };
 
@@ -52,7 +52,7 @@ export default function UpdatedCode() {
           }}
           className="overflow-y-auto"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200" style={{ borderTop: 'none' }}>
+          <div className="flex items-center justify-between p-4 border-b border-gray-200" style={{ borderTop: '0px' }}>
             <h2 className="text-lg font-semibold">Inputs</h2>
             <Button variant="outline" onClick={() => setState(prev => ({ ...prev, isInputDialogOpen: true }))}>
               Add Input
@@ -68,7 +68,7 @@ export default function UpdatedCode() {
           }}
           className="flex flex-col"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200" style={{ borderTop: 'none' }}>
+          <div className="flex items-center justify-between p-4 border-b border-gray-200" style={{ borderTop: '0px' }}>
             <h2 className="text-lg font-semibold">Script</h2>
             <div className="flex items-center space-x-4">
               <FormatDropdown onFormatChange={handleFormatChange} />
@@ -86,7 +86,7 @@ export default function UpdatedCode() {
           }}
           className="flex flex-col"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200" style={{ borderTop: 'none' }}>
+          <div className="flex items-center justify-between p-4 border-b border-gray-200" style={{ borderTop: '0px' }}>
             <h2 className="text-lg font-semibold">Output</h2>
             <Button variant="outline" onClick={handleExport}>Export</Button>
           </div>

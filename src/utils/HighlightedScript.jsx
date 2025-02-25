@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import Editor from '@monaco-editor/react';
 
@@ -7,25 +8,27 @@ const HighlightedScript = ({ content, onChange, activeLineIndex }) => {
   const handleEditorDidMount = (editor, monaco) => {
     editorRef.current = editor;
 
-    // Disable all validations
+    // Disable validations
     monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
       noSemanticValidation: true,
       noSyntaxValidation: true,
       noSuggestionDiagnostics: true
     });
 
-    // Register completion provider for $ suggestions
+    // Register completion provider for $ and . triggers
     monaco.languages.registerCompletionItemProvider('javascript', {
       provideCompletionItems: (model, position) => {
         const lineContent = model.getLineContent(position.lineNumber);
         const wordUntilPosition = model.getWordUntilPosition(position);
+        const prevChar = lineContent.charAt(wordUntilPosition.startColumn - 2);
 
-        // Handle $ trigger
-        if (lineContent.charAt(wordUntilPosition.startColumn - 2) === '$') {
-          // Get the available JSON keys from the input
+        if (prevChar === '$') {
           try {
-            const jsonInput = JSON.parse(content);
-            const keys = Object.keys(jsonInput);
+            let inputData = content;
+            if (typeof inputData === 'string') {
+              inputData = JSON.parse(inputData);
+            }
+            const keys = Object.keys(inputData);
             
             return {
               suggestions: keys.map(key => ({
@@ -41,48 +44,45 @@ const HighlightedScript = ({ content, onChange, activeLineIndex }) => {
               }))
             };
           } catch (e) {
+            console.error('Error parsing JSON input:', e);
             return { suggestions: [] };
           }
         }
 
-        // Handle . trigger (keep existing functionality)
-        if (lineContent.charAt(wordUntilPosition.startColumn - 2) === '.') {
-          const varName = lineContent.substring(0, wordUntilPosition.startColumn - 2);
+        if (prevChar === '.') {
+          const methods = [
+            'concat', 'map', 'filter', 'reduce', 'forEach', 'find',
+            'includes', 'indexOf', 'join', 'slice', 'sort', 'reverse'
+          ];
           
-          if (varName.startsWith('$')) {
-            const methods = [
-              'concat', 'map', 'filter', 'reduce', 'forEach', 'find', 'some', 'every',
-              'includes', 'indexOf', 'join', 'slice', 'splice', 'sort', 'reverse',
-              'push', 'pop', 'shift', 'unshift', 'toString', 'valueOf', 'length',
-              'toLowerCase', 'toUpperCase', 'trim', 'replace', 'split', 'substring'
-            ];
-            
-            return {
-              suggestions: methods.map(method => ({
-                label: method,
-                kind: monaco.languages.CompletionItemKind.Method,
-                insertText: method,
-                range: {
-                  startLineNumber: position.lineNumber,
-                  endLineNumber: position.lineNumber,
-                  startColumn: wordUntilPosition.startColumn,
-                  endColumn: wordUntilPosition.endColumn
-                }
-              }))
-            };
-          }
+          return {
+            suggestions: methods.map(method => ({
+              label: method,
+              kind: monaco.languages.CompletionItemKind.Method,
+              insertText: method,
+              range: {
+                startLineNumber: position.lineNumber,
+                endLineNumber: position.lineNumber,
+                startColumn: wordUntilPosition.startColumn,
+                endColumn: wordUntilPosition.endColumn
+              }
+            }))
+          };
         }
+
         return { suggestions: [] };
       },
-      triggerCharacters: ['.', '$']
+      triggerCharacters: ['$', '.']
     });
 
-    // Add comment line handling
+    // Handle comments and line execution
     editor.onDidChangeModelContent(() => {
       const model = editor.getModel();
-      const decorations = [];
+      if (!model) return;
+
       const lines = model.getLinesContent();
-      
+      const decorations = [];
+
       lines.forEach((line, index) => {
         if (line.trim().startsWith('//')) {
           decorations.push({
@@ -95,98 +95,52 @@ const HighlightedScript = ({ content, onChange, activeLineIndex }) => {
           });
         }
       });
-      
+
       editor.deltaDecorations([], decorations);
-      
-      // Skip execution of commented lines
-      const newValue = lines
+
+      // Filter out commented lines for execution
+      const executableContent = lines
         .filter(line => !line.trim().startsWith('//'))
         .join('\n');
       
-      onChange(newValue);
+      onChange(executableContent);
     });
 
-    // Define custom theme for script syntax highlighting
+    // Set editor theme and options
     monaco.editor.defineTheme('scriptTheme', {
       base: 'vs',
       inherit: false,
       rules: [
-        { token: 'jsonpath', foreground: '800000', fontStyle: 'bold' },
-        { token: 'delimiter', foreground: '000000' },
-        { token: 'property', foreground: '001080' },
+        { token: 'comment', foreground: '008000', fontStyle: 'italic' },
         { token: 'string', foreground: '0451A5' },
         { token: 'number', foreground: '098658' },
-        { token: 'operator', foreground: '000000' },
-        { token: 'function', foreground: '795E26' },
-        { token: 'variable', foreground: '001080' },
-        { token: 'comment', foreground: '008000', fontStyle: 'italic' }
+        { token: 'keyword', foreground: '0000FF' }
       ],
       colors: {
-        'editor.foreground': '#000000',
         'editor.background': '#FFFFFF',
-        'editor.lineHighlightBackground': '#F7F7F7',
-        'editorCursor.foreground': '#000000',
-        'editor.selectionBackground': '#ADD6FF',
-        'editorLineNumber.foreground': '#237893',
-        'editorLineNumber.activeForeground': '#0B216F'
+        'editor.foreground': '#000000',
+        'editor.lineHighlightBackground': '#F7F7F7'
       }
     });
 
-    // Configure editor options
     editor.updateOptions({
-      lineNumbers: 'on',
-      fontSize: 13,
-      fontFamily: 'Manrope, Monaco, Consolas, monospace',
-      lineHeight: 24,
-      padding: { top: 8, bottom: 8 },
-      scrollBeyondLastLine: false,
+      fontSize: 14,
+      lineHeight: 20,
+      fontFamily: 'Manrope, Monaco, monospace',
       minimap: { enabled: false },
-      overviewRulerLanes: 0,
-      hideCursorInOverviewRuler: true,
-      overviewRulerBorder: false,
-      renderLineHighlight: 'all',
-      roundedSelection: false,
+      lineNumbers: 'on',
       wordWrap: 'on',
-      autoIndent: 'keep',
-      formatOnPaste: false,
-      formatOnType: false,
-      autoClosingBrackets: 'never',
-      autoClosingQuotes: 'never',
-      suggestOnTriggerCharacters: true,
-      quickSuggestions: { other: true },
-      // Add validation disabling options
-      validateOnModelChange: false,
-      renderValidationDecorations: "off"
-    });
-
-    // Clear any existing markers
-    monaco.editor.setModelMarkers(editor.getModel(), 'javascript', []);
-
-    // Handle content changes
-    editor.onDidChangeModelContent(() => {
-      const newValue = editor.getValue();
-      onChange(newValue);
-    });
-
-    // Handle cursor position for line highlighting
-    editor.onDidChangeCursorPosition((e) => {
-      const lineNumber = e.position.lineNumber - 1;
-      if (typeof activeLineIndex === 'number') {
-        editor.deltaDecorations([], [
-          {
-            range: new monaco.Range(lineNumber + 1, 1, lineNumber + 1, 1),
-            options: {
-              isWholeLine: true,
-              className: 'currentLineDecoration'
-            }
-          }
-        ]);
-      }
+      tabSize: 2,
+      insertSpaces: true,
+      autoClosingBrackets: 'always',
+      autoClosingQuotes: 'always',
+      formatOnPaste: true,
+      formatOnType: true
     });
   };
 
   return (
-    <div className="flex-1 relative font-['Manrope']" style={{ overflow: 'hidden' }}>
+    <div className="flex-1 relative font-['Manrope']">
       <Editor
         height="100%"
         defaultLanguage="javascript"
@@ -194,43 +148,21 @@ const HighlightedScript = ({ content, onChange, activeLineIndex }) => {
         onMount={handleEditorDidMount}
         theme="scriptTheme"
         options={{
-          scrollbar: {
-            vertical: 'visible',
-            horizontal: 'visible',
-            verticalScrollbarSize: 10,
-            horizontalScrollbarSize: 10,
-            verticalSliderSize: 10,
-            horizontalSliderSize: 10,
-            useShadows: false
-          }
+          readOnly: false,
+          automaticLayout: true,
+          scrollBeyondLastLine: false
         }}
       />
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          .currentLineDecoration {
-            background-color: #F7F7F7;
-          }
-          .monaco-editor .margin {
-            background-color: #FFFFFF !important;
-          }
-          .monaco-editor {
-            padding-top: 4px;
-          }
-          /* Hide error decorations */
-          .monaco-editor .squiggly-error,
-          .monaco-editor .error-decoration {
-            display: none !important;
-          }
-          .commentedLine {
-            opacity: 0.6;
-            background-color: #f5f5f5;
-          }
-          .commentedText {
-            color: #008000 !important;
-            font-style: italic;
-          }
-        `
-      }} />
+      <style jsx>{`
+        .commentedLine {
+          background-color: #f5f5f5;
+          opacity: 0.7;
+        }
+        .commentedText {
+          color: #008000 !important;
+          font-style: italic;
+        }
+      `}</style>
     </div>
   );
 };
