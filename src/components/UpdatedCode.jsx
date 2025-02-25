@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { JSONPath } from 'jsonpath-plus';
 import { ChevronDown, Upload, Download, Terminal, Book, ChevronLeft } from "lucide-react";
@@ -26,15 +27,15 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Button } from '../components/ui/button';
 import FormatDropdown from './FormatDropdown';
-import { handleJSON } from './utils/jsonHandler';
+import { handleJSON } from '../utils/jsonHandler';
 import _ from 'lodash';
 import moment from 'moment';
 import * as R from 'ramda';
-import SnapLogicFunctionsHandler from './utils/SnaplogicFunctionsHandler';
-import HighLightedJSON from './utils/HighLightedJson';
-import HighlightedScript from './utils/HighlightedScript';
-import HighlightedActualOutput from './utils/HighlightedActualOutput';
-import HighlightedExpectedOutput from './utils/HighlightedExpectedOutput';
+import SnapLogicFunctionsHandler from '../utils/SnaplogicFunctionsHandler';
+import HighLightedJSON from '../utils/HighLightedJson';
+import HighlightedScript from '../utils/HighlightedScript';
+import HighlightedActualOutput from '../utils/HighlightedActualOutput';
+import HighlightedExpectedOutput from '../utils/HighlightedExpectedOutput';
 
 const UpdatedCode = () => {
 
@@ -1110,7 +1111,6 @@ const monacoStyles = `
       {showToast && (
         <div className="bg-[#E9EEF4] text-[#00044C] py-2 text-[12px] relative">
           <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
-           
             Discover the Future of Integration. Explore SnapLogic Playground Highlights
           </div>
           <button
@@ -1122,9 +1122,6 @@ const monacoStyles = `
         </div>
       )}
 
-
-
-
       <div className="flex items-center justify-between px-6 py-2 border-b">
         <div className="flex items-center space-x-3">
           <svg
@@ -1134,4 +1131,34 @@ const monacoStyles = `
             xmlns="http://www.w3.org/2000/svg"
           >
             <circle cx="50" cy="50" r="50" fill="#0046BE"/>
-            <path d="M25.7 53.4H34.3L38.6 42.2H46.1L41.7 53.4H47.8" stroke="white" strokeWidth="
+            <path 
+              d="M25.7 53.4H34.3L38.6 42.2H46.1L41.7 53.4H47.8" 
+              stroke="white" 
+              strokeWidth="2"
+            />
+          </svg>
+        </div>
+      </div>
+
+      {/* Main content area */}
+      <div className="flex-1 flex">
+        {/* Left panel */}
+        <div style={resizableStyles(leftWidth, 'left')} className="border-r">
+          {/* Panel content */}
+        </div>
+
+        {/* Middle panel */}
+        <div style={resizableStyles(middleWidth, 'middle')} className="border-r">
+          {/* Panel content */}
+        </div>
+
+        {/* Right panel */}
+        <div style={resizableStyles(rightWidth, 'right')}>
+          {/* Panel content */}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default UpdatedCode;
