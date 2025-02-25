@@ -1,4 +1,3 @@
-<lov-code>
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { JSONPath } from 'jsonpath-plus';
 import { ChevronDown, Upload, Download, Terminal, Book, ChevronLeft } from "lucide-react";
@@ -911,24 +910,15 @@ const responsiveStyles = {
 const useMediaQuery = (query) => {
   const [matches, setMatches] = useState(window.matchMedia(query).matches);
 
-
-
-
   useEffect(() => {
     const media = window.matchMedia(query);
     const listener = () => setMatches(media.matches);
     media.addEventListener('change', listener);
-    return () => media.removeEventListener('resize', listener);
+    return () => media.removeEventListener('change', listener);
   }, [query]);
-
-
-
 
   return matches;
 };
-
-
-
 
 // In your component
 const isTablet = useMediaQuery('(max-width: 1024px)');
@@ -1125,7 +1115,7 @@ const monacoStyles = `
           </div>
           <button
             onClick={() => setShowToast(false)}
-            className="absolute right-4 top-0 h-full bg-[#E9EEF4] text-[#00044C] border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center font-bold"
+            className="absolute right-4 top-0 h-full bg-[#E9EEF4] text-[#00044C] border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center"
           >
             ×
           </button>
@@ -1137,11 +1127,11 @@ const monacoStyles = `
 
       <div className="flex items-center justify-between px-6 py-2 border-b">
         <div className="flex items-center space-x-3">
-          {/* <svg
+          <svg
             viewBox="0 0 100 100"
             className="w-8 h-8"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             <circle cx="50" cy="50" r="50" fill="#0046BE"/>
-            <path d="M25.7 53.4H34.3L38.6 42.2H46.1L41.7 53.4H47.8
+            <path d="M25.7 53.4H34.3L38.6 42.2H46.1L41.7 53.4H47.8" stroke="white" strokeWidth="
