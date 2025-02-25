@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="106px" height="95px" viewBox="0 0 106 95" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>CloudUpload-Hover</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="CloudUpload-Hover" transform="translate(5.000000, 5.000000)">
+            <path d="M32.5382716,59.7037037 L18,59.7037037 C8.05925926,59.7037037 0,52.7308642 0,44.1283951 C0,36.3851852 6.52345679,28.5876543 15.0814815,28.5876543 C12.5234568,19.382716 23.6148148,10.108642 33.3679012,17.1555556 C35.3382716,7.40740741 45.1703704,0 57.0024691,0 C69.8320988,0 80.3111111,8.71111111 80.9679012,19.6740741 C89.782716,22.7407407 96,30.2123457 96,38.9382716 C96,50.4049383 85.254321,59.7037037 72,59.7037037 L69.254321,59.7037037" id="Stroke-714-Copy-8" stroke="#6084B0" stroke-width="8.27272727"></path>
+            <g id="Group-5-Copy-4" transform="translate(50.429630, 56.033545) scale(-1, 1) rotate(-180.000000) translate(-50.429630, -56.033545) translate(28.886420, 22.441905)" fill="#6084B0" fill-rule="nonzero">
+                <polygon id="Combined-Shape" points="27.1407407 -3.52658714e-15 27.1358025 39.0647616 43.0864198 39.0696999 21.6135802 67.1832801 0 39.0696999 15.945679 39.0696999 15.945679 0.0049382716"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>
