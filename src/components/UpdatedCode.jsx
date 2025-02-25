@@ -1,4 +1,3 @@
-<lov-code>
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { JSONPath } from 'jsonpath-plus';
 import { ChevronDown, Upload, Download, Terminal, Book, ChevronLeft } from "lucide-react";
@@ -1161,4 +1160,4 @@ const monacoStyles = `
             xmlns="http://www.w3.org/2000/svg"
           >
             <circle cx="50" cy="50" r="50" fill="#0046BE"/>
-            <path d="M
+            <path d="M25.7
