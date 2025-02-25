@@ -10,8 +10,9 @@ import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
-} from "../components/ui/tooltip"
+  TooltipTrigger
+} from "../components/ui/tooltip";
+
 import {
   Dialog,
   DialogContent,
@@ -19,10 +20,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from "../components/ui/dialog"
-import { Input } from "../components/ui/input"
-import { Label } from "../components/ui/label"
+  DialogTrigger
+} from "../components/ui/dialog";
+
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
 import { Button } from '../components/ui/button';
 import FormatDropdown from './FormatDropdown';
 import { handleJSON } from './utils/jsonHandler';
@@ -34,19 +36,6 @@ import HighLightedJSON from './utils/HighLightedJson';
 import HighlightedScript from './utils/HighlightedScript';
 import HighlightedActualOutput from './utils/HighlightedActualOutput';
 import HighlightedExpectedOutput from './utils/HighlightedExpectedOutput';
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 const UpdatedCode = () => {
 
@@ -144,7 +133,7 @@ const [inputContents, setInputContents] = useState({
   const [isBottomExpanded, setIsBottomExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState(null);
   const [showToast, setShowToast] = useState(true);
-  const [isDragging, setIsDragging] = useState(isDragging);
+  const [isDragging, setIsDragging] = useState(false);
   const [isInputDialogOpen, setIsInputDialogOpen] = useState(false);
   const [isScriptDialogOpen, setIsScriptDialogOpen] = useState(false);
  
@@ -929,7 +918,7 @@ const useMediaQuery = (query) => {
     const media = window.matchMedia(query);
     const listener = () => setMatches(media.matches);
     media.addEventListener('change', listener);
-    return () => media.removeEventListener('change', listener);
+    return () => media.removeEventListener('resize', listener);
   }, [query]);
 
 
@@ -1155,4 +1144,4 @@ const monacoStyles = `
             xmlns="http://www.w3.org/2000/svg"
           >
             <circle cx="50" cy="50" r="50" fill="#0046BE"/>
-            <path d="M25.7
+            <path d="M25.7 53.4H34.3L38.6 42.2H46.1L41.7 53.4H47.8
