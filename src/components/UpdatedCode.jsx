@@ -935,32 +935,4 @@ function UpdatedCode() {
           className="flex flex-col"
         >
           <div className="flex items-center justify-between p-4 border-b">
-            <h2 className="text-lg font-semibold">Output</h2>
-            <Button variant="outline" onClick={handleExport}>Export</Button>
-          </div>
-          <div className="flex-1 overflow-y-auto p-4">
-            <Label htmlFor="actualOutput" className="block text-sm font-medium text-gray-700 mb-2">
-              Actual Output
-            </Label>
-            <Editor
-              height="30vh"
-              width="100%"
-              language="json"
-              theme="light"
-              value={actualOutput}
-              onChange={handleActualOutputChange}
-              options={{
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                wrappingIndent: 'indent'
-              }}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default UpdatedCode;
+            <h2 className="text-lg font
