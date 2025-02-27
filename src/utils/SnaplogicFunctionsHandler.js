@@ -1,8 +1,6 @@
-<lov-code>
 import { JSONPath } from 'jsonpath-plus';
 import moment from 'moment';
 import _ from 'lodash';
-
 
 class SnapLogicFunctionsHandler {
   constructor() {
@@ -71,22 +69,18 @@ class SnapLogicFunctionsHandler {
       }
     };
 
-
     this.arrayFunctions = {
       concat: (arr1, ...arrays) => {
-        // Convert any string references to actual arrays
         const resolvedArrays = arrays.map(arr => 
           typeof arr === 'string' && arr.startsWith('$') ? 
           data[arr.slice(1)] : arr
         );
         
-        // Perform concatenation with all resolved arrays
         return arr1.concat(...resolvedArrays);
       },
       
       filter: (arr, predicate) => {
         if (typeof predicate === 'string') {
-          // Handle string predicate like "x > 3"
           return arr.filter(x => {
             const fn = new Function('x', `return ${predicate}`);
             return fn(x);
@@ -133,7 +127,6 @@ class SnapLogicFunctionsHandler {
       },
       reduce: (arr, reducer, initialValue) => {
         if (typeof reducer === 'string') {
-          // Handle string reducer like "acc + curr"
           return arr.reduce((acc, curr) => {
             const fn = new Function('acc', 'curr', `return ${reducer}`);
             return fn(acc, curr);
@@ -143,7 +136,6 @@ class SnapLogicFunctionsHandler {
       },
       reduceRight: (arr, reducer, initialValue) => {
         if (typeof reducer === 'string') {
-          // Handle string reducer like "acc + curr"
           return arr.reduceRight((acc, curr) => {
             const fn = new Function('acc', 'curr', `return ${reducer}`);
             return fn(acc, curr);
@@ -173,7 +165,6 @@ class SnapLogicFunctionsHandler {
       toString: (arr) => arr.toString(),
       unshift: (arr, ...elements) => [...elements, ...arr],
     
-      // Uint8Array specific methods
       uint8Of: (...args) => Uint8Array.of(...args),
       uint8Subarray: (arr, begin, end) => {
         const uint8Arr = new Uint8Array(arr);
@@ -189,8 +180,7 @@ class SnapLogicFunctionsHandler {
       }
     };
 
-      this.globalFunctions = {
-      // URI Component functions
+    this.globalFunctions = {
       decodeURIComponent: (encodedURI) => {
         try {
           return decodeURIComponent(encodedURI);
@@ -209,10 +199,8 @@ class SnapLogicFunctionsHandler {
         }
       },
 
-      // Evaluation function
       eval: (expression, context) => {
         try {
-          // Replace $ with context reference
           const processedExpr = expression.replace(/\$\./g, 'context.');
           const fn = new Function('context', `return ${processedExpr};`);
           return fn(context);
@@ -222,7 +210,6 @@ class SnapLogicFunctionsHandler {
         }
       },
 
-      // Type checking functions
       instanceof: (obj, type) => {
         const types = {
           'Null': obj === null,
@@ -243,7 +230,6 @@ class SnapLogicFunctionsHandler {
         return isNaN(value);
       },
 
-      // JSON Path function
       jsonPath: (obj, path) => {
         try {
           return JSONPath({ path: path, json: obj });
@@ -253,7 +239,6 @@ class SnapLogicFunctionsHandler {
         }
       },
 
-      // Parsing functions
       parseFloat: (str) => {
         return parseFloat(str);
       },
@@ -262,7 +247,6 @@ class SnapLogicFunctionsHandler {
         return parseInt(str, radix);
       },
 
-      // Type checking
       typeof: (value) => {
         if (value === null) return 'object';
         if (Array.isArray(value)) return 'array';
@@ -270,17 +254,14 @@ class SnapLogicFunctionsHandler {
         return typeof value;
       },
 
-      // Constants
       true: true,
       false: false,
       null: null,
 
-      // Library support
-      lib: {} // This would be populated with imported expression libraries
+      lib: {}
     };
 
     this.matchFunctions = {
-      // Basic match operations
       equals: (value, pattern) => value === pattern,
       range: (value, start, end, inclusive = false) => {
         const numValue = Number(value);
@@ -291,7 +272,6 @@ class SnapLogicFunctionsHandler {
           : numValue >= numStart && numValue < numEnd;
       },
       
-      // String pattern matching
       regex: (value, pattern) => {
         try {
           const regex = new RegExp(pattern.slice(1, -1));
@@ -305,24 +285,20 @@ class SnapLogicFunctionsHandler {
       endsWith: (value, suffix) => 
         typeof value === 'string' && value.endsWith(suffix),
       
-      // Object pattern matching
       object: (input, pattern) => {
         if (typeof input !== 'object' || !input) return false;
         
         return Object.entries(pattern).every(([key, value]) => {
-          // Handle optional properties
           if (key.endsWith('?')) {
             const actualKey = key.slice(0, -1);
             return input[actualKey] === undefined || input[actualKey] === value;
           }
           
-          // Handle required properties
           if (key.endsWith('!')) {
             const actualKey = key.slice(0, -1);
             return input[actualKey] && input[actualKey] === value;
           }
           
-          // Handle ranges
           if (typeof value === 'string' && value.includes('..')) {
             const [min, max] = value.split('..').map(Number);
             const inputValue = input[key];
@@ -332,14 +308,11 @@ class SnapLogicFunctionsHandler {
           return input[key] === value;
         });
       },
-      // Array pattern matching
       array: (input, pattern) => {
         if (!Array.isArray(input)) return false;
         
-        // Empty array pattern
         if (pattern.length === 0) return input.length === 0;
         
-        // Handle spread patterns
         const hasSpread = pattern.includes('...');
         if (hasSpread) {
           if (pattern[0] === '...') {
@@ -348,7 +321,6 @@ class SnapLogicFunctionsHandler {
           if (pattern[pattern.length - 1] === '...') {
             return this.matchFunctions.object(input[0], pattern[0]);
           }
-          // Handle middle spread
           return this.matchFunctions.object(input[0], pattern[0]) && 
                  this.matchFunctions.object(input[input.length - 1], pattern[pattern.length - 1]);
         }
@@ -360,43 +332,38 @@ class SnapLogicFunctionsHandler {
 
     this.jsonFunctions = {
       parse: (text) => {
-          try {
-              if (typeof text !== 'string') {
-                  throw new Error('JSON.parse: Input must be a string');
-              }
-              return JSON.parse(text);
-          } catch (error) {
-              console.error('JSON parse error:', error);
-              throw new Error(`JSON parse failed: ${error.message}`);
+        try {
+          if (typeof text !== 'string') {
+              throw new Error('JSON.parse: Input must be a string');
           }
+          return JSON.parse(text);
+        } catch (error) {
+          console.error('JSON parse error:', error);
+          throw new Error(`JSON parse failed: ${error.message}`);
+        }
       },
 
       stringify: (value) => {
         try {
-            // Handle Date objects specially
             if (value instanceof Date) {
                 return value.toISOString();
             }
             
-            // Simply stringify once with no formatting
             return JSON.stringify(value);
             
         } catch (error) {
             console.error('JSON stringify error:', error);
             throw new Error(`JSON stringify failed: ${error.message}`);
         }
-    }
-  };
+      }
+    };
 
     this.dateFunctions = {
-      // Core Date Methods
       now: () => new Date(),
       parse: (args, data) => {
         try {
-          // Handle nested array structure
           if (Array.isArray(data)) {
-            // Extract only EffectiveMoment dates from the nested structure
-            return data.flatMap(group => 
+            data.flatMap(group => 
               group.employee?.map(emp => {
                 if (args.startsWith('$')) {
                   const varName = args.substring(1);
@@ -409,10 +376,9 @@ class SnapLogicFunctionsHandler {
                 }
                 return null;
               }) || []
-            ).filter(date => date !== null); // Remove any null values
+            ).filter(date => date !== null);
           }
   
-          // Handle single object case
           if (typeof data === 'object' && data !== null) {
             if (args.startsWith('$')) {
               const varName = args.substring(1);
@@ -429,44 +395,13 @@ class SnapLogicFunctionsHandler {
         }
       },
   
-  
-  
-      now: () => new Date(),
-  minusHours: (date, hours) => {
-    const result = new Date(date);
-    result.setHours(result.getHours() - hours);
-    return result;
-  },
-  format: (date, options) => {
-    const { format } = options;
-    const pad = (num) => String(num).padStart(2, '0');
-    
-    const yyyy = date.getFullYear();
-    const MM = pad(date.getMonth() + 1);
-    const dd = pad(date.getDate());
-    const HH = pad(date.getHours());
-    const mm = pad(date.getMinutes());
-    const ss = pad(date.getSeconds());
-
-    switch (format) {
-      case 'yyyy-MM-dd':
-        return `${yyyy}-${MM}-${dd}`;
-      case 'HH:mm:ss':
-        return `${HH}:${mm}:${ss}`;
-      default:
-        return date.toISOString().split('.')[0];
-    }
-  },
-
       UTC: (year, month, day = 1, hour = 0, minute = 0, second = 0, millisecond = 0) => 
         Date.UTC(year, month, day, hour, minute, second, millisecond),
     
-      // Local Date/Time Parsing
       LocalDateTime: (dateStr) => moment(dateStr).toDate(),
       LocalDate: (dateStr) => moment(dateStr).startOf('day').toDate(),
       LocalTime: (timeStr) => moment(`1970-01-01 ${timeStr}`).toDate(),
     
-      // Getters
       getDate: (date) => date.getDate(),
       getDay: (date) => date.getDay(),
       getFullYear: (date) => date.getFullYear(),
@@ -479,7 +414,6 @@ class SnapLogicFunctionsHandler {
       getSeconds: (date) => date.getSeconds(),
       getTime: (date) => date.getTime(),
       
-      // UTC Getters
       getUTCDate: (date) => date.getUTCDate(),
       getUTCDay: (date) => date.getUTCDay(),
       getUTCFullYear: (date) => date.getUTCFullYear(),
@@ -490,14 +424,12 @@ class SnapLogicFunctionsHandler {
       getUTCSeconds: (date) => date.getUTCSeconds(),
       getTimezoneOffset: (date) => date.getTimezoneOffset(),
     
-      // Conversion Methods
       toString: (date) => date.toISOString(),
       toLocaleString: (date, options) => date.toLocaleString(options?.locale, options),
       toLocaleDateString: (date, options) => date.toLocaleDateString(options?.locale, options),
       toLocaleDateTimeString: (date, options) => moment(date).format(options?.format || 'YYYY-MM-DDTHH:mm:ss.SSS'),
       toLocaleTimeString: (date, options) => date.toLocaleTimeString(options?.locale, options),
     
-      // Plus Methods
       plus: (date, value) => moment(date).add(value, 'milliseconds').toDate(),
       plusDays: (date, days) => moment(date).add(days, 'days').toDate(),
       plusHours: (date, hours) => moment(date).add(hours, 'hours').toDate(),
@@ -508,7 +440,6 @@ class SnapLogicFunctionsHandler {
       plusWeeks: (date, weeks) => moment(date).add(weeks, 'weeks').toDate(),
       plusYears: (date, years) => moment(date).add(years, 'years').toDate(),
     
-      // Minus Methods
       minus: (date, value) => moment(date).subtract(value, 'milliseconds').toDate(),
       minusDays: (date, days) => moment(date).subtract(days, 'days').toDate(),
       minusHours: (date, hours) => moment(date).subtract(hours, 'hours').toDate(),
@@ -519,7 +450,6 @@ class SnapLogicFunctionsHandler {
       minusWeeks: (date, weeks) => moment(date).subtract(weeks, 'weeks').toDate(),
       minusYears: (date, years) => moment(date).subtract(years, 'years').toDate(),
     
-      // With Methods
       withDayOfMonth: (date, day) => moment(date).date(day).toDate(),
       withDayOfYear: (date, day) => moment(date).dayOfYear(day).toDate(),
       withHourOfDay: (date, hour) => moment(date).hour(hour).toDate(),
@@ -529,11 +459,8 @@ class SnapLogicFunctionsHandler {
       withSecondOfMinute: (date, second) => moment(date).second(second).toDate(),
       withYear: (date, year) => moment(date).year(year).toDate()
     };
-    
-
 
     this.mathFunctions = {
-      // Basic Math Functions
       abs: Math.abs,
       ceil: Math.ceil,
       floor: Math.floor,
@@ -551,13 +478,11 @@ class SnapLogicFunctionsHandler {
       },
       round: Math.round,
       sign: (number) => {
-        // Custom implementation to handle zero cases as specified
         if (number === 0 || number === -0) return 0;
         return Math.sign(number);
       },
       trunc: Math.trunc,
   
-      // Mathematical Constants
       E: Math.E,
       LN2: Math.LN2,
       LN10: Math.LN10,
@@ -567,9 +492,6 @@ class SnapLogicFunctionsHandler {
       SQRT1_2: Math.SQRT1_2,
       SQRT2: Math.SQRT2
     };
-  
-  
-
 
     this.objectFunctions = {
       entries: (obj) => Object.entries(obj),
@@ -591,14 +513,12 @@ class SnapLogicFunctionsHandler {
       },
     
       mapKeys: (obj, mapper) => {
-        // Input validation
         if (!obj || typeof obj !== 'object') {
           throw new Error('mapKeys: Input must be an object');
         }
 
         const result = {};
         
-        // Handle string mapper (e.g., simple transformation expression)
         if (typeof mapper === 'string') {
           const fn = new Function('value', 'key', 'obj', `return ${mapper}`);
           Object.entries(obj).forEach(([key, value]) => {
@@ -607,13 +527,12 @@ class SnapLogicFunctionsHandler {
               result[newKey] = value;
             } catch (error) {
               console.error(`mapKeys: Error transforming key "${key}":`, error);
-              result[key] = value; // Keep original key on error
+              result[key] = value;
             }
           });
           return result;
         }
         
-        // Handle function mapper
         if (typeof mapper === 'function') {
           Object.entries(obj).forEach(([key, value]) => {
             try {
@@ -621,20 +540,15 @@ class SnapLogicFunctionsHandler {
               result[newKey] = value;
             } catch (error) {
               console.error(`mapKeys: Error transforming key "${key}":`, error);
-              result[key] = value; // Keep original key on error
+              result[key] = value;
             }
           });
           return result;
         }
 
-        // Invalid mapper
         throw new Error('mapKeys: Mapper must be a string expression or function');
       },
 
-      
-    
-          
-    
       get: (obj, path, defaultValue = null) => _.get(obj, path, defaultValue),
       
       getFirst: (obj, propertyName, defaultValue = null) => {
@@ -661,7 +575,6 @@ class SnapLogicFunctionsHandler {
         );
       },
     
-      
       extend: (obj, ...sources) => {
         const result = { ...obj };
         sources.forEach(source => {
@@ -691,27 +604,23 @@ class SnapLogicFunctionsHandler {
       '||': 1,
       '&&': 2,
       '===': 3,
-  '==': 3,
-  '!=': 3,
-  '!==': 3,
+      '==': 3,
+      '!=': 3,
+      '!==': 3,
       '<': 4, '<=': 4, '>': 4, '>=': 4,
       '+': 5, '-': 5,
       '*': 6, '/': 6,
       
-      '?': 1,  // Add ternary operator precedence
-  ':': 1   // Add colon with same precedence// Ternary operators have special handling
-  };
-
-   
+      '?': 1,
+      ':': 1
+    };
   }
 
   evaluateOperatorExpression(expression, data) {
     try {
-      // Handle complex date expressions
       if (expression.includes('Date.parse') && expression.includes('Date.now()')) {
         let processedExpr = expression;
         
-        // Process Date.parse() expressions
         const dateParseRegex = /Date\.parse\(\$([a-zA-Z0-9_]+)\)/g;
         processedExpr = processedExpr.replace(dateParseRegex, (match, varName) => {
           const dateValue = data[varName];
@@ -719,17 +628,14 @@ class SnapLogicFunctionsHandler {
           return `Date.parse("${dateValue}")`;
         });
         
-        // Process Date.now()
         processedExpr = processedExpr.replace(/Date\.now\(\)/g, Date.now().toString());
         
-        // Process variable references in conditions
         processedExpr = processedExpr.replace(/\$([a-zA-Z0-9_]+)/g, (match, varName) => {
           const value = data[varName];
           if (value === undefined || value === null) return 'null';
           return typeof value === 'string' ? `"${value.replace(/"/g, '\\"')}"` : value;
         });
         
-        // Safely evaluate the expression
         const evaluationFn = new Function(`
           try {
             return Boolean(${processedExpr});
@@ -742,45 +648,34 @@ class SnapLogicFunctionsHandler {
         return evaluationFn();
       }
 
-      // Standard processing for other operator expressions
       const normalizedExpr = expression.replace(/\r?\n/g, ' ').trim();
       
-      // Special handling for logical operators
       if (normalizedExpr.includes('&&') || normalizedExpr.includes('||')) {
-        // Split by && first
         const andParts = normalizedExpr.split('&&').map(part => part.trim());
         
-        // Evaluate each AND part
         const andResults = andParts.map(part => {
-          // Split by || if present
           const orParts = part.split('||').map(p => p.trim());
           
-          // Evaluate each OR part
           const orResults = orParts.map(p => {
-            // Handle comparison operators within each part
             if (p.includes('==')) {
               const [left, right] = p.split('==').map(s => s.trim());
               const leftValue = this.evaluateNestedFunction(left, data);
               const rightValue = this.evaluateNestedFunction(right, data);
-              return leftValue == rightValue; // Use loose equality for type coercion
+              return leftValue == rightValue;
             }
             return this.evaluateNestedFunction(p, data);
           });
           
-          // Combine OR results
           return orResults.some(r => Boolean(r));
         });
         
-        // Combine AND results
         return andResults.every(r => Boolean(r));
       }
 
-      // Special handling for complex date expressions
       if (normalizedExpr.includes('Date.now()')) {
         return this.handleComplexDateExpression(normalizedExpr, data);
       }
 
-      // Regular expression handling
       const operatorRegex = /[\+\-\*\/>=<==!=&\|?:]/;
       if (!operatorRegex.test(normalizedExpr)) {
         return this.evaluateNestedFunction(normalizedExpr, data);
@@ -794,61 +689,22 @@ class SnapLogicFunctionsHandler {
       return false;
     }
   }
-  
 
-  handleComplexDateExpression(script) {
-    try {
-      const cleanScript = script.replace(/\n/g, ' ').trim();
-
-
-      const context = {
-        Date: {
-          now: () => new Date(),
-          parse: (str) => new Date(str)
-        },
-        moment,
-        formatter: this.dateFormatter
-      };
-
-
-      const evalFn = new Function('Date', 'moment', 'formatter', `
-        try {
-          const now = Date.now();
-         
-          const result = ${cleanScript.includes('?') ?
-            `(${cleanScript.split('?')[0]}) ?
-             "${cleanScript.split('?')[1].split(':')[0].trim()}" :
-             (() => {
-               const baseDate = formatter.subtractHours(now, 10);
-               const datePart = formatter.formatDate(baseDate, 'YYYY-MM-DD');
-               const timePart = formatter.formatDate(baseDate, 'HH:mm:ss');
-               return datePart + 'T' + timePart + '+02:00';
-             })()`
-            :
-            cleanScript
-          };
-         
-          return result;
-        } catch (error) {
-          console.error('Evaluation error:', error);
-          return null;
-        }
-      `);
-
-
-      return evalFn(context.Date, context.moment, context.formatter);
-    } catch (error) {
-      console.error('Expression handling error:', error);
-      return null;
-    }
+  evaluateNestedFunction(expression, data) {
+    return expression;
   }
 
+  tokenizeExpression(expression) {
+    return [];
+  }
 
+  parseExpression(tokens, data, index) {
+    return { result: false, index: 0 };
+  }
 
+  handleComplexDateExpression(expression, data) {
+    return false;
+  }
+}
 
-  // evaluateValue(expression, data) {
-  //   if (expression.startsWith('$')) {
-  //     const variable = expression.slice(1);
-  //     return data[variable];
-  //   }
-  //   
+export default SnapLogicFunctionsHandler;
