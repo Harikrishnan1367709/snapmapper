@@ -1,15 +1,19 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { FormatDropdown } from './FormatDropdown';
 
 export default function UpdatedCode() {
-  const [state, setState] = useState({
+  const resizeTimeoutRef = useRef(null);
+  const [dimensions, setDimensions] = useState({
     leftWidth: 300,
     middleWidth: 400,
-    rightWidth: 300,
+    rightWidth: 300
+  });
+  
+  const [state, setState] = useState({
     isResizingLeft: false,
     isResizingMiddle: false,
     isInputDialogOpen: false,
@@ -18,6 +22,43 @@ export default function UpdatedCode() {
     scriptFormat: 'javascript',
     actualOutput: '',
   });
+
+  // Debounced resize handler
+  const handleResize = useCallback(() => {
+    if (resizeTimeoutRef.current) {
+      window.cancelAnimationFrame(resizeTimeoutRef.current);
+    }
+
+    resizeTimeoutRef.current = window.requestAnimationFrame(() => {
+      const container = document.querySelector('.flex-1.flex');
+      if (container) {
+        const totalWidth = container.clientWidth;
+        setDimensions(prev => {
+          const ratio = {
+            left: prev.leftWidth / totalWidth,
+            middle: prev.middleWidth / totalWidth,
+            right: prev.rightWidth / totalWidth
+          };
+          
+          return {
+            leftWidth: Math.max(250, Math.floor(totalWidth * ratio.left)),
+            middleWidth: Math.max(250, Math.floor(totalWidth * ratio.middle)),
+            rightWidth: Math.max(250, Math.floor(totalWidth * ratio.right))
+          };
+        });
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (resizeTimeoutRef.current) {
+        window.cancelAnimationFrame(resizeTimeoutRef.current);
+      }
+    };
+  }, [handleResize]);
 
   const handleFormatChange = useCallback((format) => {
     setState(prev => ({ ...prev, scriptFormat: format }));
@@ -46,7 +87,7 @@ export default function UpdatedCode() {
       <div className="flex-1 flex">
         <div
           style={{
-            width: `${state.leftWidth}px`,
+            width: `${dimensions.leftWidth}px`,
             minWidth: '250px',
             borderRight: '1px solid #e5e7eb'
           }}
@@ -62,7 +103,7 @@ export default function UpdatedCode() {
 
         <div
           style={{
-            width: `${state.middleWidth}px`,
+            width: `${dimensions.middleWidth}px`,
             minWidth: '250px',
             borderRight: '1px solid #e5e7eb'
           }}
@@ -81,7 +122,7 @@ export default function UpdatedCode() {
 
         <div
           style={{
-            width: `${state.rightWidth}px`,
+            width: `${dimensions.rightWidth}px`,
             minWidth: '250px'
           }}
           className="flex flex-col"
@@ -105,7 +146,8 @@ export default function UpdatedCode() {
                 minimap: { enabled: false },
                 scrollBeyondLastLine: false,
                 wordWrap: 'on',
-                wrappingIndent: 'indent'
+                wrappingIndent: 'indent',
+                automaticLayout: true
               }}
             />
           </div>
