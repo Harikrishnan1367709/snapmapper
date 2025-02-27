@@ -1,4 +1,6 @@
-export class SnaplogicFunctionsHandler {
+
+// Change the export to use default
+export default class SnaplogicFunctionsHandler {
   constructor(data) {
     this.data = data;
   }
