@@ -1,30 +1,30 @@
+
 export default class SnaplogicFunctionsHandler {
   constructor(data) {
     this.data = data;
   }
 
   evaluateOperatorExpression(expr) {
-    // Handle date comparisons with Date.parse and Date.now()
-    expr = expr.replace(/Date\.parse\(\$([^\)]+)\)/g, (match, key) => {
-      const value = this.data[key];
-      return value ? `Date.parse('${value}')` : 'null';
-    });
-
-    expr = expr.replace(/Date\.now\(\)/g, Date.now());
-
-    // Handle normal variable substitution
-    expr = expr.replace(/\$([a-zA-Z0-9_]+)/g, (match, key) => {
-      const value = this.data[key];
-      if (typeof value === 'string') {
-        return `"${value}"`;
-      }
-      return value !== undefined ? value : 'null';
-    });
-
     try {
+      // Handle date comparisons with Date.parse and Date.now()
+      expr = expr.replace(/Date\.parse\(\$([^\)]+)\)/g, (match, key) => {
+        const value = this.data[key];
+        return value ? `Date.parse('${value}')` : 'null';
+      });
+
+      expr = expr.replace(/Date\.now\(\)/g, `${Date.now()}`);
+
+      // Handle string variable substitution with proper quotes
+      expr = expr.replace(/\$([a-zA-Z0-9_]+)/g, (match, key) => {
+        const value = this.data[key];
+        if (typeof value === 'string') {
+          return `"${value.replace(/"/g, '\\"')}"`;
+        }
+        return value !== undefined ? value : 'null';
+      });
+
       // Safely evaluate the expression
-      const result = new Function(`return ${expr}`)();
-      return result;
+      return new Function(`return ${expr}`)();
     } catch (error) {
       console.error('Error evaluating expression:', error);
       return false;
