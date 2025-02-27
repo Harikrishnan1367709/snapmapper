@@ -2186,89 +2186,37 @@ evaluateBaseExpression(expr, data) {
   }
   
 
-  // handleJSONPath(script, data) {
-  //   try {
-  //     // console.log('Original expression:', script);
-  //     // console.log('Original data:', data);
-  
-  //     // Parse JSON data if it's a string
-  //     const jsonData = typeof data === 'string' ? JSON.parse(data) : data;
-  //     // console.log('Parsed JSON data:', jsonData);
-  
-  //     // Handle root access cases
-  //     if (script === '$' || script === 'jsonPath($,"$")') {
-  //       return jsonData;
-  //     }
-  
-  //     // Normalize the expression
-  //     let normalizedExpression = script;
-  //     let finalArrayAccess = false;
-  //     // Handle jsonPath function syntax with explicit [0] at the end
-  //     if (normalizedExpression.match(/jsonPath\(\$,\s*["'].+?\["']\)\[0\]/)) {
-  //       finalArrayAccess = true;
-  //       normalizedExpression = normalizedExpression.replace(/\[0\]$/, '');
-  //     }
-  
-  //     // Handle jsonPath function syntax
-  //     if (normalizedExpression.startsWith('jsonPath(')) {
-  //       const pathMatch = normalizedExpression.match(/jsonPath\(\$,\s*["'](.+?)["']\)/);
-  //       if (pathMatch) {
-  //         normalizedExpression = pathMatch[1];
-  //       } else {
-  //         throw new Error('Invalid jsonPath function syntax');
-  //       }
-  //     }
-  
-  //     // Remove quotes around the path if present
-  //     normalizedExpression = normalizedExpression.replace(/^["'](.+)["']$/, '$1');
-  
-  //     // Handle direct property access after $ (e.g., $ACTION -> $.ACTION)
-  //     normalizedExpression = normalizedExpression.replace(/\$([A-Za-z])/g, '$.$1');
-  
-  //     // Handle special case where [0] is missing after MAST_UPL
-  //     // if (normalizedExpression.includes('MAST_UPL.')) {
-  //     //   normalizedExpression = normalizedExpression.replace('MAST_UPL.', 'MAST_UPL[0].');
-  //     // }
-  
-  //     // If the path doesn't start with $[0] and data is an array, add [0]
-  //     if (!normalizedExpression.startsWith('$[0]') && Array.isArray(jsonData)) {
-  //       normalizedExpression = normalizedExpression.replace('$', '$[0]');
-  //     }
-  
-  //     console.log('Normalized expression:', normalizedExpression);
-  
-  //     // Execute JSONPath query
-  //     let result = JSONPath({ path: normalizedExpression, json: jsonData });
-  //     console.log('JSONPath query result:', result);
-  
-  //     // Handle empty results
-  //     if (!result || result.length === 0) {
-  //       console.log('No results found');
-  //       return null;
-  //     }
-  
-  //     // Handle the case where we need to return first element
-  //     if (finalArrayAccess || script.includes('[0]')) {
-  //       console.log('Returning first element:', result[0]);
-  //       return result[0];
-  //     }
-  
-  //     // Return single value for specific cases
-  //     if (result.length === 1 && !normalizedExpression.includes('*') && !normalizedExpression.includes('..')) {
-  //       console.log('Returning single value:', result[0]);
-  //       return result[0];
-  //     }
-  
-  //     console.log('Returning full result:', result);
-  //     return result;
-  //   } catch (error) {
-  //     console.error('JSONPath evaluation error:', error);
-  //     throw new Error('JSONPath evaluation failed: ' + error.message);
-  //   }
-  // }
+  executeScript(script, data) {
+    if (!script) return null;
+
+    try {
+      // Clean the script first
+      const cleanedScript = this.cleanScript(script);
+      if (!cleanedScript) return null;
+
+      // Order matters! Process in specific order
+      return this.processScript(cleanedScript, data);
+    } catch (error) {
+      console.error('Script execution error:', error);
+      throw new Error(`Script execution failed: ${error.message}`);
+    }
+  }
+
+  cleanScript(script) {
+    // Remove comments and clean the script
+    return script
+      .replace(/\/\*[\s\S]*?\*\//g, '')  // Remove multi-line comments
+      .split('\n')
+      .map(line => {
+        const commentIndex = line.indexOf('//');
+        return commentIndex >= 0 ? line.slice(0, commentIndex) : line;
+      })
+      .filter(line => line.trim())
+      .join('\n');
+  }
   
  
-  executeScript(script, data) { 
+  processScript(script, data) { 
     if (!script) return null; 
   
     try { 

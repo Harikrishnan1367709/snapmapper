@@ -1388,7 +1388,7 @@ const monacoStyles = `
     >
       {/* + */}
       <img
-  src="/SnapLogicPlayground1/add-Hover.svg"
+  src="/add-Hover.svg"
   alt="SnapLogic Logo"
  className="text-gray-500 h-3 w-3"
 />
@@ -1537,6 +1537,7 @@ const monacoStyles = `
         setActiveLineIndex(lines.length - 1);
       }}
       activeLineIndex={activeLineIndex}
+      payload={inputContents[activeInput] || '{}'}
     />
   </div>
  <canvas
