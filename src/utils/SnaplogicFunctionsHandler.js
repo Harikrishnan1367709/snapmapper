@@ -1,7 +1,12 @@
 
-export default class SnaplogicFunctionsHandler {
+class SnaplogicFunctionsHandler {
   constructor(data) {
     this.data = data;
+  }
+
+  executeScript(script, inputData) {
+    this.data = inputData;
+    return this.evaluate(script);
   }
 
   evaluateOperatorExpression(expr) {
@@ -51,7 +56,7 @@ export default class SnaplogicFunctionsHandler {
 
     // Handle helper function calls
     if (script.startsWith('$')) {
-      return this.evaluateHelper(script);
+      return this.evaluateOperatorExpression(script);
     }
 
     // Handle object literals
@@ -238,3 +243,6 @@ export default class SnaplogicFunctionsHandler {
     return value;
   }
 }
+
+// Export a new instance
+export default SnaplogicFunctionsHandler;
