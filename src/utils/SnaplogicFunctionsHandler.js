@@ -5,6 +5,29 @@ export default class SnaplogicFunctionsHandler {
     this.data = data;
   }
 
+  executeScript(script, inputData) {
+    // Update the data with the new input
+    this.data = inputData;
+
+    // Handle empty script
+    if (!script || script.trim() === '') {
+      return null;
+    }
+
+    try {
+      // Handle different script types
+      if (script.startsWith('$')) {
+        return this.evaluateExpression(script);
+      } else {
+        // For future extension of other script types
+        return this.evaluateExpression(script);
+      }
+    } catch (error) {
+      console.error('Script execution error:', error);
+      throw new Error(`Script execution failed: ${error.message}`);
+    }
+  }
+
   evaluateOperatorExpression(expr) {
     // Handle date comparisons with Date.parse and Date.now()
     expr = expr.replace(/Date\.parse\(\$([^\)]+)\)/g, (match, key) => {
