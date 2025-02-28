@@ -141,7 +141,7 @@ export default function UpdatedCode() {
         </div>
       </div>
 
-      <div className="flex-1 flex shadow-sm">
+      <div className="flex-1 flex">
         {/* Left Panel */}
         <div
           style={{
@@ -151,20 +151,20 @@ export default function UpdatedCode() {
           }}
           className="overflow-y-auto bg-white"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50/30">
             <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Inputs</h2>
             <Button 
               variant="outline" 
               onClick={handleInputDialogOpen}
-              className="bg-white border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm h-8 px-3 py-1 text-xs"
+              className="bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm h-8 px-3 py-1 text-xs"
             >
               Add
             </Button>
           </div>
           
           {/* Input items would go here */}
-          <div className="p-2">
-            <div className="p-2 hover:bg-gray-100 cursor-pointer rounded-sm transition-colors duration-150">
+          <div className="p-2 bg-gradient-to-b from-white to-blue-50/10">
+            <div className="p-2 hover:bg-blue-50/40 cursor-pointer rounded-sm transition-colors duration-150 border border-transparent hover:border-blue-100">
               <div className="flex items-center">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
                 <span className="text-sm text-gray-700">input.json</span>
@@ -215,14 +215,14 @@ export default function UpdatedCode() {
           }}
           className="flex flex-col bg-white"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50/30">
             <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Script</h2>
             <div className="flex items-center space-x-4">
               <FormatDropdown onFormatChange={handleFormatChange} />
               <Button 
                 variant="outline" 
                 onClick={handleScriptDialogOpen}
-                className="bg-white border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm h-8 px-3 py-1 text-xs"
+                className="bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm h-8 px-3 py-1 text-xs"
               >
                 Add
               </Button>
@@ -230,8 +230,8 @@ export default function UpdatedCode() {
           </div>
           
           {/* Script content area */}
-          <div className="flex-1 p-4">
-            <div className="bg-white border border-gray-200 rounded-sm h-full shadow-sm hover:shadow transition-shadow duration-300">
+          <div className="flex-1 p-4 bg-gradient-to-b from-white to-blue-50/10">
+            <div className="bg-white border border-gray-200 rounded-sm h-full shadow-sm hover:shadow-md transition-shadow duration-300">
               <Editor
                 height="100%"
                 language={state.scriptFormat}
@@ -290,14 +290,14 @@ export default function UpdatedCode() {
           }}
           className="flex flex-col bg-white"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50/30">
             <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Output</h2>
           </div>
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-white to-blue-50/10">
             <Label htmlFor="actualOutput" className="block text-sm font-medium text-gray-700 mb-2">
               Actual Output
             </Label>
-            <div className="rounded-sm border border-gray-200 shadow-sm transition-shadow duration-300">
+            <div className="rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white">
               <Editor
                 height="30vh"
                 width="100%"
@@ -323,7 +323,7 @@ export default function UpdatedCode() {
               <Label htmlFor="expectedOutput" className="block text-sm font-medium text-gray-700 mb-2">
                 Expected Output
               </Label>
-              <div className="rounded-sm border border-gray-200 shadow-sm transition-shadow duration-300">
+              <div className="rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white">
                 <Editor
                   height="20vh"
                   width="100%"
@@ -349,7 +349,7 @@ export default function UpdatedCode() {
       </div>
       
       {/* Footer */}
-      <div className="border-t border-gray-200 py-2 px-4 text-xs text-gray-500 bg-gray-50">
+      <div className="border-t border-gray-200 py-2 px-4 text-xs text-gray-500 bg-gradient-to-r from-gray-50 to-blue-50/30">
         <div className="flex justify-between items-center">
           <div>SnapLogic Playground – v1.0.0</div>
           <div className="flex items-center space-x-4">
@@ -365,30 +365,33 @@ export default function UpdatedCode() {
 
       {/* Import Project Dialog using the Dialog component from UI */}
       <Dialog open={state.importDialogOpen} onOpenChange={closeImportDialog}>
-        <DialogContent className="sm:max-w-md bg-white p-0 rounded-md overflow-hidden">
-          <DialogHeader className="px-6 pt-6 pb-3">
+        <DialogContent className="sm:max-w-md bg-white p-0 rounded-md overflow-hidden shadow-xl">
+          <DialogHeader className="px-6 pt-6 pb-3 bg-gradient-to-r from-white to-blue-50/30">
             <DialogTitle className="text-xl font-bold text-gray-800">Import project</DialogTitle>
           </DialogHeader>
           <div className="p-6 pt-0">
-            <div className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center text-center">
-              <div className="mb-2 text-gray-400">
+            <div className="border-2 border-dashed border-gray-300 rounded-md p-8 flex flex-col items-center justify-center text-center hover:border-blue-400 transition-colors duration-200 hover:bg-blue-50/20">
+              <div className="mb-2 text-blue-500">
                 <svg className="mx-auto h-12 w-12" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
                   <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm font-medium text-gray-600 mb-1">
                 Drop project zip here or click to upload
               </div>
+              <div className="text-xs text-gray-500">
+                Supported format: .zip
+              </div>
             </div>
-            <div className="mt-3 text-center text-sm text-red-500">
+            <div className="mt-4 text-center text-sm text-red-500">
               Upload functionality is only intended for playground exported projects
             </div>
             <div className="mt-1 text-center text-sm text-gray-500">
               Importing modified files may yield an invalid project.
             </div>
           </div>
-          <DialogFooter className="bg-gray-50 px-6 py-4">
-            <Button variant="outline" onClick={closeImportDialog} className="rounded">
+          <DialogFooter className="bg-gradient-to-r from-gray-50 to-blue-50/30 px-6 py-4 border-t border-gray-200">
+            <Button variant="outline" onClick={closeImportDialog} className="rounded hover:bg-blue-50 hover:border-blue-400 transition-all duration-200">
               Cancel
             </Button>
           </DialogFooter>
