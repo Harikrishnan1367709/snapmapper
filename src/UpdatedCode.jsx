@@ -2,22 +2,16 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { JSONPath } from 'jsonpath-plus';
 import { ChevronDown, Upload, Download, Terminal, Book, ChevronLeft } from "lucide-react";
-import { v4 as uuidv4 } from "uuid"
-
+import { v4 as uuidv4 } from "uuid";
 import JSZip from 'jszip';
-
-
-// import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-// import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Editor from '@monaco-editor/react';
-
 
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "./components/ui/tooltip"
+} from "./components/ui/tooltip";
 import {
   Dialog,
   DialogContent,
@@ -26,9 +20,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./components/ui/dialog"
-import { Input } from "./components/ui/input"
-import { Label } from "./components/ui/label"
+} from "./components/ui/dialog";
+import { Input } from "./components/ui/input";
+import { Label } from "./components/ui/label";
 import { Button } from './components/ui/button';
 import FormatDropdown from './FormatDropdown';
 import { handleJSON } from './utils/jsonHandler';
@@ -42,19 +36,6 @@ import HighlightedActualOutput from './utils/HighlightedActualOutput';
 import HighlightedExpectedOutput from './utils/HighlightedExpectedOutput';
 import SnapLogicFunctionsHandler from './utils/SnaplogicFunctionsHandler';
 import { Documentation } from './components/Documentation';
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 const UpdatedCode = () => {
   const [format, setFormat] = useState('json');
@@ -85,7 +66,6 @@ const UpdatedCode = () => {
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
-  // const [activeInput, setActiveInput] = useState('Payload');
   const [showDocumentation, setShowDocumentation] = useState(false);
  
   const [leftWidth, setLeftWidth] = useState(() =>
@@ -133,11 +113,9 @@ const UpdatedCode = () => {
     }
   ]);
   
-  // const [activeScript, setActiveScript] = useState(scripts[0]);
   const [activeScript, setActiveScript] = useState(null);
   const [scriptContent, setScriptContent] = useState('');
   const [newScript, setNewScript] = useState("");
-  // const [scriptContent, setScriptContent] = useState(scripts[0].content);
 
   const handleNavigation = (page, e) => {
     // Prevent default browser navigation behavior
@@ -164,7 +142,7 @@ const UpdatedCode = () => {
   
   const resizableStyles = (width, panelType) => ({
     width: `${width}px`,
-    minWidth: '250px', // Increased minimum width
+    minWidth: '250px',
     position: 'relative',
     cursor: panelType === 'middle' ? 'text' : 'pointer',
     userSelect: 'none'
@@ -500,7 +478,6 @@ const UpdatedCode = () => {
       setActualOutput(JSON.stringify(result, null, 2));
 
     } catch (error) {
-      // console.error("Transformation Error:", error);
       setActualOutput(JSON.stringify({
         error: "Transformation Error",
         message: error.message || "Unknown error occurred",
@@ -509,10 +486,6 @@ const UpdatedCode = () => {
       }, null, 2));
     }
   };
-
-  // useEffect(() => {
-  //   console.log("Actual output updated:", actualOutput) // Debugging log
-  // }, [actualOutput])
  
   const textAreaStyles = {
     minHeight: '100px',
@@ -767,7 +740,6 @@ const UpdatedCode = () => {
     panels: {
       minWidth: '250px'
     }
-   
   };
   
   const useMediaQuery = (query) => {
@@ -828,27 +800,27 @@ const UpdatedCode = () => {
   // If showing documentation, render the Documentation component
   if (showDocumentation) {
     return (
-      <div className="flex flex-col h-screen w-screen bg-white overflow-hidden">
+      <div className="flex flex-col h-screen w-screen overflow-hidden bg-gradient-to-b from-white to-gray-50">
         {showToast && (
-          <div className="bg-[#E9EEF4] text-[#00044C] py-2 text-[12px] relative">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-2 relative">
             <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
               Discover the Future of Integration. Explore SnapLogic Playground Highlights
             </div>
             <button
               onClick={() => setShowToast(false)}
-              className="absolute right-4 top-0 h-full bg-[#E9EEF4] text-[#00044C] border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center font-bold"
+              className="absolute right-4 top-0 h-full bg-transparent text-white border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center hover:opacity-80 transition-opacity duration-200"
             >
               ×
             </button>
           </div>
         )}
 
-        <div className="flex items-center justify-between px-6 py-2 border-b">
+        <div className="flex items-center justify-between px-6 py-2 border-b bg-white shadow-sm">
           <div className="flex items-center space-x-3">
             <img
               src="/sl-logo.svg"
               alt="SnapLogic Logo"
-              className="object-contain"
+              className="object-contain hover:scale-105 transition-transform duration-200"
               style={{
                 width: isTablet ? '22px' : '32px',
                 height: isTablet ? '22px' : '32px'
@@ -857,61 +829,61 @@ const UpdatedCode = () => {
             <img
               src="/LogoN.svg"
               alt="SnapLogic"
-              className="object-contain"
+              className="object-contain hover:scale-105 transition-transform duration-200"
               style={{
                 height: isTablet ? '20px' : '32px'
               }}
             />
           </div>
           
-          <div className="space-x-8 text-[0.82rem] font-bold text-[#333333] relative font-['Manrope'] flex items-center">
-            {['blogs', 'docs', 'tutorial', 'playground'].map(item => (
-              <a
-                key={item}
-                href={getNavLink(item)}
-                className={`text-black hover:text-blue-500 px-2 py-2 relative ${
-                  activeNavItem === item
-                    ? 'after:content-[""] after:absolute after:left-0 after:right-0 after:h-0.5 after:bg-[#1B4E8D] after:-bottom-[0.5rem] z-10'
-                    : ''
-                }`}
-                onClick={(e) => handleNavClick(item, e)}
-              >
-                {item.toUpperCase()}
-              </a>
-            ))}
-          </div>
-          
-          <div className="flex items-center">
-            <button
-              onClick={() => {
-                handleExport();
-                if (!wasChecked) {
-                  setShowExportDialog(true);
-                }
-              }}
-              className="flex items-center px-4 py-1.5 bg-white rounded border-none focus:outline-none group hover:text-blue-500 -ml-3"
-            >
-              <img
-                src="/cloud-upload-Hover.svg"
-                alt="SnapLogic Logo"
-                className="mr-2 text-gray-700 group-hover:text-blue-500 text-gray-500 h-4 w-4"
-              />
-              <span className="text-gray-700 font-['Manrope'] group-hover:text-blue-500 text-[0.9rem] tracking-[0.09em] font-['Manrope'] font-normal">Export</span>
-            </button>
+          <div className="flex items-center space-x-8">
+            <div className="space-x-8 text-[0.82rem] font-semibold text-[#333333] relative font-['Manrope'] flex items-center">
+              {['blogs', 'docs', 'tutorial', 'playground'].map(item => (
+                <a
+                  key={item}
+                  href={getNavLink(item)}
+                  className={`text-gray-800 hover:text-blue-600 px-2 py-2 relative transition-colors duration-200 ${
+                    activeNavItem === item
+                      ? 'after:content-[""] after:absolute after:left-0 after:right-0 after:h-0.5 after:bg-blue-600 after:-bottom-[0.5rem] z-10 text-blue-600 font-bold'
+                      : ''
+                  }`}
+                  onClick={(e) => handleNavClick(item, e)}
+                >
+                  {item.toUpperCase()}
+                </a>
+              ))}
+            </div>
             
-            <button
-              onClick={() => {setShowImportDialog(true); setSelectedFile(null);}} 
-              className="flex items-center px-4 py-1.5 bg-white rounded border-none focus:outline-none group hover:text-blue-500 -ml-4"
-            >
-              <img
-                src="/cloud-download-Hover.svg"
-                alt="SnapLogic Logo"
-                className="mr-2 group-hover:text-blue-500 text-gray-500 h-4 w-4"
-              />
-              <span className="text-gray-700 group-hover:text-blue-500 text-[0.9rem] font-['Manrope'] tracking-[0.09em] font-normal">Import</span>
-            </button>
-
-            <div className="h-6 w-[1px] bg-gray-500 mx-4"></div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => {
+                  handleExport();
+                  if (!wasChecked) {
+                    setShowExportDialog(true);
+                  }
+                }}
+                className="flex items-center px-4 py-1.5 bg-white rounded-md border border-gray-200 shadow-sm focus:outline-none group hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+              >
+                <img
+                  src="/cloud-upload-Hover.svg"
+                  alt="Export"
+                  className="mr-2 h-4 w-4 text-blue-500 group-hover:text-blue-600"
+                />
+                <span className="text-gray-700 font-['Manrope'] group-hover:text-blue-600 text-[0.9rem] tracking-[0.05em] font-medium">Export</span>
+              </button>
+              
+              <button
+                onClick={() => {setShowImportDialog(true); setSelectedFile(null);}} 
+                className="flex items-center px-4 py-1.5 bg-white rounded-md border border-gray-200 shadow-sm focus:outline-none group hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+              >
+                <img
+                  src="/cloud-download-Hover.svg"
+                  alt="Import"
+                  className="mr-2 h-4 w-4 text-blue-500 group-hover:text-blue-600"
+                />
+                <span className="text-gray-700 group-hover:text-blue-600 text-[0.9rem] font-['Manrope'] tracking-[0.05em] font-medium">Import</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -924,175 +896,84 @@ const UpdatedCode = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-white overflow-hidden">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-gradient-to-b from-white to-gray-50">
       {showToast && (
-        <div className="bg-[#E9EEF4] text-[#00044C] py-2 text-[12px] relative">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-2 relative">
           <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
-           
             Discover the Future of Integration. Explore SnapLogic Playground Highlights
           </div>
           <button
             onClick={() => setShowToast(false)}
-            className="absolute right-4 top-0 h-full bg-[#E9EEF4] text-[#00044C] border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center font-bold"
+            className="absolute right-4 top-0 h-full bg-transparent text-white border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center hover:opacity-80 transition-opacity duration-200"
           >
             ×
           </button>
         </div>
       )}
 
-      <div className="flex items-center justify-between px-6 py-2 border-b">
+      <div className="flex items-center justify-between px-6 py-2 border-b bg-white shadow-sm">
         <div className="flex items-center space-x-3">
-          
-           <img
-  src="/sl-logo.svg"
-  alt="SnapLogic Logo"
-  className=" object-contain"
-  style={{
-    width: isTablet ? '22px' : '32px',
-    height: isTablet ? '22px' : '32px'
-  }}
-/>
-<img
-  src="/LogoN.svg"
-  alt="SnapLogic"
-  className=" object-contain"
-  style={{
-    height: isTablet ? '20px' : '32px'
-  }}
-/>
+          <img
+            src="/sl-logo.svg"
+            alt="SnapLogic Logo"
+            className="object-contain hover:scale-105 transition-transform duration-200"
+            style={{
+              width: isTablet ? '22px' : '32px',
+              height: isTablet ? '22px' : '32px'
+            }}
+          />
+          <img
+            src="/LogoN.svg"
+            alt="SnapLogic"
+            className="object-contain hover:scale-105 transition-transform duration-200"
+            style={{
+              height: isTablet ? '20px' : '32px'
+            }}
+          />
         </div>
-        <div className="flex items-center">
-        <button
-  onClick={() => {
-    handleExport();
-    // Show dialog if not checked in current session
-    if (!wasChecked) {
-      setShowExportDialog(true);
-    }
-  }}
+        
+        <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => {
+                handleExport();
+                if (!wasChecked) {
+                  setShowExportDialog(true);
+                }
+              }}
+              className="flex items-center px-4 py-1.5 bg-white rounded-md border border-gray-200 shadow-sm focus:outline-none group hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+            >
+              <img
+                src="/cloud-upload-Hover.svg"
+                alt="Export"
+                className="mr-2 h-4 w-4 text-blue-500 group-hover:text-blue-600"
+              />
+              <span className="text-gray-700 font-['Manrope'] group-hover:text-blue-600 text-[0.9rem] tracking-[0.05em] font-medium">Export</span>
+            </button>
+            
+            <button
+              onClick={() => {setShowImportDialog(true); setSelectedFile(null);}} 
+              className="flex items-center px-4 py-1.5 bg-white rounded-md border border-gray-200 shadow-sm focus:outline-none group hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+            >
+              <img
+                src="/cloud-download-Hover.svg"
+                alt="Import"
+                className="mr-2 h-4 w-4 text-blue-500 group-hover:text-blue-600"
+              />
+              <span className="text-gray-700 group-hover:text-blue-600 text-[0.9rem] font-['Manrope'] tracking-[0.05em] font-medium">Import</span>
+            </button>
+          </div>
 
-  className="flex items-center px-4 py-1.5 bg-white rounded border-none focus:outline-none group hover:text-blue-500 -ml-3"
->
-<img
-  src="/cloud-upload-Hover.svg"
-  alt="SnapLogic Logo"
- className="mr-2 text-gray-700 group-hover:text-blue-500 text-gray-500 h-4 w-4"
-/>
-  {/* <Upload className="mr-2 group-hover:text-blue-500 text-gray-500 h-3 w-3" /> */}
-  <span className="text-gray-700 font-['Manrope'] group-hover:text-blue-500 text-[0.9rem] tracking-[0.09em] font-['Manrope'] font-normal">Export</span>
-</button>
+          <div className="h-6 w-[1px] bg-gray-300"></div>
 
-          {showExportDialog && (
-            <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
-              <div className="bg-white h-[19rem] w-205" style={{ borderRadius: 0 }}>
-                <div className="p-6 font-['Manrope']">
-                  <h2 className="text-[1.9rem] font-bold mt-[1rem] mb-[2rem] text-gray-700">Open in Visual Studio Code</h2>
-                  <div className="h-[1px] bg-gray-200 w-[calc(100%+48px)] -mx-6 mt-4 mb-[1.8rem]"></div>
-                  <p className="text-sm mb-3">
-                    For the best DataWeave development experience unzip and open the project on <span className="text-blue-500">VSCode</span>
-                  </p>
-                  <p className="text-sm mb-[3rem]">
-                    Don't forget to install the <span className="text-blue-500">DataWeave Playground</span> extension
-                  </p>
-                  <div className="flex justify-between items-center">
-                  <label
-  className="flex items-center text-sm cursor-pointer select-none"
-  onClick={() => {
-    setIsChecked(!isChecked);
-    setWasChecked(true);
-    // setShowExportDialog(false);
-  }}
->
-  <div className="w-5 h-5 mr-2 border border-gray-300 flex items-center justify-center bg-white hover:border-gray-400 cursor-pointer" style={{ borderRadius: 0 }}>
-    {isChecked && (
-      <svg className="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-      </svg>
-    )}
-  </div>
-  Don't show popup again
-</label>
-
-                    <button
-                      onClick={() => setShowExportDialog(false)}
-                      className="px-3 py-2.5 text-sm bg-white border border-gray-400 hover:border-gray-400 hover:bg-gray-200 focus:border-none focus:outline-none"
-                      style={{ borderRadius: 0 }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          <button
-            onClick={() => {setShowImportDialog(true); setSelectedFile(null);}} 
-            className="flex items-center px-4 py-1.5 bg-white rounded border-none focus:outline-none group hover:text-blue-500 -ml-4"
-          >
-            <img
-              src="/cloud-download-Hover.svg"
-              alt="SnapLogic Logo"
-              className="mr-2 group-hover:text-blue-500 text-gray-500 h-4 w-4"
-            />
-            <span className="text-gray-700 group-hover:text-blue-500 text-[0.9rem] font-['Manrope'] tracking-[0.09em] font-normal">Import</span>
-          </button>
-
-          {showImportDialog && (
-            <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
-              <div className="bg-white h-[28.5rem] w-[31rem]" style={{ borderRadius: 0 }}>
-                <div className="p-8 pt-10 flex flex-col h-full">
-                  <h2 className="text-[1.9rem] font-bold text-gray-700">Import project</h2>
-                  <div className="h-[1px] bg-gray-200 w-[calc(100%+48px)] -mx-6 mt-4 mb-[0.4rem]"></div>
-                  <div className="mt-6 flex-1 font-['Manrope']">
-                    <div
-                      className="border-2 border-dashed border-gray-600 h-[11rem] w-[27.2rem] mx-auto flex flex-col items-center justify-center cursor-pointer hover:border-gray-400"
-                      onClick={() => document.getElementById('fileInput').click()}
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={handleFileDrop}
-                    >
-                      <input
-                        id="fileInput"
-                        type="file"
-                        accept=".zip"
-                        onChange={handleFileSelect}
-                        className="hidden"
-                      />
-                      <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <p className="text-sm text-center mt-2 text-gray-500">
-                        {selectedFile ? selectedFile.name : "Drop project zip here or click to upload"}
-                      </p>
-                    </div>
-                    <div className="mt-4 w-[28rem] mx-auto mb-[2.2rem]">
-                      <p className="text-[#FF0000] text-sm">Upload functionality is only intended for playground exported projects</p>
-                      <p className="text-[#FF0000] text-sm mt-1 ml-[3.5rem]">Importing modified files may yield an invalid project.</p>
-                    </div>
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      onClick={() => setShowImportDialog(false)}
-                      className="px-3 py-2.5 text-sm bg-white border border-gray-400 hover:border-gray-400 hover:bg-gray-200 focus:border-none focus:outline-none"
-                      style={{ borderRadius: 0 }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="h-6 w-[1px] bg-gray-500 mx-4"></div>
-
-          <div className="space-x-8 text-[0.82rem] font-bold text-[#333333] relative font-['Manrope'] flex items-center">
+          <div className="space-x-8 text-[0.82rem] font-semibold text-[#333333] relative font-['Manrope'] flex items-center">
             {['blogs', 'docs', 'tutorial', 'playground'].map(item => (
               <a
                 key={item}
                 href={getNavLink(item)}
-                className={`text-black hover:text-blue-500 px-2 py-2 relative ${
+                className={`text-gray-800 hover:text-blue-600 px-2 py-2 relative transition-colors duration-200 ${
                   activeNavItem === item
-                    ? 'after:content-[""] after:absolute after:left-0 after:right-0 after:h-0.5 after:bg-[#1B4E8D] after:-bottom-[0.5rem] z-10'
+                    ? 'after:content-[""] after:absolute after:left-0 after:right-0 after:h-0.5 after:bg-blue-600 after:-bottom-[0.5rem] z-10 text-blue-600 font-bold'
                     : ''
                 }`}
                 onClick={(e) => handleNavClick(item, e)}
@@ -1104,576 +985,473 @@ const UpdatedCode = () => {
         </div>
       </div>
 
-      {/* main content */}
-      <div className="flex flex-1 overflow-hidden h-[calc(100vh-100px)]" style={responsiveStyles.mainContainer}>
-        <div style={{...resizableStyles(leftWidth,'left'),...responsiveStyles.panels}} className="flex-shrink-0 border-r flex flex-col relative h-full overflow-hidden ">
+      {/* Main content */}
+      <div className="flex flex-1 overflow-hidden h-[calc(100vh-100px)] bg-white m-4 rounded-lg shadow-md" style={responsiveStyles.mainContainer}>
+        {/* Left Panel */}
+        <div style={{...resizableStyles(leftWidth,'left'),...responsiveStyles.panels}} className="flex-shrink-0 border-r border-gray-200 flex flex-col relative h-full overflow-hidden bg-gray-50">
           {isPayloadView ? (
-            <div className="flex flex-col h-full overflow-auto"
-            style={{...scrollbarStyle}}>
-              <div className="border-b">
-  <div className="flex justify-center items-center h-[30px] px-2 min-w-[200px]">
-    <div className="flex items-center gap-1 ">
-      <button onClick={handleBackClick} className="text-gray-600 bg-white  border-none outline-none h-[30px] flex items-center focus:outline-none focus:border-none flex-shrink-0">
-        {/* <ChevronLeft className="h-4 w-4" /> */}
-        <img
-  src="/toolbarExpand-Active.svg"
-  alt="SnapLogic Logo"
-  className="w-3 h-3 flex-shrink-0 "
-/>
-      </button>
-     
-      <span className="font-bold font-['Manrope'] text-gray-600 text-xs mr-4">PAYLOAD</span>
-    </div>
-    <FormatDropdown onFormatChange={handleFormatChange} />
-  </div>
-</div>
+            <div className="flex flex-col h-full overflow-auto" style={{...scrollbarStyle}}>
+              <div className="border-b border-gray-200 bg-white">
+                <div className="flex justify-center items-center h-[40px] px-4 min-w-[200px]">
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={handleBackClick} 
+                      className="text-gray-600 bg-transparent hover:bg-gray-100 rounded-full p-1 border-none outline-none h-8 w-8 flex items-center justify-center focus:outline-none transition-colors duration-200"
+                    >
+                      <img
+                        src="/toolbarExpand-Active.svg"
+                        alt="Back"
+                        className="w-4 h-4 flex-shrink-0"
+                      />
+                    </button>
+                    <span className="font-bold font-['Manrope'] text-gray-700 text-sm">PAYLOAD</span>
+                  </div>
+                  <div className="ml-auto">
+                    <FormatDropdown onFormatChange={handleFormatChange} />
+                  </div>
+                </div>
+              </div>
 
-          <HighLightedJSON
-      content={payloadContent}
-      onChange={handlePayloadChange}
-      format={format}
-      style={{
-        lineHeight: '1.5rem',
-        ...scrollbarStyle,
-        height: '100%',
-        backgroundColor: 'white'
-      }}
-    />
-
-
-
-
-
-
+              <div className="flex-1 p-4 bg-white">
+                <HighLightedJSON
+                  content={payloadContent}
+                  onChange={handlePayloadChange}
+                  format={format}
+                  style={{
+                    lineHeight: '1.5rem',
+                    ...scrollbarStyle,
+                    height: '100%',
+                    backgroundColor: 'white'
+                  }}
+                />
+              </div>
             </div>
           ) : (
             <>
-            <div className="h-1/2 border-b overflow-auto" style={responsiveStyles.panels}>
-            <div className="border-b">
-  <div className="flex justify-between items-center h-[30px]  px-4">
-    <span className="font-bold text-gray-600  font-['Manrope'] text-xs">INPUT EXPLORER</span>
-    <button
-      onClick={() => setShowInputContainer(true)}
-      className="text-l bg-white  text-gray-500 border-none focus:outline-none h-[30px] flex items-center border-r-2"
-      style={{ borderRight: "0px" }}
-    >
-      {/* + */}
-      <img
-  src="/add-Hover.svg"
-  alt="SnapLogic Logo"
- className="text-gray-500 h-3 w-3"
-/>
+              {/* Input Explorer */}
+              <div className="h-1/2 border-b border-gray-200 overflow-auto bg-white" style={responsiveStyles.panels}>
+                <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+                  <div className="flex justify-between items-center h-[40px] px-4">
+                    <span className="font-bold text-gray-700 font-['Manrope'] text-sm tracking-wide">INPUT EXPLORER</span>
+                    <button
+                      onClick={() => setShowInputContainer(true)}
+                      className="text-gray-500 hover:text-blue-600 bg-transparent hover:bg-gray-100 rounded-full p-1 border-none outline-none h-8 w-8 flex items-center justify-center transition-colors duration-200"
+                    >
+                      <img
+                        src="/add-Hover.svg"
+                        alt="Add Input"
+                        className="h-4 w-4"
+                      />
+                    </button>
+                  </div>
+                </div>
 
+                {showInputContainer && (
+                  <>
+                    <div className="fixed inset-0 bg-black/75 z-40" />
+                    <div className="fixed inset-0 z-50 flex items-center justify-center">
+                      <div className="w-[32rem] bg-white p-6 shadow-lg rounded-md">
+                        <div className="mb-5 font-['Manrope']">
+                          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                            Create new input
+                          </h2>
+                          <div className="border-b border-gray-200 -mx-6"></div>
+                        </div>
+                        <div className="py-2">
+                          <div className="flex items-center justify-between mb-2">
+                            <label className="block text-sm font-medium text-gray-700">
+                              Identifier
+                            </label>
+                            <div className="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-xs text-gray-500 cursor-help hover:bg-gray-100 transition-colors duration-200">
+                              i
+                            </div>
+                          </div>
+                          <input
+                            value={newInput}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-2 text-base bg-gray-50 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-md transition-all duration-200 outline-none"
+                            placeholder="Enter identifier name"
+                          />
+                        </div>
+                        <div className="flex justify-end gap-3 mt-6">
+                          <button
+                            onClick={() => setShowInputContainer(false)}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            disabled={isCreateInputDisabled}
+                            onClick={() => {
+                              handleCreateInput();
+                              setShowInputContainer(false);
+                            }}
+                            className={`px-4 py-2 text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 ${
+                              isCreateInputDisabled
+                                ? "text-gray-500 bg-gray-200 cursor-not-allowed"
+                                : "text-white bg-blue-600 hover:bg-blue-700 cursor-pointer"
+                            }`}
+                          >
+                            Create
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
 
-
-
-    </button>
-  </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{showInputContainer && (
-    <>
-   <div className="fixed inset-0 bg-black/75 z-40" />
-   <div className="fixed inset-0 z-50 flex items-center justify-center">
-   <div className="w-[31.5rem] h-[19rem] bg-gray-100 p-6 shadow-md">
-      <div className="mb-3 font-['Manrope']">
-        <h2 className="text-[31px] font-bold text-[#444444] mb-7 ml-2 mt-4">
-          Create new input
-        </h2>
-        <div className="border-b border-gray-200 mt-5 -mx-6"></div>
-      </div>
-      <div className="py-2">
-<div className="flex items-center justify-between">
-        <label className="block text-sm font-small text-[#262626]  text-[14px] mb-2 ml-1">
-          Identifier
-        </label>
-<div className="w-3.5 h-3.5 rounded-full font-bold border border-gray-900 flex items-center justify-center text-[0.7rem] text-gray-900 mb-2">
-      i
-    </div>
-  </div>
-        <input
-  value={newInput}
-  onChange={handleInputChange}
-  className="w-full text-[15px] ml-1 h-11 px-3  outline-none bg-gray-200 border-t-0 border-b-0 border-l-gray-300 border-l-[3px] mt-1 border-r-gray-300 border-r-[3px] hover:bg-gray-100 hover:border-t-0 hover:border-b-0 hover:border-l-gray-400 hover:border-r-gray-400 focus:bg-gray-100 focus:border-t-0 focus:border-b-0 focus:border-l-gray-600 focus:border-r-gray-600"
-  style={{
-    borderTop: "0",
-    borderBottom: "0",
-    outline: "none"
-  }}
-/>
-      </div>
-      <div className="flex justify-end gap-2 mt-4">
-        <button
-          onClick={() => setShowInputContainer(false)}
-          className="h-10 px-4 text-sm  font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-200  rounded-none"
-          style={{ borderColor: "rgb(209 213 219)",outline: "none" }}
-        >
-       
-          Cancel
-        </button>
-         <button
-          disabled={isCreateInputDisabled}
-          onClick={() => {
-            handleCreateInput();
-            setShowInputContainer(false);
-          }}
-          className={`h-10 px-4 text-sm  rounded-none font-medium ${
-            isCreateInputDisabled
-              ? "text-black bg-gray-300 cursor-not-allowed"
-              : "text-white bg-blue-500 hover:bg-blue-600 cursor-pointer"
-          }`}
-          style={{
-            border: "none",
-            outline: "none"
-          }}
-        >
-          Create
-        </button>
-      </div>
-    </div>
-  </div>
-  </>
-)}
-              <div className="w-full  pt-2">
-  {inputs.map((input, index) => (
-    <div
-      key={index}
-      className={`flex items-center text-sm text-gray-600 p-1.5 cursor-pointer w-full group
-        ${activeInput === input
-          ? 'bg-gray-100 relative before:absolute before:top-0 before:bottom-0 before:left-0 before:w-[2px] before:bg-blue-500 after:absolute after:top-0 after:bottom-0 after:right-0 after:w-[2px] after:bg-blue-500 after:rounded-r-full group-hover:rounded-r-full after:group-hover:rounded-r-full hover:bg-gray-200'
-          : 'hover:bg-gray-200 hover:rounded-r-full'}`}
-      onClick={() => handleInputClick(input, index)}
-    >
-      <span className="text-blue-500 px-4">json</span>
-      <span>{input}</span>
-    </div>
-  ))}
-</div>
+                <div className="pt-2">
+                  {inputs.map((input, index) => (
+                    <div
+                      key={index}
+                      className={`flex items-center text-sm p-2 cursor-pointer w-full group transition-colors duration-200
+                        ${activeInput === input
+                          ? 'bg-blue-50 text-blue-700 border-l-2 border-blue-500 font-medium'
+                          : 'text-gray-700 hover:bg-gray-100 border-l-2 border-transparent'}`}
+                      onClick={() => handleInputClick(input, index)}
+                    >
+                      <div className="flex items-center">
+                        <span className="text-blue-500 px-3 font-mono text-xs uppercase">json</span>
+                        <span>{input}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="h-1/2 overflow-auto" style={responsiveStyles.panels}>
-              <div className="border-b">
-  <div className="flex justify-between items-center h-[30px] px-4">
-    <span className="font-bold text-gray-600 font-['Manrope'] text-xs">SCRIPT EXPLORER</span>
-    <button
-      onClick={() => setShowScriptContainer(true)}
-      className="text-l text-gray-500 bg-white text-gray-300 border-none focus:outline-none h-[30px] flex items-center border-r-2"
-      style={{ borderRight: "0px" }}
-    >
-      {/* + */}
-      <img
-  src="/add-Hover.svg"
-  alt="SnapLogic Logo"
- className="text-gray-500 h-3 w-3"
-/>
-    </button>
-  </div>
-</div>
-{showScriptContainer && (
-    <>
-   <div className="fixed inset-0 bg-black/75 z-40" />
-   <div className="fixed inset-0 z-50 flex items-center justify-center">
-    <div className="w-[31.5rem] h-[19rem] bg-gray-100 p-6 shadow-md ">
-      <div className="mb-3 font-['Manrope']">
-        <h2 className="text-[31px] font-bold text-[#444444] mb-7 ml-2 mt-4">
-          Create new script
-        </h2>
-        <div className="border-b border-gray-200 mt-5 -mx-6"></div>
-      </div>
-      <div className="py-2">
-      <div className="flex items-center justify-between">
-        <label className="block text-sm font-small text-[#262626] text-[14px] mb-2 ml-1">
-          Identifier
-        </label>
-        <div className="w-3.5 h-3.5 rounded-full font-bold border border-gray-900 flex items-center justify-center text-[0.7rem] text-gray-900 mb-2">
-      i
-    </div>
-  </div>
-  <input
-  value={newScript}
-  onChange={handleScriptChange}
-  className="w-full ml-1 h-11 text-[14px] px-3 text-lg outline-none bg-gray-200 border-t-0 border-b-0 border-l-gray-300 border-l-[3px] mt-1 border-r-gray-300 border-r-[3px] hover:bg-gray-100 hover:border-t-0 hover:border-b-0 hover:border-l-gray-400 hover:border-r-gray-400 focus:bg-gray-100 focus:border-t-0 focus:border-b-0 focus:border-l-gray-600 focus:border-r-gray-600"
-  style={{
-    borderTop: "0",
-    borderBottom: "0",
-    outline: "none"
-  }}
-/>
-      </div>
-      <div className="flex justify-end gap-2 mt-4">
-        <button
-          onClick={() => setShowScriptContainer(false)}
-          className="h-10 px-4 text-sm  font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-200  rounded-none"
-          style={{ borderColor: "rgb(209 213 219)",outline: "none" }}
-        >
-          Cancel
-        </button>
-        <button
-          disabled={isCreateScriptDisabled}
-          onClick={() => {
-            handleCreateScript();
-            setShowScriptContainer(false);
-          }}
-          className={`h-10 px-4 text-sm  rounded-none font-medium ${
-            isCreateScriptDisabled
-              ? "text-black bg-gray-300 cursor-not-allowed"
-              : "text-white bg-blue-500 hover:bg-blue-600 cursor-pointer"
-          }`}
-          style={{
-            border: "none",
-            outline: "none"
-          }}
-        >
-          Create
-        </button>
-      </div>
-    </div>
-  </div>
-  </>
-)}
-                <div className="w-full  pt-2 ">
-                {scripts.map((script) => (
-  <div
-  key={script.id}
-  className={`flex items-center text-sm text-gray-600 p-1.5 cursor-pointer w-full group ${
-    activeScript?.id === script.id
-      ? 'bg-gray-100 relative before:absolute before:top-0 before:bottom-0 before:left-0 before:w-[2px] before:bg-blue-500 after:absolute after:top-0 after:bottom-0 after:right-0 after:w-[2px] after:bg-blue-500 after:rounded-r-full group-hover:rounded-r-full after:group-hover:rounded-r-full hover:bg-gray-200'
-      : 'hover:bg-gray-200 hover:rounded-r-full'
-  }`}
-  onClick={() => handleScriptSelect(script)}
->
-  <span className="px-4">{script.name}</span>
-</div>
 
+              {/* Script Explorer */}
+              <div className="h-1/2 overflow-auto bg-white" style={responsiveStyles.panels}>
+                <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+                  <div className="flex justify-between items-center h-[40px] px-4">
+                    <span className="font-bold text-gray-700 font-['Manrope'] text-sm tracking-wide">SCRIPT EXPLORER</span>
+                    <button
+                      onClick={() => setShowScriptContainer(true)}
+                      className="text-gray-500 hover:text-blue-600 bg-transparent hover:bg-gray-100 rounded-full p-1 border-none outline-none h-8 w-8 flex items-center justify-center transition-colors duration-200"
+                    >
+                      <img
+                        src="/add-Hover.svg"
+                        alt="Add Script"
+                        className="h-4 w-4"
+                      />
+                    </button>
+                  </div>
+                </div>
+                
+                {showScriptContainer && (
+                  <>
+                    <div className="fixed inset-0 bg-black/75 z-40" />
+                    <div className="fixed inset-0 z-50 flex items-center justify-center">
+                      <div className="w-[32rem] bg-white p-6 shadow-lg rounded-md">
+                        <div className="mb-5 font-['Manrope']">
+                          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                            Create new script
+                          </h2>
+                          <div className="border-b border-gray-200 -mx-6"></div>
+                        </div>
+                        <div className="py-2">
+                          <div className="flex items-center justify-between mb-2">
+                            <label className="block text-sm font-medium text-gray-700">
+                              Identifier
+                            </label>
+                            <div className="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-xs text-gray-500 cursor-help hover:bg-gray-100 transition-colors duration-200">
+                              i
+                            </div>
+                          </div>
+                          <input
+                            value={newScript}
+                            onChange={handleScriptChange}
+                            className="w-full px-4 py-2 text-base bg-gray-50 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-md transition-all duration-200 outline-none"
+                            placeholder="Enter script name"
+                          />
+                        </div>
+                        <div className="flex justify-end gap-3 mt-6">
+                          <button
+                            onClick={() => setShowScriptContainer(false)}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            disabled={isCreateScriptDisabled}
+                            onClick={() => {
+                              handleCreateScript();
+                              setShowScriptContainer(false);
+                            }}
+                            className={`px-4 py-2 text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 ${
+                              isCreateScriptDisabled
+                                ? "text-gray-500 bg-gray-200 cursor-not-allowed"
+                                : "text-white bg-blue-600 hover:bg-blue-700 cursor-pointer"
+                            }`}
+                          >
+                            Create
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
 
-
-
-
-
-
-
-))}
-
-
-
-
-</div>
+                <div className="pt-2">
+                  {scripts.map((script) => (
+                    <div
+                      key={script.id}
+                      className={`flex items-center text-sm p-2 cursor-pointer w-full group transition-colors duration-200
+                        ${activeScript?.id === script.id
+                          ? 'bg-blue-50 text-blue-700 border-l-2 border-blue-500 font-medium'
+                          : 'text-gray-700 hover:bg-gray-100 border-l-2 border-transparent'}`}
+                      onClick={() => handleScriptSelect(script)}
+                    >
+                      <span className="pl-3">{script.name}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </>
           )}
         </div>
 
-
-
-
         {/* Left Resize Handle */}
         <div
-          className="w-[2px] bg-gray-200 relative"
+          className="w-[4px] bg-gray-100 relative hover:bg-blue-200 transition-colors duration-200"
           onMouseDown={(e) => handleMouseDown(e, true)}
         >
           <div
             className="absolute -left-2 -right-2 top-0 bottom-0 hover:cursor-ew-resize"
             style={{ cursor: isDragging ? 'ew-resize' : 'ew-resize' }}
           >
-            <div className="w-[1px] h-full mx-auto hover:bg-blue-500" />
+            <div className="w-[2px] h-full mx-auto bg-gray-300 hover:bg-blue-500 transition-colors duration-200" />
           </div>
         </div>
-                {/* Middle Panel */}
-                <div style={{...resizableStyles(middleWidth,'middle'), ...responsiveStyles.panels}} className="flex-1 border-r  flex flex-col relative">
-          <div className="border-b">
-            <div className="flex items-center justify-between min-h-[30px] px-4">
-              <span className="font-bold text-gray-600 font-['Manrope'] text-xs">SCRIPT</span>
+
+        {/* Middle Panel */}
+        <div style={{...resizableStyles(middleWidth,'middle'), ...responsiveStyles.panels}} className="flex-1 border-r border-gray-200 flex flex-col relative bg-white">
+          <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+            <div className="flex items-center justify-between min-h-[40px] px-4">
+              <span className="font-bold text-gray-700 font-['Manrope'] text-sm tracking-wide">SCRIPT</span>
               <div className="flex items-center">
                 {outputMatch ? (
-                  <div className="flex items-center">
+                  <div className="flex items-center bg-green-50 text-green-700 px-2 py-1 rounded-full text-xs">
                     <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
-                    <span className="text-gray-500  font-['Manrope'] text-[12px]">SUCCESS</span>
+                    <span className="font-medium">SUCCESS</span>
                   </div>
                 ) : (
-                  <div className="flex items-center">
+                  <div className="flex items-center bg-red-50 text-red-700 px-2 py-1 rounded-full text-xs">
                     <div className="w-2 h-2 rounded-full bg-red-500 mr-2"></div>
-                    <span className="text-gray-500 font-['Manrope'] text-xs">FAILURE</span>
+                    <span className="font-medium">FAILURE</span>
                   </div>
                 )}
               </div>
             </div>
           </div>
-          <div className="p-2 pl-2 pr-0 flex flex-1 font-mono text-sm h-full font-['Manrope'] relative "
-          style={{ overflow: 'hidden' }}>
-            <div className="flex flex-1 " style={scrollbarStyle}>
- 
-  <HighlightedScript
-  
-      content={scriptContent}
-      onChange={(newContent) => {
-        handleScriptContentChange({ target: { value: newContent } });
-        const lines = newContent.split('\n');
-        setActiveLineIndex(lines.length - 1);
-      }}
-      activeLineIndex={activeLineIndex}
-      payload={inputContents[activeInput] || '{}'}
-    />
-  </div>
- <canvas
-          ref={canvasRef}
-          className="decorationsOverviewRuler"
-          aria-hidden="true"
-          width="14"
-          height={scriptContent.split('\n').length * 24}
-          style={{
-            position: 'absolute',
-            willChange: 'transform',
-            top: '8px',
-            right: 0,
-            width: '14px',
-            height: 'calc(100% - 8px)',
-            zIndex: 10
-          }}
-        />
 
+          <div className="p-4 flex flex-1 font-mono text-sm h-full font-['Manrope'] relative bg-white" style={{ overflow: 'hidden' }}>
+            <div className="flex flex-1 rounded-md shadow-inner" style={scrollbarStyle}>
+              <HighlightedScript
+                content={scriptContent}
+                onChange={(newContent) => {
+                  handleScriptContentChange({ target: { value: newContent } });
+                  const lines = newContent.split('\n');
+                  setActiveLineIndex(lines.length - 1);
+                }}
+                activeLineIndex={activeLineIndex}
+                payload={inputContents[activeInput] || '{}'}
+              />
+            </div>
 
+            <canvas
+              ref={canvasRef}
+              className="decorationsOverviewRuler"
+              aria-hidden="true"
+              width="14"
+              height={scriptContent.split('\n').length * 24}
+              style={{
+                position: 'absolute',
+                willChange: 'transform',
+                top: '8px',
+                right: 0,
+                width: '14px',
+                height: 'calc(100% - 8px)',
+                zIndex: 10
+              }}
+            />
 
-
-        {/* Active Line Indicator */}
-        <div
-          style={{
-            position: 'absolute',
-            right: 0,
-            top: `${8 + (activeLineIndex * 24)}px`,
-            width: '14px',
-            height: '2px',
-            backgroundColor: '#1e1e1e',
-            zIndex: 11
-          }}
-        />
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
+            {/* Active Line Indicator */}
+            <div
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: `${8 + (activeLineIndex * 24)}px`,
+                width: '14px',
+                height: '2px',
+                backgroundColor: '#3b82f6',
+                zIndex: 11
+              }}
+            />
+          </div>
         </div>
-
-
-
 
         {/* Right Resize Handle */}
         <div
-          className="w-[2px] bg-gray-200 relative"
+          className="w-[4px] bg-gray-100 relative hover:bg-blue-200 transition-colors duration-200"
           onMouseDown={(e) => handleMouseDown(e, false)}
         >
           <div
             className="absolute -left-2 -right-2 top-0 bottom-0 hover:cursor-ew-resize"
             style={{ cursor: isDragging ? 'ew-resize' : 'ew-resize' }}
           >
-            <div className="w-[1px] h-full mx-auto hover:bg-blue-500" />
+            <div className="w-[2px] h-full mx-auto bg-gray-300 hover:bg-blue-500 transition-colors duration-200" />
           </div>
         </div>
-                {/* Right Panel */}
-                <div style={{...resizableStyles(rightWidth,'right'), ...responsiveStyles.panels}} className="flex-shrink-0  flex flex-col h-full relative overflow-hidden">
+
+        {/* Right Panel */}
+        <div style={{...resizableStyles(rightWidth,'right'), ...responsiveStyles.panels}} className="flex-shrink-0 flex flex-col h-full relative overflow-hidden bg-gray-50">
           {/* Actual Output Section */}
-          <div className="h-1/2 border-b overflow-hidden">
-            <div className="border-b">
-              <div className="flex justify-between items-center h-[30px] px-4">
-                <span className="font-bold text-gray-600 font-['Manrope'] text-xs">ACTUAL OUTPUT</span>
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-2 font-['Manrope']">
-                    <FormatDropdown />
-                   
-                  </div>
+          <div className="h-1/2 border-b border-gray-200 overflow-hidden bg-white">
+            <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+              <div className="flex justify-between items-center h-[40px] px-4">
+                <span className="font-bold text-gray-700 font-['Manrope'] text-sm tracking-wide">ACTUAL OUTPUT</span>
+                <div className="flex items-center">
+                  <FormatDropdown />
                 </div>
               </div>
             </div>
-            <div className="p-4 font-mono text-sm font-['Manrope'] h-[calc(100%-30px)]  "
-            >
-               <HighlightedActualOutput
-  actualOutput={actualOutput}
-  onActualOutputChange={handleActualOutputChange}
-/>
-    
-</div>
-
-
-
-
+            <div className="p-4 font-mono text-sm font-['Manrope'] h-[calc(100%-40px)] bg-white">
+              <HighlightedActualOutput
+                actualOutput={actualOutput}
+                onActualOutputChange={handleActualOutputChange}
+              />
+            </div>
           </div>
+
           {/* Expected Output Section */}
-          <div className="h-1/2">
-            <div className="border-b">
-              <div className="flex justify-between items-center h-[30px] px-4">
-                <span className="font-bold text-gray-600 font-['Manrope'] text-xs">EXPECTED OUTPUT</span>
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-2 font-['Manrope']">
-                    <FormatDropdown />
-                  </div>
+          <div className="h-1/2 bg-white">
+            <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+              <div className="flex justify-between items-center h-[40px] px-4">
+                <span className="font-bold text-gray-700 font-['Manrope'] text-sm tracking-wide">EXPECTED OUTPUT</span>
+                <div className="flex items-center">
+                  <FormatDropdown />
                 </div>
               </div>
             </div>
-            <div className="p-4 font-mono text-sm font-['Manrope'] h-[calc(100%-30px)] overflow-auto "
-            style={scrollbarStyle}>
+            <div className="p-4 font-mono text-sm font-['Manrope'] h-[calc(100%-40px)] overflow-auto bg-white" style={scrollbarStyle}>
               <HighlightedExpectedOutput
-  expectedOutput={expectedOutput}
-  onExpectedOutputChange={handleExpectedOutputChange}
-/>
-              
+                expectedOutput={expectedOutput}
+                onExpectedOutputChange={handleExpectedOutputChange}
+              />
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div
+        className="border-t border-gray-200 relative flex flex-col bg-white shadow-inner"
+        style={{
+          height: `${bottomHeight}px`,
+          transition: isDragging ? 'none' : 'height 0.2s ease-in-out',
+          ...responsiveStyles.panels
+        }}
+      >
+        <div
+          className="absolute left-0 right-0 top-0 h-2 cursor-ns-resize z-20 group"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+            const startY = e.clientY;
+            const startHeight = bottomHeight;
+
+            const handleMouseMove = (e) => {
+              const deltaY = startY - e.clientY;
+              const newHeight = startHeight + deltaY;
+              setBottomHeight(Math.max(32, Math.min(300, newHeight)));
+            };
+
+            const handleMouseUp = () => {
+              setIsDragging(false);
+              document.removeEventListener('mousemove', handleMouseMove);
+              document.removeEventListener('mouseup', handleMouseUp);
+            };
+
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+          }}
+        >
+          <div className="w-full h-1 bg-gray-200 group-hover:bg-blue-500 transition-colors duration-200" />
         </div>
 
+        <div className="flex items-center justify-between min-h-[40px] bg-gray-50 font-['Manrope'] relative px-4">
+          <div className="flex space-x-4 z-10">
+            <TooltipProvider delayDuration={50}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => {
+                      if (!isBottomExpanded || activeTab !== 'log') {
+                        setIsBottomExpanded(true);
+                        setActiveTab('log');
+                        setBottomHeight(300);
+                      } else {
+                        setIsBottomExpanded(false);
+                        setBottomHeight(40);
+                      }
+                    }}
+                    className={`text-xs px-3 py-2 flex items-center hover:bg-gray-100 cursor-pointer outline-none focus:outline-none focus:ring-0 rounded-md transition-colors duration-200 ${
+                      activeTab === 'log' ? 'text-blue-600 bg-blue-50 font-medium' : 'text-gray-700'
+                    }`}
+                  >
+                    <Terminal className="h-3.5 w-3.5 mr-2" />
+                    <span className='tracking-wide'>LOG VIEWER</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" sideOffset={15} className="h-2 w-5 rounded-full bg-gray-800 p-0 border-0" />
+              </Tooltip>
 
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => {
+                      if (!isBottomExpanded || activeTab !== 'api') {
+                        setIsBottomExpanded(true);
+                        setActiveTab('api');
+                        setBottomHeight(300);
+                      } else {
+                        setIsBottomExpanded(false);
+                        setBottomHeight(40);
+                      }
+                    }}
+                    className={`text-xs px-3 py-2 flex items-center hover:bg-gray-100 cursor-pointer outline-none focus:outline-none focus:ring-0 rounded-md transition-colors duration-200 ${
+                      activeTab === 'api' ? 'text-blue-600 bg-blue-50 font-medium' : 'text-gray-700'
+                    }`}
+                  >
+                    <Book className="h-3.5 w-3.5 mr-2" />
+                    <span className="tracking-wide">API REFERENCE</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" sideOffset={15} className="h-2 w-5 rounded-full bg-gray-800 p-0 border-0" />
+              </Tooltip>
+            </TooltipProvider>
+          </div>
 
+          <span className="font-['Manrope'] text-sm text-gray-500 absolute left-1/2 transform -translate-x-1/2 tracking-wide">
+            SnapLogic Playground – Redefining Integration.
+          </span>
+        </div>
 
-{/* Bottom Bar */}
-<div
-  className="border-t relative flex flex-col   "
-  style={{
-    height: `${bottomHeight}px`,
-    transition: isDragging ? 'none' : 'height 0.2s ease-in-out',
-    ...responsiveStyles.panels
-  }}
->
-
-
-
-
-<div
-  className="absolute left-0 right-0 top-0 h-2 cursor-ns-resize z-20 group"
-  onMouseDown={(e) => {
-    e.preventDefault();
-    setIsDragging(true);
-    const startY = e.clientY;
-    const startHeight = bottomHeight;
-
-
-
-
-    const handleMouseMove = (e) => {
-      const deltaY = startY - e.clientY;
-      const newHeight = startHeight + deltaY;
-      // Set maximum height to 250px to prevent collision with input explorer
-      setBottomHeight(Math.max(32, Math.min(250, newHeight)));
-    };
-
-
-
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-
-
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  }}
->
-  <div className="w-full h-[1.5px] bg-gray-200 group-hover:bg-blue-500 transition-colors" />
-</div>
-
-
-
-
-
-
-
-
-  <div className="flex items-center justify-between h-8 bg-[#E6EEF4] font-['Manrope'] bg-white relative">
-  <div className="flex space-x-4 pl-2 pr-8 z-10">
-  <TooltipProvider delayDuration={50}>
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          onClick={() => {
-            if (!isBottomExpanded || activeTab !== 'log') {
-              setIsBottomExpanded(true);
-              setActiveTab('log');
-              setBottomHeight(300);
-            } else {
-              setIsBottomExpanded(false);
-              setBottomHeight(32);
-            }
-          }}
-          className="text-[11px] h-7 px-2 bg-white flex items-center hover:bg-gray-100 cursor-pointer outline-none focus:outline-none focus:ring-0 rounded-none border-none"
-        >
-          <Terminal className="h-3 w-3" />
-          <span className='ml-2 text-gray-600 tracking-[0.03em]'>LOG VIEWER</span>
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="top" sideOffset={15} className="h-2 w-5 rounded-full bg-gray-800 p-0 border-0" />
-    </Tooltip>
-
-
-
-
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          onClick={() => {
-            if (!isBottomExpanded || activeTab !== 'api') {
-              setIsBottomExpanded(true);
-              setActiveTab('api');
-              setBottomHeight(300);
-            } else {
-              setIsBottomExpanded(false);
-              setBottomHeight(32);
-            }
-          }}
-          className="text-[11px] h-7 px-2 bg-white flex items-center hover:bg-gray-100 cursor-pointer outline-none focus:outline-none focus:ring-0 rounded-none border-none"
-        >
-          <Book className="h-3 w-3" />
-          <span className="ml-2 font-['Manrope'] text-gray-600 tracking-[0.03em]">API REFERENCE</span>
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="top" sideOffset={15} className="h-2 w-5 rounded-full bg-gray-800 p-0 border-0" />
-    </Tooltip>
-  </TooltipProvider>
-</div>
-
-    <span className=" font-['Manrope'] text-sm text-gray-400 absolute left-[calc(45%+0px)] tracking-[0.03em] flex items-center h-full z-10">
-      {/* ©2023 Snaplogic LLC, a Salesforce company */}
-      SnapLogic Playground – Redefining Integration.
-    </span>
-    {/* Resize Handle */}
-   
-  </div>
-          {/* Content */}
-          {isBottomExpanded && (
+        {/* Content */}
+        {isBottomExpanded && (
           <div className="flex-1 overflow-auto">
-            <div className="h-[calc(100%-2rem)] overflow-auto">
-              <div className="flex flex-col justify-center items-center h-full">
+            <div className="h-full overflow-auto">
+              <div className="flex flex-col justify-center items-center h-full p-6">
                 {activeTab === 'log' && (
                   <>
-                    <h2 className="text-xl font-bold text-black mb-4 font-['Manrope'] ">No Logs Available</h2>
-                    <p className="text-sm font-['Manrope'] tracking-[0.04em]">
+                    <h2 className="text-xl font-bold text-gray-800 mb-4">No Logs Available</h2>
+                    <p className="text-sm text-gray-600">
                       Learn more about the
-                      <span className="mx-1 bg-gray-100 px-2 py-1 rounded-none font-['Manrope'] tracking-[0.04em]">jsonPath</span>
+                      <span className="mx-2 bg-blue-50 px-3 py-1 rounded-md text-blue-700 font-mono">jsonPath</span>
                       function in the
-                      <span className="text-sky-500 font-['Manrope'] tracking-[0.04em]">  API Reference</span>
+                      <span className="ml-1 text-blue-600 font-medium cursor-pointer hover:underline" onClick={() => {
+                        setActiveTab('api');
+                      }}>API Reference</span>
                     </p>
                   </>
                 )}
@@ -1681,73 +1459,57 @@ const UpdatedCode = () => {
                 {activeTab === 'api' && (
                   <div className="w-full h-full flex">
                     {/* Left Navigation */}
-                    <div className="w-64 border-r overflow-y-auto"
-                    style={{...scrollbarStyle, ...responsiveStyles.panels}}>
+                    <div className="w-64 border-r border-gray-200 overflow-y-auto bg-gray-50" style={{...scrollbarStyle, ...responsiveStyles.panels}}>
                       <nav className="p-4">
-                        <ul className="space-y-2 font-['Manrope']">
-                          <li className="font-semibold text-sm">Getting Started</li>
-                          <li className="text-blue-500 text-sm cursor-pointer pl-4">Understanding Expressions</li>
-                          <li className="text-gray-600 text-sm cursor-pointer pl-4">Expression Types</li>
-                          <li className="text-gray-600 text-sm cursor-pointer pl-4">Syntax Guide</li>
-                          <li className="text-gray-600 text-sm cursor-pointer pl-4">Common Functions</li>
-                          <li className="font-semibold text-sm mt-4">Advanced Topics</li>
-                          <li className="text-gray-600 text-sm cursor-pointer pl-4">Complex Expressions</li>
-                          <li className="text-gray-600 text-sm cursor-pointer pl-4">Best Practices</li>
-                          <li className="text-gray-600 text-sm cursor-pointer pl-4">Troubleshooting</li>
+                        <ul className="space-y-1 font-['Manrope']">
+                          <li className="font-semibold text-gray-900 px-3 py-2">Getting Started</li>
+                          <li className="text-blue-600 bg-blue-50 rounded-md px-3 py-1.5 text-sm cursor-pointer font-medium">Understanding Expressions</li>
+                          <li className="text-gray-700 hover:bg-gray-100 rounded-md px-3 py-1.5 text-sm cursor-pointer transition-colors duration-200">Expression Types</li>
+                          <li className="text-gray-700 hover:bg-gray-100 rounded-md px-3 py-1.5 text-sm cursor-pointer transition-colors duration-200">Syntax Guide</li>
+                          <li className="text-gray-700 hover:bg-gray-100 rounded-md px-3 py-1.5 text-sm cursor-pointer transition-colors duration-200">Common Functions</li>
+                          <li className="font-semibold text-gray-900 mt-4 px-3 py-2">Advanced Topics</li>
+                          <li className="text-gray-700 hover:bg-gray-100 rounded-md px-3 py-1.5 text-sm cursor-pointer transition-colors duration-200">Complex Expressions</li>
+                          <li className="text-gray-700 hover:bg-gray-100 rounded-md px-3 py-1.5 text-sm cursor-pointer transition-colors duration-200">Best Practices</li>
+                          <li className="text-gray-700 hover:bg-gray-100 rounded-md px-3 py-1.5 text-sm cursor-pointer transition-colors duration-200">Troubleshooting</li>
                         </ul>
                       </nav>
                     </div>
 
-
-
-
                     {/* Right Content */}
-                    <div className="flex-1 overflow-y-auto"
-                    style={scrollbarStyle}>
+                    <div className="flex-1 overflow-y-auto bg-white" style={scrollbarStyle}>
                       <div className="p-6 font-['Manrope']">
-                        <h1 className="text-2xl font-bold mb-6">Understanding Expressions</h1>
+                        <h1 className="text-2xl font-bold text-gray-800 mb-6">Understanding Expressions</h1>
                         <div className="space-y-6">
                           <section>
-                            <h2 className="text-lg font-semibold mb-3">Overview</h2>
-                            <p className="text-gray-700">
+                            <h2 className="text-lg font-semibold text-gray-800 mb-3">Overview</h2>
+                            <p className="text-gray-700 leading-relaxed">
                               SnapLogic expressions provide a powerful way to transform and manipulate data within your pipelines.
+                              These expressions can be used to extract, filter, map, and restructure your data as it moves through the integration flow.
                             </p>
                           </section>
 
-
-
-
                           <section>
-                            <h2 className="text-lg font-semibold mb-3">Expression Types</h2>
-                            <ul className="list-disc pl-6 space-y-2">
-                              <li>JSONPath expressions for data navigation</li>
-                              <li>Pipeline parameters for configuration</li>
-                              <li>JavaScript expressions for complex logic</li>
-                              <li>Runtime expressions for dynamic behavior</li>
+                            <h2 className="text-lg font-semibold text-gray-800 mb-3">Expression Types</h2>
+                            <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                              <li><span className="font-medium text-gray-800">JSONPath expressions</span> - Navigate and extract data from JSON structures</li>
+                              <li><span className="font-medium text-gray-800">Pipeline parameters</span> - Configure dynamic behavior for pipeline execution</li>
+                              <li><span className="font-medium text-gray-800">JavaScript expressions</span> - Implement complex logic and custom transformations</li>
+                              <li><span className="font-medium text-gray-800">Runtime expressions</span> - Define behavior that responds to execution context</li>
                             </ul>
                           </section>
 
-
-
-
                           <section>
-                            <h2 className="text-lg font-semibold mb-3">Examples</h2>
-                            <div className="bg-gray-50 p-4 rounded-md">
-                              <pre className="text-sm font-mono">
+                            <h2 className="text-lg font-semibold text-gray-800 mb-3">Examples</h2>
+                            <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                              <pre className="text-sm font-mono text-gray-800">
                                 {`// Data Navigation
-                                $.phoneNumbers[0].type
+$.phoneNumbers[0].type
 
+// String Operations
+$uppercase($.firstName)
 
-
-
-                                // String Operations
-                                $uppercase($.firstName)
-
-
-
-
-                                // Array Operations
-                                $.items[*].price`}
+// Array Operations
+$.items[*].price`}
                               </pre>
                             </div>
                           </section>
@@ -1760,8 +1522,101 @@ const UpdatedCode = () => {
             </div>
           </div>
         )}
-        <ResizeHandle/>
       </div>
+
+      {/* Export Dialog */}
+      {showExportDialog && (
+        <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
+          <div className="bg-white w-[32rem] rounded-md shadow-xl overflow-hidden">
+            <div className="p-6 font-['Manrope']">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">Open in Visual Studio Code</h2>
+              <div className="h-[1px] bg-gray-200 w-full -mx-6 mb-6"></div>
+              <p className="text-gray-700 mb-3">
+                For the best DataWeave development experience, unzip and open the project in <span className="text-blue-600 font-medium">VSCode</span>
+              </p>
+              <p className="text-gray-700 mb-8">
+                Don't forget to install the <span className="text-blue-600 font-medium">DataWeave Playground</span> extension
+              </p>
+              <div className="flex justify-between items-center">
+                <label
+                  className="flex items-center text-sm cursor-pointer select-none"
+                  onClick={() => {
+                    setIsChecked(!isChecked);
+                    setWasChecked(true);
+                  }}
+                >
+                  <div className="w-5 h-5 mr-2 border border-gray-300 flex items-center justify-center bg-white hover:border-blue-400 cursor-pointer rounded transition-colors duration-200">
+                    {isChecked && (
+                      <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                  Don't show popup again
+                </label>
+
+                <button
+                  onClick={() => setShowExportDialog(false)}
+                  className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Import Dialog */}
+      {showImportDialog && (
+        <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
+          <div className="bg-white w-[32rem] rounded-md shadow-xl overflow-hidden">
+            <div className="p-6 font-['Manrope']">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">Import project</h2>
+              <div className="h-[1px] bg-gray-200 w-full -mx-6 mb-6"></div>
+              <div 
+                className="border-2 border-dashed border-gray-400 rounded-md p-8 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 transition-colors duration-200 bg-gray-50"
+                onClick={() => document.getElementById('fileInput').click()}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleFileDrop}
+              >
+                <input
+                  id="fileInput"
+                  type="file"
+                  accept=".zip"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <svg className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <p className="text-base font-medium text-gray-700 mt-4 mb-1">
+                  {selectedFile ? selectedFile.name : "Drop project zip here or click to upload"}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Supported format: .zip
+                </p>
+              </div>
+              <div className="mt-6 text-center">
+                <p className="text-red-500 text-sm mb-1">
+                  Upload functionality is only intended for playground exported projects
+                </p>
+                <p className="text-gray-500 text-sm">
+                  Importing modified files may yield an invalid project.
+                </p>
+              </div>
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={() => setShowImportDialog(false)}
+                  className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
