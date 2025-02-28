@@ -11,7 +11,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: transparent;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -35,8 +35,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-attachment: fixed;
-  background-size: cover;
+  background-color: transparent;
 }
 
 h1 {
@@ -66,7 +65,7 @@ button:focus-visible {
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
-    background-color: #ffffff;
+    background-color: transparent;
   }
   a:hover {
     color: #747bff;
@@ -137,7 +136,7 @@ button:focus-visible {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-transparent text-foreground;
   }
 }
 

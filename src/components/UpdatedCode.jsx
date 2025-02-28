@@ -101,7 +101,7 @@ export default function UpdatedCode() {
       <div 
         className="fixed inset-0 z-[-1]" 
         style={{
-          backgroundImage: 'url("/lovable-uploads/77ebd894-16f0-4f55-84c8-6d0e1447d420.png")',
+          backgroundImage: 'url("/lovable-uploads/e097fd02-e653-4b86-95e5-09646c987272.png")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
@@ -157,7 +157,7 @@ export default function UpdatedCode() {
           }}
           className="overflow-y-auto bg-white/95 backdrop-blur-sm"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50/80 to-blue-50/60">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Inputs</h2>
             <Button 
               variant="outline" 
@@ -169,7 +169,7 @@ export default function UpdatedCode() {
           </div>
           
           {/* Input items would go here */}
-          <div className="p-2 bg-gradient-to-b from-white/80 to-blue-50/10">
+          <div className="p-2">
             <div className="p-2 hover:bg-blue-50/60 cursor-pointer rounded-sm transition-colors duration-150 border border-transparent hover:border-blue-100">
               <div className="flex items-center">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
@@ -221,7 +221,7 @@ export default function UpdatedCode() {
           }}
           className="flex flex-col bg-white/95 backdrop-blur-sm"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50/80 to-blue-50/60">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Script</h2>
             <div className="flex items-center space-x-4">
               <FormatDropdown onFormatChange={handleFormatChange} />
@@ -236,7 +236,7 @@ export default function UpdatedCode() {
           </div>
           
           {/* Script content area */}
-          <div className="flex-1 p-4 bg-gradient-to-b from-white/80 to-blue-50/10">
+          <div className="flex-1 p-4">
             <div className="bg-white border border-gray-200 rounded-sm h-full shadow-sm hover:shadow-md transition-shadow duration-300">
               <Editor
                 height="100%"
@@ -296,10 +296,10 @@ export default function UpdatedCode() {
           }}
           className="flex flex-col bg-white/95 backdrop-blur-sm"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50/80 to-blue-50/60">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Output</h2>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-white/80 to-blue-50/10">
+          <div className="flex-1 overflow-y-auto p-4">
             <Label htmlFor="actualOutput" className="block text-sm font-medium text-gray-700 mb-2">
               Actual Output
             </Label>
