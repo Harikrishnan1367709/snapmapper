@@ -894,20 +894,11 @@ export function Documentation({ onBack }) {
             <Button 
               variant="outline" 
               size="sm" 
-              className="flex items-center justify-start text-white border-gray-600 hover:bg-blue-600 hover:text-white transition-colors duration-200 shadow-sm"
+              className="flex items-center justify-center px-4 py-2 text-white border border-gray-600 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors duration-200 shadow-sm w-full"
               onClick={onBack}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Playground
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-1 h-8 w-8 rounded-full hover:bg-gray-700 text-white md:hidden"
-              onClick={toggleMobileSidebar}
-            >
-              <X className="h-4 w-4" />
             </Button>
           </div>
           
@@ -948,7 +939,7 @@ export function Documentation({ onBack }) {
         <div className="flex-1 p-4">
           {bookmarkedSections.length > 0 && !isSearching && (
             <div className="mb-5">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">Bookmarks</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">BOOKMARKS</h3>
               {bookmarkedSections.map((id) => {
                 const section = allSections.find(s => s.id === id);
                 if (!section) return null;
@@ -1009,7 +1000,7 @@ export function Documentation({ onBack }) {
           
           {(!isSearching || (isSearching && searchResults.length === 0 && searchQuery === '')) && (
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">Content</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">CONTENT</h3>
               {filteredSections.length === 0 && searchQuery !== '' ? (
                 <div className="text-center py-8">
                   <div className="text-gray-500 mb-2">
