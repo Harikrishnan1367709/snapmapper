@@ -98,9 +98,14 @@ export default function UpdatedCode() {
     setState(prev => ({ ...prev, importDialogOpen: false }));
   };
 
-  const handleNavigation = (page) => {
+  const handleNavigation = (page, e) => {
+    // Prevent default browser navigation behavior
+    if (e) {
+      e.preventDefault();
+    }
+    
     if (page === 'docs') {
-      setState(prev => ({ ...prev, showDocumentation: true }));
+      setState(prev => ({ ...prev, showDocumentation: true, activePage: 'docs' }));
     } else {
       setState(prev => ({ ...prev, activePage: page, showDocumentation: false }));
     }
@@ -143,25 +148,25 @@ export default function UpdatedCode() {
           {/* Navigation links */}
           <div className="flex items-center space-x-8">
             <button 
-              onClick={() => handleNavigation('blogs')}
+              onClick={(e) => handleNavigation('blogs', e)}
               className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'blogs' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
             >
               BLOGS
             </button>
             <button 
-              onClick={() => handleNavigation('docs')}
+              onClick={(e) => handleNavigation('docs', e)}
               className={`px-2 py-1 text-sm font-medium transition-colors ${state.showDocumentation ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
             >
               DOCS
             </button>
             <button 
-              onClick={() => handleNavigation('tutorial')}
+              onClick={(e) => handleNavigation('tutorial', e)}
               className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'tutorial' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
             >
               TUTORIAL
             </button>
             <button 
-              onClick={() => handleNavigation('playground')}
+              onClick={(e) => handleNavigation('playground', e)}
               className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'playground' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
             >
               PLAYGROUND
@@ -188,7 +193,7 @@ export default function UpdatedCode() {
           </div>
         </div>
 
-        <Documentation onBack={() => setState(prev => ({ ...prev, showDocumentation: false }))} />
+        <Documentation onBack={() => setState(prev => ({ ...prev, showDocumentation: false, activePage: 'playground' }))} />
 
         {/* Footer - Updated with new design and custom icons */}
         <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white/90 shadow-sm relative backdrop-blur-sm">
@@ -295,28 +300,28 @@ export default function UpdatedCode() {
           <span className="text-lg font-semibold text-gray-800">SnapLogic Playground</span>
         </div>
         
-        {/* Navigation links */}
+        {/* Navigation links - Updated to prevent default behavior */}
         <div className="flex items-center space-x-8">
           <button 
-            onClick={() => handleNavigation('blogs')}
+            onClick={(e) => handleNavigation('blogs', e)}
             className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'blogs' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
           >
             BLOGS
           </button>
           <button 
-            onClick={() => handleNavigation('docs')}
+            onClick={(e) => handleNavigation('docs', e)}
             className={`px-2 py-1 text-sm font-medium transition-colors ${state.showDocumentation ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
           >
             DOCS
           </button>
           <button 
-            onClick={() => handleNavigation('tutorial')}
+            onClick={(e) => handleNavigation('tutorial', e)}
             className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'tutorial' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
           >
             TUTORIAL
           </button>
           <button 
-            onClick={() => handleNavigation('playground')}
+            onClick={(e) => handleNavigation('playground', e)}
             className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'playground' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
           >
             PLAYGROUND
