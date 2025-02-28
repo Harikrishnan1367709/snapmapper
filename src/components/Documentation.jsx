@@ -10,11 +10,14 @@ export function Documentation({ onBack }) {
   const [copiedSection, setCopiedSection] = useState(null);
   const [filteredSections, setFilteredSections] = useState([]);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [bookmarkedSections, setBookmarkedSections] = useState(() => {
     const saved = localStorage.getItem('snaplogicBookmarks');
     return saved ? JSON.parse(saved) : [];
   });
   const contentRef = useRef(null);
+  const searchInputRef = useRef(null);
 
   const allSections = [
     { id: 'introduction', title: 'Introduction to SnapLogic', level: 1 },
@@ -46,14 +49,54 @@ export function Documentation({ onBack }) {
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setFilteredSections(allSections);
+      setIsSearching(false);
     } else {
+      setIsSearching(true);
       const query = searchQuery.toLowerCase();
-      setFilteredSections(
-        allSections.filter(section => 
-          section.title.toLowerCase().includes(query) || 
-          getContentForSection(section.id).toLowerCase().includes(query)
-        )
+      
+      // First filter the sections based on title
+      const titleMatches = allSections.filter(section => 
+        section.title.toLowerCase().includes(query)
       );
+      
+      // Then search content for other matches
+      const contentMatches = allSections.filter(section => 
+        !titleMatches.includes(section) && 
+        getContentForSection(section.id).toLowerCase().includes(query)
+      );
+      
+      setFilteredSections([...titleMatches, ...contentMatches]);
+      
+      // Create search results with context
+      const results = [];
+      [...titleMatches, ...contentMatches].forEach(section => {
+        const content = getContentForSection(section.id).toLowerCase();
+        const index = content.indexOf(query);
+        
+        if (index !== -1) {
+          // Get context around the match (80 characters before and after)
+          const start = Math.max(0, index - 80);
+          const end = Math.min(content.length, index + query.length + 80);
+          let snippet = content.substring(start, end);
+          
+          // Add ellipsis if we cut the text
+          if (start > 0) snippet = '...' + snippet;
+          if (end < content.length) snippet = snippet + '...';
+          
+          // Highlight the matched text
+          const highlightedSnippet = snippet.replace(
+            new RegExp(query, 'gi'),
+            match => `<mark class="bg-yellow-200 px-0.5 rounded">${match}</mark>`
+          );
+          
+          results.push({
+            section,
+            snippet: highlightedSnippet
+          });
+        }
+      });
+      
+      setSearchResults(results);
     }
   }, [searchQuery]);
 
@@ -63,6 +106,12 @@ export function Documentation({ onBack }) {
       contentRef.current.scrollTop = 0;
     }
   }, [activeSection]);
+
+  const focusSearch = () => {
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  };
 
   const toggleBookmark = (sectionId) => {
     if (bookmarkedSections.includes(sectionId)) {
@@ -701,36 +750,6 @@ export function Documentation({ onBack }) {
                 </div>
               </div>
             </div>
-            
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-lg">
-              <h3 className="text-lg font-semibold mb-3 text-indigo-700">Timeline</h3>
-              <div className="relative">
-                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-indigo-200"></div>
-                <div className="space-y-6 pl-12 relative">
-                  <div className="relative">
-                    <div className="absolute left-[-32px] top-0 w-6 h-6 rounded-full bg-indigo-500 shadow-md flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-white"></div>
-                    </div>
-                    <h4 className="text-indigo-700 font-medium">Q2 2024</h4>
-                    <p className="text-gray-700">Extended functionality and operator implementation</p>
-                  </div>
-                  <div className="relative">
-                    <div className="absolute left-[-32px] top-0 w-6 h-6 rounded-full bg-indigo-400 shadow-md flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-white"></div>
-                    </div>
-                    <h4 className="text-indigo-700 font-medium">Q3 2024</h4>
-                    <p className="text-gray-700">Enhanced debugging capabilities</p>
-                  </div>
-                  <div className="relative">
-                    <div className="absolute left-[-32px] top-0 w-6 h-6 rounded-full bg-indigo-300 shadow-md flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-white"></div>
-                    </div>
-                    <h4 className="text-indigo-700 font-medium">Q4 2024</h4>
-                    <p className="text-gray-700">Collaboration features and UI improvements</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         );
       
@@ -803,31 +822,48 @@ export function Documentation({ onBack }) {
     setShowMobileSidebar(!showMobileSidebar);
   };
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ctrl/Cmd + K to focus search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        focusSearch();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
-    <div className="flex h-full bg-gray-50 backdrop-blur-sm">
+    <div className="flex h-full bg-gradient-to-br from-gray-50 to-blue-50/30 relative">
       {/* Mobile menu button - only visible on small screens */}
       <button
-        className="fixed top-20 left-4 z-50 md:hidden bg-white p-2 rounded-full shadow-lg border border-gray-200"
+        className="fixed top-20 left-4 z-50 md:hidden bg-white p-2 rounded-full shadow-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
         onClick={toggleMobileSidebar}
       >
         {showMobileSidebar ? (
-          <X className="h-5 w-5 text-gray-600" />
+          <X className="h-5 w-5 text-blue-600" />
         ) : (
-          <ChevronRight className="h-5 w-5 text-gray-600" />
+          <ChevronRight className="h-5 w-5 text-blue-600" />
         )}
       </button>
 
-      {/* Sidebar - hidden on mobile unless toggled */}
-      <div className={`w-72 bg-white border-r border-gray-200 overflow-y-auto flex flex-col h-full transition-all duration-300 ease-in-out shadow-md
+      {/* Sidebar - enhanced with better styling */}
+      <div className={`w-72 bg-white overflow-y-auto flex flex-col h-full transition-all duration-300 ease-in-out shadow-lg rounded-r-xl
         ${showMobileSidebar ? 'translate-x-0' : '-translate-x-full'} 
         md:translate-x-0 md:static fixed left-0 top-0 bottom-0 z-40`}
+        style={{
+          backgroundImage: "linear-gradient(to bottom, #fff, #fafafa)"
+        }}
       >
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4">
           <div className="flex items-center justify-between mb-4">
             <Button 
               variant="outline" 
               size="sm" 
-              className="flex items-center justify-start text-gray-700 hover:text-blue-600 transition-colors duration-200"
+              className="flex items-center justify-start text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 shadow-sm"
               onClick={onBack}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -837,29 +873,51 @@ export function Documentation({ onBack }) {
             <Button
               variant="ghost"
               size="sm"
-              className="p-1 h-8 w-8 rounded-full hover:bg-gray-100 md:hidden"
+              className="p-1 h-8 w-8 rounded-full hover:bg-blue-50 text-blue-600 md:hidden"
               onClick={toggleMobileSidebar}
             >
-              <X className="h-4 w-4 text-gray-500" />
+              <X className="h-4 w-4" />
             </Button>
           </div>
           
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div className="relative mt-4 group">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-500 group-focus-within:text-blue-600" />
             <input
+              ref={searchInputRef}
               type="text"
-              placeholder="Search documentation..."
-              className="w-full bg-gray-50 rounded-md border border-gray-300 py-2 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              placeholder="Search documentation... (Ctrl+K)"
+              className="w-full bg-white rounded-lg border border-gray-300 py-2 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm group-focus-within:shadow-md"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsSearching(true)}
             />
+            {searchQuery && (
+              <button
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-600"
+                onClick={() => setSearchQuery('')}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
+
+          {searchQuery && (
+            <div className="text-xs text-gray-500 mt-2 flex justify-between items-center">
+              <span>{filteredSections.length} result{filteredSections.length !== 1 ? 's' : ''}</span>
+              <button 
+                className="text-blue-500 hover:text-blue-700 text-xs"
+                onClick={() => setSearchQuery('')}
+              >
+                Clear
+              </button>
+            </div>
+          )}
         </div>
         
         <div className="flex-1 p-4">
-          {bookmarkedSections.length > 0 && (
-            <div className="mb-4">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Bookmarks</h3>
+          {bookmarkedSections.length > 0 && !isSearching && (
+            <div className="mb-5">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-600 mb-2 px-2">Bookmarks</h3>
               {bookmarkedSections.map((id) => {
                 const section = allSections.find(s => s.id === id);
                 if (!section) return null;
@@ -867,9 +925,9 @@ export function Documentation({ onBack }) {
                 return (
                   <button
                     key={`bookmark-${id}`}
-                    className={`w-full text-left px-3 py-2 rounded mb-1 text-sm flex items-center justify-between ${
+                    className={`w-full text-left px-3 py-2 rounded-lg mb-1 text-sm flex items-center justify-between ${
                       activeSection === id 
-                        ? 'bg-blue-100 text-blue-700 font-medium' 
+                        ? 'bg-blue-100 text-blue-700 font-medium shadow-sm' 
                         : 'text-gray-600 hover:bg-gray-100'
                     }`}
                     onClick={() => setActiveSection(id)}
@@ -879,70 +937,125 @@ export function Documentation({ onBack }) {
                   </button>
                 );
               })}
-              <div className="border-t border-gray-200 my-2"></div>
+              <div className="border-t border-gray-200 my-3"></div>
             </div>
           )}
           
-          {filteredSections.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="text-gray-400 mb-2">
-                <Search className="h-8 w-8 mx-auto" />
+          {isSearching && searchResults.length > 0 && (
+            <div className="mb-5 mt-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-600 mb-2 px-2">Search Results</h3>
+              <div className="space-y-3">
+                {searchResults.map((result, index) => (
+                  <div key={`result-${index}`} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <button
+                      className={`w-full text-left p-3 ${
+                        activeSection === result.section.id 
+                          ? 'bg-blue-50 border-l-4 border-blue-500' 
+                          : 'hover:bg-gray-50'
+                      }`}
+                      onClick={() => {
+                        setActiveSection(result.section.id);
+                        setIsSearching(false);
+                      }}
+                    >
+                      <h4 className="font-medium text-blue-700 mb-1">{result.section.title}</h4>
+                      <p 
+                        className="text-xs text-gray-600 line-clamp-2"
+                        dangerouslySetInnerHTML={{ __html: result.snippet }}
+                      ></p>
+                    </button>
+                  </div>
+                ))}
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No results found</h3>
-              <p className="text-gray-500">Try searching with different keywords</p>
-            </div>
-          ) : (
-            filteredSections.map((section) => (
               <button
-                key={section.id}
-                className={`w-full text-left px-3 py-2 rounded mb-1 text-sm transition-colors flex items-center justify-between ${
-                  activeSection === section.id 
-                    ? 'bg-blue-100 text-blue-700 font-medium' 
-                    : 'text-gray-600 hover:bg-gray-100'
-                } ${section.level === 1 ? 'font-medium' : 'pl-6 text-sm'}`}
-                onClick={() => setActiveSection(section.id)}
+                className="w-full mt-4 text-center text-sm text-blue-600 hover:text-blue-800 py-2"
+                onClick={() => setIsSearching(false)}
               >
-                <span className={`truncate ${section.level === 1 ? '' : 'opacity-90'}`}>{section.title}</span>
-                
-                <button 
-                  className="opacity-0 group-hover:opacity-100 hover:text-blue-500"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleBookmark(section.id);
-                  }}
-                >
-                  {bookmarkedSections.includes(section.id) ? (
-                    <BookmarkCheck className="h-3.5 w-3.5 text-blue-500" />
-                  ) : (
-                    <Bookmark className="h-3.5 w-3.5 text-gray-400" />
-                  )}
-                </button>
+                Show all sections
               </button>
-            ))
+            </div>
+          )}
+          
+          {(!isSearching || (isSearching && searchResults.length === 0 && searchQuery === '')) && (
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-600 mb-2 px-2">Content</h3>
+              {filteredSections.length === 0 && searchQuery !== '' ? (
+                <div className="text-center py-8">
+                  <div className="text-gray-400 mb-2">
+                    <Search className="h-8 w-8 mx-auto" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No results found</h3>
+                  <p className="text-gray-500">Try searching with different keywords</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {filteredSections.map((section) => (
+                    <button
+                      key={section.id}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-150 flex items-center justify-between group ${
+                        activeSection === section.id 
+                          ? 'bg-gradient-to-r from-blue-100 to-blue-50 text-blue-700 font-medium shadow-sm' 
+                          : 'text-gray-600 hover:bg-gray-100'
+                      } ${section.level === 1 ? 'font-medium' : 'pl-6 text-sm'}`}
+                      onClick={() => setActiveSection(section.id)}
+                    >
+                      <span className={`truncate ${section.level === 1 ? '' : 'opacity-90'}`}>{section.title}</span>
+                      
+                      <button 
+                        className={`opacity-0 group-hover:opacity-100 hover:text-blue-500 transition-opacity duration-200 ${
+                          bookmarkedSections.includes(section.id) ? 'text-blue-500' : 'text-gray-400'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBookmark(section.id);
+                        }}
+                      >
+                        {bookmarkedSections.includes(section.id) ? (
+                          <BookmarkCheck className="h-3.5 w-3.5" />
+                        ) : (
+                          <Bookmark className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
         
-        <div className="p-4 border-t border-gray-200 bg-gray-50">
+        <div className="p-4 border-t border-gray-200 bg-gradient-to-b from-white to-gray-50">
           <div className="flex items-center justify-between">
             <p className="text-xs text-gray-500">
               SnapLogic Playground Docs v1.0
             </p>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-1 h-7 w-7 rounded-full hover:bg-gray-200"
-              onClick={() => setActiveSection('introduction')}
-              title="Home"
-            >
-              <Home className="h-4 w-4 text-gray-500" />
-            </Button>
+            <div className="flex space-x-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-1 h-7 w-7 rounded-full hover:bg-blue-100 text-blue-600"
+                onClick={() => setActiveSection('introduction')}
+                title="Home"
+              >
+                <Home className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-1 h-7 w-7 rounded-full hover:bg-blue-100 text-blue-600"
+                onClick={focusSearch}
+                title="Search (Ctrl+K)"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
       
-      {/* Main content */}
-      <div className="flex-1 overflow-y-auto" ref={contentRef}>
-        <div className="max-w-4xl mx-auto px-6 py-8 bg-white min-h-full">
+      {/* Main content - with improved styling */}
+      <div className="flex-1 overflow-y-auto bg-white" ref={contentRef}>
+        <div className="max-w-4xl mx-auto px-6 py-8 bg-white shadow-sm rounded-lg m-4 min-h-[calc(100%-2rem)]">
           <div className="mb-8 flex justify-between items-start">
             <div>
               <div className="flex items-center mb-2">
@@ -961,13 +1074,13 @@ export function Documentation({ onBack }) {
                   {allSections.find(s => s.id === activeSection)?.title || 'Documentation'}
                 </h1>
               </div>
-              <div className="w-32 h-1 bg-blue-500 rounded-full"></div>
+              <div className="w-32 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>
             </div>
             
             <Button
               variant="outline"
               size="sm"
-              className="md:hidden"
+              className="md:hidden bg-white text-blue-600 border-blue-200 shadow-sm hover:bg-blue-50 hover:border-blue-300"
               onClick={toggleMobileSidebar}
             >
               Contents
@@ -981,7 +1094,7 @@ export function Documentation({ onBack }) {
           <div className="mt-12 pt-6 border-t border-gray-200">
             <div className="flex justify-between items-center">
               <button 
-                className={`text-sm flex items-center text-blue-600 hover:text-blue-800 transition-colors ${
+                className={`flex items-center px-3 py-2 text-blue-600 hover:text-blue-800 transition-colors rounded-lg hover:bg-blue-50 ${
                   allSections.findIndex(s => s.id === activeSection) === 0 ? 'invisible' : ''
                 }`}
                 onClick={() => {
@@ -996,7 +1109,7 @@ export function Documentation({ onBack }) {
               </button>
               
               <button 
-                className={`text-sm flex items-center text-blue-600 hover:text-blue-800 transition-colors ${
+                className={`flex items-center px-3 py-2 text-blue-600 hover:text-blue-800 transition-colors rounded-lg hover:bg-blue-50 ${
                   allSections.findIndex(s => s.id === activeSection) === allSections.length - 1 ? 'invisible' : ''
                 }`}
                 onClick={() => {
