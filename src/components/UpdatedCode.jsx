@@ -349,7 +349,7 @@ export default function UpdatedCode() {
         </div>
       </div>
       
-      {/* Footer - Updated with Made with coffee & beer in Tamil Nadu and SnapLogic text */}
+      {/* Footer - Updated with Made with coffee & beer in Tamil Nadu and image instead of text */}
       <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white shadow-sm">
         <div className="flex justify-center items-center">
           <div className="flex items-center space-x-2">
@@ -365,8 +365,12 @@ export default function UpdatedCode() {
             </a>
           </div>
         </div>
-        <div className="text-center mt-1 text-gray-600 font-medium">
-          SnapLogic Playground – Redefining Integration
+        <div className="text-center mt-1">
+          <img 
+            src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7" 
+            alt="SnapLogic Playground – Redefining Integration" 
+            className="h-6 mx-auto"
+          />
         </div>
       </div>
 
