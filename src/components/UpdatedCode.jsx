@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { FormatDropdown } from './FormatDropdown';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Coffee, Beer } from "lucide-react";
+import { Coffee, Beer, UploadCloud, DownloadCloud } from "lucide-react";
 
 export default function UpdatedCode() {
   const resizeTimeoutRef = useRef(null);
@@ -123,10 +123,7 @@ export default function UpdatedCode() {
             className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
           >
             <span className="mr-2">Export</span>
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 4V16M12 16L7 11M12 16L17 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M20 20H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <DownloadCloud className="h-4 w-4 text-blue-600" />
           </Button>
           <Button 
             variant="outline" 
@@ -134,10 +131,7 @@ export default function UpdatedCode() {
             className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
           >
             <span className="mr-2">Import</span>
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 20V8M12 8L7 13M12 8L17 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M20 4H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <UploadCloud className="h-4 w-4 text-blue-600" />
           </Button>
         </div>
       </div>
@@ -338,7 +332,7 @@ export default function UpdatedCode() {
                     wrappingIndent: 'indent',
                     automaticLayout: true,
                     fontSize: 13,
-                    fontFamily: "'Manrope', 'Monaco', monospace",
+                    fontFamily: "'Manrope', 'Monaco', monospace',
                     padding: { top: 12, bottom: 12 }
                   }}
                   className="font-mono"
@@ -427,10 +421,8 @@ export default function UpdatedCode() {
           
           <div className="p-6">
             <div className="border-2 border-dashed border-gray-300 rounded-none p-10 flex flex-col items-center justify-center text-center hover:border-gray-400 transition-colors duration-200 cursor-pointer">
-              <div className="mb-4 text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                </svg>
+              <div className="mb-4 text-blue-500">
+                <UploadCloud className="mx-auto h-14 w-14 text-blue-500 opacity-80" />
               </div>
               <p className="text-base font-medium text-gray-600 mb-1">
                 Drop project zip here or click to upload
