@@ -96,7 +96,17 @@ export default function UpdatedCode() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-white overflow-hidden font-['Manrope']">
+    <div 
+      className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']"
+      style={{
+        backgroundImage: 'url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000&auto=format&fit=crop")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        backgroundColor: 'rgba(255, 255, 255, 0.85)',
+        backgroundBlendMode: 'overlay'
+      }}
+    >
       {state.showToast && (
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 relative">
           <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
@@ -111,7 +121,7 @@ export default function UpdatedCode() {
         </div>
       )}
 
-      <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 bg-white/90 shadow-sm backdrop-blur-sm">
         <div className="flex items-center space-x-3">
           <img src="/sl-logo.svg" alt="SnapLogic Logo" className="h-8 w-8" />
           <span className="text-lg font-semibold text-gray-800">SnapLogic Playground</span>
@@ -136,7 +146,7 @@ export default function UpdatedCode() {
         </div>
       </div>
 
-      <div className="flex-1 flex">
+      <div className="flex-1 flex mx-4 my-4 rounded-md overflow-hidden shadow-xl">
         {/* Left Panel */}
         <div
           style={{
@@ -144,9 +154,9 @@ export default function UpdatedCode() {
             minWidth: '250px',
             borderRight: '1px solid #e5e7eb'
           }}
-          className="overflow-y-auto bg-white"
+          className="overflow-y-auto bg-white/95 backdrop-blur-sm"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50/30">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50/80 to-blue-50/60">
             <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Inputs</h2>
             <Button 
               variant="outline" 
@@ -158,8 +168,8 @@ export default function UpdatedCode() {
           </div>
           
           {/* Input items would go here */}
-          <div className="p-2 bg-gradient-to-b from-white to-blue-50/10">
-            <div className="p-2 hover:bg-blue-50/40 cursor-pointer rounded-sm transition-colors duration-150 border border-transparent hover:border-blue-100">
+          <div className="p-2 bg-gradient-to-b from-white/80 to-blue-50/10">
+            <div className="p-2 hover:bg-blue-50/60 cursor-pointer rounded-sm transition-colors duration-150 border border-transparent hover:border-blue-100">
               <div className="flex items-center">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
                 <span className="text-sm text-gray-700">input.json</span>
@@ -208,9 +218,9 @@ export default function UpdatedCode() {
             minWidth: '250px',
             borderRight: '1px solid #e5e7eb'
           }}
-          className="flex flex-col bg-white"
+          className="flex flex-col bg-white/95 backdrop-blur-sm"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50/30">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50/80 to-blue-50/60">
             <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Script</h2>
             <div className="flex items-center space-x-4">
               <FormatDropdown onFormatChange={handleFormatChange} />
@@ -225,7 +235,7 @@ export default function UpdatedCode() {
           </div>
           
           {/* Script content area */}
-          <div className="flex-1 p-4 bg-gradient-to-b from-white to-blue-50/10">
+          <div className="flex-1 p-4 bg-gradient-to-b from-white/80 to-blue-50/10">
             <div className="bg-white border border-gray-200 rounded-sm h-full shadow-sm hover:shadow-md transition-shadow duration-300">
               <Editor
                 height="100%"
@@ -283,12 +293,12 @@ export default function UpdatedCode() {
             width: `${dimensions.rightWidth}px`,
             minWidth: '250px'
           }}
-          className="flex flex-col bg-white"
+          className="flex flex-col bg-white/95 backdrop-blur-sm"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50/30">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50/80 to-blue-50/60">
             <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Output</h2>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-white to-blue-50/10">
+          <div className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-white/80 to-blue-50/10">
             <Label htmlFor="actualOutput" className="block text-sm font-medium text-gray-700 mb-2">
               Actual Output
             </Label>
@@ -332,7 +342,7 @@ export default function UpdatedCode() {
                     wrappingIndent: 'indent',
                     automaticLayout: true,
                     fontSize: 13,
-                    fontFamily: "'Manrope', 'Monaco', monospace',
+                    fontFamily: "'Manrope', 'Monaco', monospace",
                     padding: { top: 12, bottom: 12 }
                   }}
                   className="font-mono"
@@ -344,7 +354,7 @@ export default function UpdatedCode() {
       </div>
       
       {/* Footer - Updated with new design and custom icons */}
-      <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white shadow-sm relative">
+      <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white/90 shadow-sm relative backdrop-blur-sm">
         <div className="flex justify-center items-center">
           <img 
             src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7" 
