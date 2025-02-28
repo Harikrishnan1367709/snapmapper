@@ -96,15 +96,18 @@ export default function UpdatedCode() {
   };
 
   return (
-    <div 
-      className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']"
-      style={{
-        backgroundImage: 'url("/lovable-uploads/77ebd894-16f0-4f55-84c8-6d0e1447d420.png")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
-      }}
-    >
+    <div className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']">
+      {/* Apply the background using an absolutely positioned div to ensure it covers everything */}
+      <div 
+        className="fixed inset-0 z-[-1]" 
+        style={{
+          backgroundImage: 'url("/lovable-uploads/77ebd894-16f0-4f55-84c8-6d0e1447d420.png")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }} 
+      />
+      
       {state.showToast && (
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 relative">
           <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
