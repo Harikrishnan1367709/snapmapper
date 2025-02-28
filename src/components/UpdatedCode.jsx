@@ -4,6 +4,7 @@ import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { FormatDropdown } from './FormatDropdown';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 export default function UpdatedCode() {
   const resizeTimeoutRef = useRef(null);
@@ -21,6 +22,7 @@ export default function UpdatedCode() {
     showToast: true,
     scriptFormat: 'javascript',
     actualOutput: '',
+    importDialogOpen: false,
   });
 
   // Debounced resize handler
@@ -84,6 +86,14 @@ export default function UpdatedCode() {
     setState(prev => ({ ...prev, isScriptDialogOpen: false }));
   };
 
+  const openImportDialog = () => {
+    setState(prev => ({ ...prev, importDialogOpen: true }));
+  };
+
+  const closeImportDialog = () => {
+    setState(prev => ({ ...prev, importDialogOpen: false }));
+  };
+
   return (
     <div className="flex flex-col h-screen w-screen bg-white overflow-hidden font-['Manrope']">
       {state.showToast && (
@@ -119,7 +129,7 @@ export default function UpdatedCode() {
           </Button>
           <Button 
             variant="outline" 
-            onClick={handleInputDialogOpen}
+            onClick={openImportDialog}
             className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
           >
             <span className="mr-2">Import</span>
@@ -352,6 +362,38 @@ export default function UpdatedCode() {
           </div>
         </div>
       </div>
+
+      {/* Import Project Dialog using the Dialog component from UI */}
+      <Dialog open={state.importDialogOpen} onOpenChange={closeImportDialog}>
+        <DialogContent className="sm:max-w-md bg-white p-0 rounded-md overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-3">
+            <DialogTitle className="text-xl font-bold text-gray-800">Import project</DialogTitle>
+          </DialogHeader>
+          <div className="p-6 pt-0">
+            <div className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center text-center">
+              <div className="mb-2 text-gray-400">
+                <svg className="mx-auto h-12 w-12" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div className="text-sm text-gray-600">
+                Drop project zip here or click to upload
+              </div>
+            </div>
+            <div className="mt-3 text-center text-sm text-red-500">
+              Upload functionality is only intended for playground exported projects
+            </div>
+            <div className="mt-1 text-center text-sm text-gray-500">
+              Importing modified files may yield an invalid project.
+            </div>
+          </div>
+          <DialogFooter className="bg-gray-50 px-6 py-4">
+            <Button variant="outline" onClick={closeImportDialog} className="rounded">
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
