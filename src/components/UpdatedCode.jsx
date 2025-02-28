@@ -99,7 +99,7 @@ export default function UpdatedCode() {
     <div 
       className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']"
       style={{
-        backgroundImage: 'url("/lovable-uploads/29214f8f-381e-4407-851f-1586c28709a0.png")',
+        backgroundImage: 'url("/lovable-uploads/77ebd894-16f0-4f55-84c8-6d0e1447d420.png")',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed'
