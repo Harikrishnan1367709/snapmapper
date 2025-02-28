@@ -99,12 +99,10 @@ export default function UpdatedCode() {
     <div 
       className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']"
       style={{
-        backgroundImage: 'url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000&auto=format&fit=crop")',
+        backgroundImage: 'url("/lovable-uploads/29214f8f-381e-4407-851f-1586c28709a0.png")',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-        backgroundColor: 'rgba(255, 255, 255, 0.85)',
-        backgroundBlendMode: 'overlay'
+        backgroundAttachment: 'fixed'
       }}
     >
       {state.showToast && (
