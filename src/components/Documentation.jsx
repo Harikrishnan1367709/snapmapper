@@ -124,13 +124,13 @@ export function Documentation({ onBack }) {
       }
       
       .doc-scrollbar::-webkit-scrollbar-thumb {
-        background: #222;
+        background: #3b82f6; /* Blue scrollbar thumb */
         border-radius: 4px;
         border: 2px solid #fff;
       }
       
       .doc-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #333;
+        background: #2563eb;
       }
     `;
     document.head.appendChild(styleElement);
@@ -885,19 +885,16 @@ export function Documentation({ onBack }) {
       </button>
 
       {/* Sidebar - enhanced with better styling */}
-      <div className={`w-72 bg-white overflow-y-auto flex flex-col h-full transition-all duration-300 ease-in-out shadow-lg rounded-r-xl doc-scrollbar
+      <div className={`w-72 bg-[#1a1a1a] overflow-y-auto flex flex-col h-full transition-all duration-300 ease-in-out shadow-lg rounded-r-xl doc-scrollbar
         ${showMobileSidebar ? 'translate-x-0' : '-translate-x-full'} 
         md:translate-x-0 md:static fixed left-0 top-0 bottom-0 z-40`}
-        style={{
-          backgroundImage: "linear-gradient(to bottom, #fff, #fafafa)"
-        }}
       >
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4">
+        <div className="sticky top-0 z-10 bg-[#232323] border-b border-gray-700 p-4">
           <div className="flex items-center justify-between mb-4">
             <Button 
               variant="outline" 
               size="sm" 
-              className="flex items-center justify-start text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 shadow-sm"
+              className="flex items-center justify-start text-white border-gray-600 hover:bg-blue-600 hover:text-white transition-colors duration-200 shadow-sm"
               onClick={onBack}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -907,7 +904,7 @@ export function Documentation({ onBack }) {
             <Button
               variant="ghost"
               size="sm"
-              className="p-1 h-8 w-8 rounded-full hover:bg-blue-50 text-blue-600 md:hidden"
+              className="p-1 h-8 w-8 rounded-full hover:bg-gray-700 text-white md:hidden"
               onClick={toggleMobileSidebar}
             >
               <X className="h-4 w-4" />
@@ -915,19 +912,19 @@ export function Documentation({ onBack }) {
           </div>
           
           <div className="relative mt-4 group">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-500 group-focus-within:text-blue-600" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-400" />
             <input
               ref={searchInputRef}
               type="text"
               placeholder="Search documentation... (Ctrl+K)"
-              className="w-full bg-white rounded-lg border border-gray-300 py-2 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm group-focus-within:shadow-md"
+              className="w-full bg-[#333333] rounded-lg border border-gray-700 py-2 pl-10 pr-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm group-focus-within:shadow-md"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setIsSearching(true)}
             />
             {searchQuery && (
               <button
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-300"
                 onClick={() => setSearchQuery('')}
               >
                 <X className="h-4 w-4" />
@@ -936,10 +933,10 @@ export function Documentation({ onBack }) {
           </div>
 
           {searchQuery && (
-            <div className="text-xs text-gray-500 mt-2 flex justify-between items-center">
+            <div className="text-xs text-gray-400 mt-2 flex justify-between items-center">
               <span>{filteredSections.length} result{filteredSections.length !== 1 ? 's' : ''}</span>
               <button 
-                className="text-blue-500 hover:text-blue-700 text-xs"
+                className="text-blue-400 hover:text-blue-300 text-xs"
                 onClick={() => setSearchQuery('')}
               >
                 Clear
@@ -951,7 +948,7 @@ export function Documentation({ onBack }) {
         <div className="flex-1 p-4">
           {bookmarkedSections.length > 0 && !isSearching && (
             <div className="mb-5">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-600 mb-2 px-2">Bookmarks</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">Bookmarks</h3>
               {bookmarkedSections.map((id) => {
                 const section = allSections.find(s => s.id === id);
                 if (!section) return null;
@@ -961,40 +958,40 @@ export function Documentation({ onBack }) {
                     key={`bookmark-${id}`}
                     className={`w-full text-left px-3 py-2 rounded-lg mb-1 text-sm flex items-center justify-between ${
                       activeSection === id 
-                        ? 'bg-gray-800 text-white font-medium shadow-sm border border-blue-500' 
-                        : 'text-gray-600 hover:bg-gray-100'
+                        ? 'bg-[#1e3a8a] text-white font-medium shadow-sm border border-blue-500' 
+                        : 'text-white hover:bg-[#2d2d2d]'
                     }`}
                     onClick={() => setActiveSection(id)}
                   >
                     <span className="truncate">{section.title}</span>
-                    <BookmarkCheck className={`h-4 w-4 ${activeSection === id ? 'text-white' : 'text-blue-500'} flex-shrink-0`} />
+                    <BookmarkCheck className={`h-4 w-4 text-white flex-shrink-0`} />
                   </button>
                 );
               })}
-              <div className="border-t border-gray-200 my-3"></div>
+              <div className="border-t border-gray-700 my-3"></div>
             </div>
           )}
           
           {isSearching && searchResults.length > 0 && (
             <div className="mb-5 mt-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-600 mb-2 px-2">Search Results</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">Search Results</h3>
               <div className="space-y-3">
                 {searchResults.map((result, index) => (
-                  <div key={`result-${index}`} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  <div key={`result-${index}`} className="bg-[#252525] rounded-lg shadow-sm border border-gray-700 overflow-hidden">
                     <button
                       className={`w-full text-left p-3 ${
                         activeSection === result.section.id 
-                          ? 'bg-gray-800 border-l-4 border-blue-500 text-white' 
-                          : 'hover:bg-gray-50'
+                          ? 'bg-[#1e3a8a] border-l-4 border-blue-500 text-white' 
+                          : 'hover:bg-[#2d2d2d] text-white'
                       }`}
                       onClick={() => {
                         setActiveSection(result.section.id);
                         setIsSearching(false);
                       }}
                     >
-                      <h4 className={`font-medium ${activeSection === result.section.id ? 'text-white' : 'text-blue-700'} mb-1`}>{result.section.title}</h4>
+                      <h4 className={`font-medium text-white mb-1`}>{result.section.title}</h4>
                       <p 
-                        className={`text-xs ${activeSection === result.section.id ? 'text-gray-300' : 'text-gray-600'} line-clamp-2`}
+                        className={`text-xs text-gray-300 line-clamp-2`}
                         dangerouslySetInnerHTML={{ __html: result.snippet }}
                       ></p>
                     </button>
@@ -1002,7 +999,7 @@ export function Documentation({ onBack }) {
                 ))}
               </div>
               <button
-                className="w-full mt-4 text-center text-sm text-blue-600 hover:text-blue-800 py-2"
+                className="w-full mt-4 text-center text-sm text-blue-400 hover:text-blue-300 py-2"
                 onClick={() => setIsSearching(false)}
               >
                 Show all sections
@@ -1012,14 +1009,14 @@ export function Documentation({ onBack }) {
           
           {(!isSearching || (isSearching && searchResults.length === 0 && searchQuery === '')) && (
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-600 mb-2 px-2">Content</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">Content</h3>
               {filteredSections.length === 0 && searchQuery !== '' ? (
                 <div className="text-center py-8">
-                  <div className="text-gray-400 mb-2">
+                  <div className="text-gray-500 mb-2">
                     <Search className="h-8 w-8 mx-auto" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No results found</h3>
-                  <p className="text-gray-500">Try searching with different keywords</p>
+                  <h3 className="text-lg font-medium text-white mb-2">No results found</h3>
+                  <p className="text-gray-400">Try searching with different keywords</p>
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -1028,16 +1025,16 @@ export function Documentation({ onBack }) {
                       key={section.id}
                       className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-150 flex items-center justify-between group ${
                         activeSection === section.id 
-                          ? 'bg-gray-800 text-white font-medium shadow-sm border border-blue-500' 
-                          : 'text-gray-600 hover:bg-gray-100'
+                          ? 'bg-[#1e3a8a] text-white font-medium shadow-sm border border-blue-500' 
+                          : 'text-white hover:bg-[#2d2d2d]'
                       } ${section.level === 1 ? 'font-medium' : 'pl-6 text-sm'}`}
                       onClick={() => setActiveSection(section.id)}
                     >
                       <span className={`truncate ${section.level === 1 ? '' : 'opacity-90'}`}>{section.title}</span>
                       
                       <button 
-                        className={`opacity-0 group-hover:opacity-100 hover:text-blue-500 transition-opacity duration-200 ${
-                          bookmarkedSections.includes(section.id) ? (activeSection === section.id ? 'text-white' : 'text-blue-500') : 'text-gray-400'
+                        className={`opacity-0 group-hover:opacity-100 hover:text-blue-400 transition-opacity duration-200 ${
+                          bookmarkedSections.includes(section.id) ? 'text-white' : 'text-gray-400'
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1058,16 +1055,16 @@ export function Documentation({ onBack }) {
           )}
         </div>
         
-        <div className="p-4 border-t border-gray-200 bg-gradient-to-b from-white to-gray-50">
+        <div className="p-4 border-t border-gray-700 bg-[#232323]">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400">
               SnapLogic Playground Docs v1.0
             </p>
             <div className="flex space-x-1">
               <Button
                 variant="ghost"
                 size="sm"
-                className="p-1 h-7 w-7 rounded-full hover:bg-blue-100 text-blue-600"
+                className="p-1 h-7 w-7 rounded-full hover:bg-gray-700 text-white"
                 onClick={() => setActiveSection('introduction')}
                 title="Home"
               >
@@ -1076,7 +1073,7 @@ export function Documentation({ onBack }) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="p-1 h-7 w-7 rounded-full hover:bg-blue-100 text-blue-600"
+                className="p-1 h-7 w-7 rounded-full hover:bg-gray-700 text-white"
                 onClick={focusSearch}
                 title="Search (Ctrl+K)"
               >
