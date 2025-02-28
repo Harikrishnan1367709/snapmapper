@@ -349,29 +349,73 @@ export default function UpdatedCode() {
         </div>
       </div>
       
-      {/* Footer - Updated with Made with coffee & beer in Tamil Nadu and image instead of text */}
-      <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white shadow-sm">
+      {/* Footer - Updated with new design and custom icons */}
+      <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white shadow-sm relative">
         <div className="flex justify-center items-center">
-          <div className="flex items-center space-x-2">
-            <span className="text-gray-700">Made with</span>
-            <Coffee className="h-5 w-5 text-gray-800 animate-pulse" />
-            <span>&</span>
-            <Beer className="h-5 w-5 text-amber-500 animate-bounce" />
-            <span className="text-gray-700">in Tamil Nadu, India</span>
-            <span className="mx-1 text-gray-500">|</span>
-            <span className="text-gray-700">Powered by</span>
-            <a href="https://www.mulecraft.in/" target="_blank" rel="noopener noreferrer" className="text-blue-500 font-medium hover:text-blue-700 transition-colors">
-              Mulecraft
-            </a>
-          </div>
-        </div>
-        <div className="text-center mt-1">
           <img 
             src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7" 
             alt="SnapLogic Playground – Redefining Integration" 
             className="h-6 mx-auto"
           />
         </div>
+        
+        <div className="font-['Manrope'] text-[0.69rem] text-gray-300 absolute left-[calc(45%+0px)] tracking-[0.04em] flex items-center h-full z-10 gap-2.5 font-medium">
+          <span className="text-gray-500">Made with</span>
+          <div className="inline-flex items-center gap-2.5">
+            {/* Tea Icon */}
+            <div className="relative w-[18px] h-[18px] animate-pulse transition-transform hover:scale-110">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 19h18v2H2v-2zm2-8v5c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2zm15 0v5H5v-5h14zm-6.75-7L15 8H9l2.75-4z" fill="#374151"/>
+                <path d="M19 10h2c0-2.21-1.79-4-4-4h-2l2 4z" fill="#374151"/>
+              </svg>
+            </div>
+            <span className="text-gray-500 font-semibold">&</span>
+            {/* Beer Icon */}
+            <div className="relative w-[18px] h-[18px] animate-bounce transition-transform hover:scale-110">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 3h10v2h-10z" fill="#D97706"/>
+                <path d="M18 8c-0.4-2.3-2.4-4-4.8-4h-2.4c-2.4 0-4.4 1.7-4.8 4h-1v12h14v-12h-1zM8 18v-8h8v8h-8z" fill="#D97706"/>
+                <path d="M10 11h4v3h-4z" fill="#ffffff"/>
+              </svg>
+            </div>
+          </div>
+          <span className="text-gray-500">in</span>
+          <span className="text-gray-500 font-semibold hover:text-blue-800 cursor-pointer transition-colors">
+            Tamil Nadu, India
+          </span>
+          <span className="mx-2.5 text-gray-400">|</span>
+          <span className="text-gray-500">Powered by</span>
+          <a 
+            href="https://www.mulecraft.in/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-blue-500 font-semibold hover:text-blue-800 transition-colors relative group"
+          >
+            Mulecraft
+          </a>
+        </div>
+        
+        <style jsx>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+          
+          .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          }
+          
+          .animate-bounce {
+            animation: bounce 1s infinite;
+          }
+          
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+          }
+          
+          @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-25%); }
+          }
+        `}</style>
       </div>
 
       {/* Import Project Dialog - Completely redesigned */}
