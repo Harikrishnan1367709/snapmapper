@@ -60,6 +60,25 @@ module.exports = {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
+      animation: {
+        'fade-in': 'fadeIn 0.4s ease-out forwards',
+        'scale-in': 'scaleIn 0.4s ease-out forwards',
+        'slide-in': 'slideIn 0.4s ease-out forwards',
+      },
+      keyframes: {
+        fadeIn: {
+          from: { opacity: 0 },
+          to: { opacity: 1 },
+        },
+        scaleIn: {
+          from: { transform: 'scale(0.95)', opacity: 0 },
+          to: { transform: 'scale(1)', opacity: 1 },
+        },
+        slideIn: {
+          from: { transform: 'translateY(-10px)', opacity: 0 },
+          to: { transform: 'translateY(0)', opacity: 1 },
+        },
+      },
     }
   },
   plugins: [require("tailwindcss-animate")],

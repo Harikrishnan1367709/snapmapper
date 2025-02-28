@@ -67,11 +67,27 @@ export default function UpdatedCode() {
   const handleExport = () => {
     alert('Export functionality will be implemented here.');
   };
+  
+  const handleInputDialogOpen = () => {
+    setState(prev => ({ ...prev, isInputDialogOpen: true }));
+  };
+  
+  const handleInputDialogClose = () => {
+    setState(prev => ({ ...prev, isInputDialogOpen: false }));
+  };
+  
+  const handleScriptDialogOpen = () => {
+    setState(prev => ({ ...prev, isScriptDialogOpen: true }));
+  };
+  
+  const handleScriptDialogClose = () => {
+    setState(prev => ({ ...prev, isScriptDialogOpen: false }));
+  };
 
   return (
     <div className="flex flex-col h-screen w-screen bg-white overflow-hidden font-['Manrope']">
       {state.showToast && (
-        <div className="bg-gradient-to-r from-indigo-500/90 to-purple-500/90 text-white py-2 relative transition-all duration-300">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 relative transition-all duration-300 animate-slide-in">
           <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
             Discover the Future of Integration. Explore SnapLogic Playground Highlights
           </div>
@@ -85,71 +101,159 @@ export default function UpdatedCode() {
       )}
 
       <div className="flex-1 flex shadow-sm">
+        {/* Left Panel */}
         <div
           style={{
             width: `${dimensions.leftWidth}px`,
             minWidth: '250px',
             borderRight: '1px solid #e5e7eb'
           }}
-          className="overflow-y-auto bg-gradient-to-b from-white to-gray-50/30"
+          className="overflow-y-auto bg-gradient-to-b from-white to-blue-50/30 animate-fade-in"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 border-t-0 bg-white">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 border-t-0 bg-gradient-to-r from-gray-50 to-blue-50/40">
             <h2 className="text-lg font-semibold text-gray-700">Inputs</h2>
             <Button 
               variant="outline" 
-              onClick={() => setState(prev => ({ ...prev, isInputDialogOpen: true }))}
-              className="bg-white border-gray-300 hover:bg-gray-100 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm"
+              onClick={handleInputDialogOpen}
+              className="bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm hover:shadow-sm"
             >
               Add Input
             </Button>
           </div>
+          
+          {/* Input dialog would appear here */}
+          {state.isInputDialogOpen && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40 animate-fade-in">
+              <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4 animate-scale-in">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">Add Input</h2>
+                <div className="mb-4">
+                  <Label htmlFor="inputName" className="block text-sm font-medium text-gray-700 mb-1">Input Name</Label>
+                  <input
+                    id="inputName"
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    placeholder="Enter input name"
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={handleInputDialogClose}
+                    className="border-gray-300 hover:bg-gray-100 text-gray-700"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleInputDialogClose}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Add
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
+        {/* Middle Panel */}
         <div
           style={{
             width: `${dimensions.middleWidth}px`,
             minWidth: '250px',
             borderRight: '1px solid #e5e7eb'
           }}
-          className="flex flex-col bg-gradient-to-b from-white to-gray-50/30"
+          className="flex flex-col bg-gradient-to-b from-white to-blue-50/30 animate-fade-in delay-75"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 border-t-0 bg-white">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 border-t-0 bg-gradient-to-r from-gray-50 to-blue-50/40">
             <h2 className="text-lg font-semibold text-gray-700">Script</h2>
             <div className="flex items-center space-x-4">
               <FormatDropdown onFormatChange={handleFormatChange} />
               <Button 
                 variant="outline" 
-                onClick={() => setState(prev => ({ ...prev, isScriptDialogOpen: true }))}
-                className="bg-white border-gray-300 hover:bg-gray-100 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm"
+                onClick={handleScriptDialogOpen}
+                className="bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm hover:shadow-sm"
               >
                 Add Script
               </Button>
             </div>
           </div>
+          
+          {/* Script content area */}
+          <div className="flex-1 p-4 animate-fade-in delay-150">
+            <div className="bg-white border border-gray-200 rounded-sm h-full shadow-sm hover:shadow-md transition-shadow duration-300">
+              <Editor
+                height="100%"
+                language={state.scriptFormat}
+                theme="light"
+                value=""
+                options={{
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  fontFamily: "'Manrope', 'Monaco', monospace",
+                  fontSize: 13,
+                  padding: { top: 12, bottom: 12 }
+                }}
+              />
+            </div>
+          </div>
+          
+          {/* Script dialog would appear here */}
+          {state.isScriptDialogOpen && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40 animate-fade-in">
+              <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4 animate-scale-in">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">Add Script</h2>
+                <div className="mb-4">
+                  <Label htmlFor="scriptName" className="block text-sm font-medium text-gray-700 mb-1">Script Name</Label>
+                  <input
+                    id="scriptName"
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    placeholder="Enter script name"
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={handleScriptDialogClose}
+                    className="border-gray-300 hover:bg-gray-100 text-gray-700"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleScriptDialogClose}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Add
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
+        {/* Right Panel */}
         <div
           style={{
             width: `${dimensions.rightWidth}px`,
             minWidth: '250px'
           }}
-          className="flex flex-col bg-gradient-to-b from-white to-gray-50/30"
+          className="flex flex-col bg-gradient-to-b from-white to-blue-50/30 animate-fade-in delay-150"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 border-t-0 bg-white">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 border-t-0 bg-gradient-to-r from-gray-50 to-blue-50/40">
             <h2 className="text-lg font-semibold text-gray-700">Output</h2>
             <Button 
               variant="outline" 
               onClick={handleExport}
-              className="bg-white border-gray-300 hover:bg-gray-100 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm"
+              className="bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm hover:shadow-sm"
             >
               Export
             </Button>
           </div>
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-4 animate-fade-in delay-300">
             <Label htmlFor="actualOutput" className="block text-sm font-medium text-gray-700 mb-2">
               Actual Output
             </Label>
-            <div className="rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <div className="rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 transform hover:translate-y-[-2px]">
               <Editor
                 height="30vh"
                 width="100%"
@@ -170,6 +274,47 @@ export default function UpdatedCode() {
                 className="font-mono"
               />
             </div>
+            
+            <div className="mt-8">
+              <Label htmlFor="expectedOutput" className="block text-sm font-medium text-gray-700 mb-2">
+                Expected Output
+              </Label>
+              <div className="rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 transform hover:translate-y-[-2px]">
+                <Editor
+                  height="20vh"
+                  width="100%"
+                  language="json"
+                  theme="light"
+                  value=""
+                  options={{
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'on',
+                    wrappingIndent: 'indent',
+                    automaticLayout: true,
+                    fontSize: 13,
+                    fontFamily: "'Manrope', 'Monaco', monospace",
+                    padding: { top: 12, bottom: 12 }
+                  }}
+                  className="font-mono"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Footer */}
+      <div className="border-t border-gray-200 py-2 px-4 text-sm text-gray-500 bg-gradient-to-r from-gray-50 to-blue-50/30 animate-fade-in delay-300">
+        <div className="flex justify-between items-center">
+          <div>SnapLogic Playground – v1.0.0</div>
+          <div className="flex items-center space-x-4">
+            <button className="text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200">
+              Documentation
+            </button>
+            <button className="text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200">
+              Feedback
+            </button>
           </div>
         </div>
       </div>
