@@ -892,9 +892,9 @@ export function Documentation({ onBack }) {
         <div className="sticky top-0 z-10 bg-[#232323] border-b border-gray-700 p-4">
           <div className="flex items-center justify-between mb-4">
             <Button 
-              variant="outline" 
+              variant="default" 
               size="sm" 
-              className="flex items-center justify-center px-4 py-2 text-white border border-gray-600 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors duration-200 shadow-sm w-full"
+              className="flex items-center justify-center px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 border-none transition-colors duration-200 shadow-md w-full font-medium"
               onClick={onBack}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
