@@ -348,22 +348,36 @@ export default function UpdatedCode() {
         </div>
       </div>
       
-      {/* Footer */}
-      <div className="border-t border-gray-200 py-2 px-4 text-xs text-gray-500 bg-gradient-to-r from-gray-50 to-blue-50/30">
-        <div className="flex justify-between items-center">
-          <div>SnapLogic Playground – v1.0.0</div>
-          <div className="flex items-center space-x-4">
-            <button className="text-blue-600 hover:text-blue-800 transition-colors duration-200">
-              Documentation
-            </button>
-            <button className="text-blue-600 hover:text-blue-800 transition-colors duration-200">
-              Feedback
-            </button>
-          </div>
+      {/* Footer - Updated with Made with coffee & beer in Tamil Nadu */}
+      <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white shadow-sm">
+        <div className="flex justify-center items-center">
+          <span className="flex items-center space-x-1">
+            <span className="text-gray-700">Made with</span>
+            <span className="inline-flex items-center justify-center">
+              {/* Coffee icon */}
+              <svg className="h-5 w-5 text-gray-800" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17 8H19C20.1046 8 21 8.89543 21 10V12C21 13.1046 20.1046 14 19 14H17M17 8V14M17 8H3M17 14H3M3 8V14M3 8C1.89543 8 1 8.89543 1 10V12C1 13.1046 1.89543 14 3 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M3 18H17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </span>
+            <span>&</span>
+            <span className="inline-flex items-center justify-center">
+              {/* Beer icon */}
+              <svg className="h-5 w-5 text-amber-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 20H15M9 20C5.13401 20 2 16.866 2 13V9C2 6.79086 3.79086 5 6 5H18C20.2091 5 22 6.79086 22 9V13C22 16.866 18.866 20 15 20M9 20C9.33137 20 9.65748 19.9647 9.97365 19.8974M15 20C14.6686 20 14.3425 19.9647 14.0264 19.8974M7 10H17M7 14H17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </span>
+            <span className="text-gray-700">in Tamil Nadu, India</span>
+            <span className="mx-1 text-gray-500">|</span>
+            <span className="text-gray-700">Powered by</span>
+            <a href="https://www.mulecraft.in/" target="_blank" rel="noopener noreferrer" className="text-blue-500 font-medium hover:text-blue-700 transition-colors">
+              Mulecraft
+            </a>
+          </span>
         </div>
       </div>
 
-      {/* Import Project Dialog using the Dialog component from UI */}
+      {/* Import Project Dialog */}
       <Dialog open={state.importDialogOpen} onOpenChange={closeImportDialog}>
         <DialogContent className="sm:max-w-md bg-white p-0 rounded-md overflow-hidden shadow-xl">
           <DialogHeader className="px-6 pt-6 pb-3 bg-gradient-to-r from-white to-blue-50/30">
