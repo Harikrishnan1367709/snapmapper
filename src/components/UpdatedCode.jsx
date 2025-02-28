@@ -354,7 +354,7 @@ export default function UpdatedCode() {
         <div className="flex justify-center items-center">
           <img 
             src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7" 
-            alt="SnapLogic Playground – Redefining Integration" 
+            alt="Code background" 
             className="h-6 mx-auto"
           />
         </div>
