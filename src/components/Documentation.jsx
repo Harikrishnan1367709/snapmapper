@@ -107,6 +107,40 @@ export function Documentation({ onBack }) {
     }
   }, [activeSection]);
 
+  // Add custom scrollbar styles
+  useEffect(() => {
+    // Add scrollbar styles to head
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = `
+      /* Custom scrollbar for documentation */
+      .doc-scrollbar::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      
+      .doc-scrollbar::-webkit-scrollbar-track {
+        background: #fff;
+        border-radius: 4px;
+      }
+      
+      .doc-scrollbar::-webkit-scrollbar-thumb {
+        background: #222;
+        border-radius: 4px;
+        border: 2px solid #fff;
+      }
+      
+      .doc-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #333;
+      }
+    `;
+    document.head.appendChild(styleElement);
+
+    return () => {
+      // Clean up on unmount
+      document.head.removeChild(styleElement);
+    };
+  }, []);
+
   const focusSearch = () => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
@@ -851,7 +885,7 @@ export function Documentation({ onBack }) {
       </button>
 
       {/* Sidebar - enhanced with better styling */}
-      <div className={`w-72 bg-white overflow-y-auto flex flex-col h-full transition-all duration-300 ease-in-out shadow-lg rounded-r-xl
+      <div className={`w-72 bg-white overflow-y-auto flex flex-col h-full transition-all duration-300 ease-in-out shadow-lg rounded-r-xl doc-scrollbar
         ${showMobileSidebar ? 'translate-x-0' : '-translate-x-full'} 
         md:translate-x-0 md:static fixed left-0 top-0 bottom-0 z-40`}
         style={{
@@ -927,13 +961,13 @@ export function Documentation({ onBack }) {
                     key={`bookmark-${id}`}
                     className={`w-full text-left px-3 py-2 rounded-lg mb-1 text-sm flex items-center justify-between ${
                       activeSection === id 
-                        ? 'bg-white text-black font-medium shadow-sm border border-blue-500' 
+                        ? 'bg-gray-800 text-white font-medium shadow-sm border border-blue-500' 
                         : 'text-gray-600 hover:bg-gray-100'
                     }`}
                     onClick={() => setActiveSection(id)}
                   >
                     <span className="truncate">{section.title}</span>
-                    <BookmarkCheck className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                    <BookmarkCheck className={`h-4 w-4 ${activeSection === id ? 'text-white' : 'text-blue-500'} flex-shrink-0`} />
                   </button>
                 );
               })}
@@ -950,7 +984,7 @@ export function Documentation({ onBack }) {
                     <button
                       className={`w-full text-left p-3 ${
                         activeSection === result.section.id 
-                          ? 'bg-white border-l-4 border-blue-500 text-black' 
+                          ? 'bg-gray-800 border-l-4 border-blue-500 text-white' 
                           : 'hover:bg-gray-50'
                       }`}
                       onClick={() => {
@@ -958,9 +992,9 @@ export function Documentation({ onBack }) {
                         setIsSearching(false);
                       }}
                     >
-                      <h4 className="font-medium text-blue-700 mb-1">{result.section.title}</h4>
+                      <h4 className={`font-medium ${activeSection === result.section.id ? 'text-white' : 'text-blue-700'} mb-1`}>{result.section.title}</h4>
                       <p 
-                        className="text-xs text-gray-600 line-clamp-2"
+                        className={`text-xs ${activeSection === result.section.id ? 'text-gray-300' : 'text-gray-600'} line-clamp-2`}
                         dangerouslySetInnerHTML={{ __html: result.snippet }}
                       ></p>
                     </button>
@@ -994,7 +1028,7 @@ export function Documentation({ onBack }) {
                       key={section.id}
                       className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-150 flex items-center justify-between group ${
                         activeSection === section.id 
-                          ? 'bg-white text-black font-medium shadow-sm border border-blue-500' 
+                          ? 'bg-gray-800 text-white font-medium shadow-sm border border-blue-500' 
                           : 'text-gray-600 hover:bg-gray-100'
                       } ${section.level === 1 ? 'font-medium' : 'pl-6 text-sm'}`}
                       onClick={() => setActiveSection(section.id)}
@@ -1003,7 +1037,7 @@ export function Documentation({ onBack }) {
                       
                       <button 
                         className={`opacity-0 group-hover:opacity-100 hover:text-blue-500 transition-opacity duration-200 ${
-                          bookmarkedSections.includes(section.id) ? 'text-blue-500' : 'text-gray-400'
+                          bookmarkedSections.includes(section.id) ? (activeSection === section.id ? 'text-white' : 'text-blue-500') : 'text-gray-400'
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1054,7 +1088,7 @@ export function Documentation({ onBack }) {
       </div>
       
       {/* Main content - with improved styling */}
-      <div className="flex-1 overflow-y-auto bg-white" ref={contentRef}>
+      <div className="flex-1 overflow-y-auto bg-white doc-scrollbar" ref={contentRef}>
         <div className="max-w-4xl mx-auto px-6 py-8 bg-white shadow-sm rounded-lg m-4 min-h-[calc(100%-2rem)]">
           <div className="mb-8 flex justify-between items-start">
             <div>
