@@ -374,38 +374,47 @@ export default function UpdatedCode() {
         </div>
       </div>
 
-      {/* Import Project Dialog */}
+      {/* Import Project Dialog - Completely redesigned */}
       <Dialog open={state.importDialogOpen} onOpenChange={closeImportDialog}>
-        <DialogContent className="sm:max-w-md bg-white p-0 rounded-md overflow-hidden shadow-xl">
-          <DialogHeader className="px-6 pt-6 pb-3 bg-gradient-to-r from-white to-blue-50/30">
-            <DialogTitle className="text-xl font-bold text-gray-800">Import project</DialogTitle>
+        <DialogContent className="sm:max-w-md w-full max-h-[90vh] bg-white p-0 rounded-none overflow-hidden border border-gray-300 shadow-xl">
+          <DialogHeader className="px-6 pt-6 pb-2 border-b border-gray-200">
+            <DialogTitle className="text-2xl font-bold text-gray-800">Import project</DialogTitle>
           </DialogHeader>
-          <div className="p-6 pt-0">
-            <div className="border-2 border-dashed border-gray-300 rounded-md p-8 flex flex-col items-center justify-center text-center hover:border-blue-400 transition-colors duration-200 hover:bg-blue-50/20">
-              <div className="mb-2 text-blue-500">
-                <svg className="mx-auto h-12 w-12" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          
+          <div className="p-6">
+            <div className="border-2 border-dashed border-gray-300 rounded-none p-10 flex flex-col items-center justify-center text-center hover:border-gray-400 transition-colors duration-200 cursor-pointer">
+              <div className="mb-4 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <div className="text-sm font-medium text-gray-600 mb-1">
+              <p className="text-base font-medium text-gray-600 mb-1">
                 Drop project zip here or click to upload
-              </div>
-              <div className="text-xs text-gray-500">
+              </p>
+              <p className="text-sm text-gray-500">
                 Supported format: .zip
-              </div>
+              </p>
             </div>
-            <div className="mt-4 text-center text-sm text-red-500">
-              Upload functionality is only intended for playground exported projects
-            </div>
-            <div className="mt-1 text-center text-sm text-gray-500">
-              Importing modified files may yield an invalid project.
+            
+            <div className="mt-6">
+              <p className="text-center text-sm text-red-500 mb-1">
+                Upload functionality is only intended for playground exported projects
+              </p>
+              <p className="text-center text-sm text-gray-500">
+                Importing modified files may yield an invalid project.
+              </p>
             </div>
           </div>
-          <DialogFooter className="bg-gradient-to-r from-gray-50 to-blue-50/30 px-6 py-4 border-t border-gray-200">
-            <Button variant="outline" onClick={closeImportDialog} className="rounded hover:bg-blue-50 hover:border-blue-400 transition-all duration-200">
+          
+          <div className="flex justify-end p-4 border-t border-gray-200 bg-gray-50">
+            <Button 
+              variant="outline" 
+              onClick={closeImportDialog} 
+              className="px-5 py-2 text-sm rounded-none bg-white border border-gray-300 hover:bg-gray-100 text-gray-700"
+            >
               Cancel
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
