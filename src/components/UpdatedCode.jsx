@@ -87,7 +87,7 @@ export default function UpdatedCode() {
   return (
     <div className="flex flex-col h-screen w-screen bg-white overflow-hidden font-['Manrope']">
       {state.showToast && (
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 relative transition-all duration-300 animate-slide-in">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 relative">
           <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
             Discover the Future of Integration. Explore SnapLogic Playground Highlights
           </div>
@@ -100,6 +100,37 @@ export default function UpdatedCode() {
         </div>
       )}
 
+      <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 bg-white shadow-sm">
+        <div className="flex items-center space-x-3">
+          <img src="/sl-logo.svg" alt="SnapLogic Logo" className="h-8 w-8" />
+          <span className="text-lg font-semibold text-gray-800">SnapLogic Playground</span>
+        </div>
+        <div className="flex items-center space-x-3">
+          <Button 
+            variant="outline" 
+            onClick={handleExport}
+            className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
+          >
+            <span className="mr-2">Export</span>
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 4V16M12 16L7 11M12 16L17 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M20 20H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={handleInputDialogOpen}
+            className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
+          >
+            <span className="mr-2">Import</span>
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 20V8M12 8L7 13M12 8L17 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M20 4H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </Button>
+        </div>
+      </div>
+
       <div className="flex-1 flex shadow-sm">
         {/* Left Panel */}
         <div
@@ -108,23 +139,33 @@ export default function UpdatedCode() {
             minWidth: '250px',
             borderRight: '1px solid #e5e7eb'
           }}
-          className="overflow-y-auto bg-gradient-to-b from-white to-blue-50/30 animate-fade-in"
+          className="overflow-y-auto bg-white"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 border-t-0 bg-gradient-to-r from-gray-50 to-blue-50/40">
-            <h2 className="text-lg font-semibold text-gray-700">Inputs</h2>
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Inputs</h2>
             <Button 
               variant="outline" 
               onClick={handleInputDialogOpen}
-              className="bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm hover:shadow-sm"
+              className="bg-white border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm h-8 px-3 py-1 text-xs"
             >
-              Add Input
+              Add
             </Button>
+          </div>
+          
+          {/* Input items would go here */}
+          <div className="p-2">
+            <div className="p-2 hover:bg-gray-100 cursor-pointer rounded-sm transition-colors duration-150">
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                <span className="text-sm text-gray-700">input.json</span>
+              </div>
+            </div>
           </div>
           
           {/* Input dialog would appear here */}
           {state.isInputDialogOpen && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40 animate-fade-in">
-              <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4 animate-scale-in">
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40">
+              <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4 transform transition-all duration-200 opacity-100 scale-100">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Add Input</h2>
                 <div className="mb-4">
                   <Label htmlFor="inputName" className="block text-sm font-medium text-gray-700 mb-1">Input Name</Label>
@@ -162,25 +203,25 @@ export default function UpdatedCode() {
             minWidth: '250px',
             borderRight: '1px solid #e5e7eb'
           }}
-          className="flex flex-col bg-gradient-to-b from-white to-blue-50/30 animate-fade-in delay-75"
+          className="flex flex-col bg-white"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 border-t-0 bg-gradient-to-r from-gray-50 to-blue-50/40">
-            <h2 className="text-lg font-semibold text-gray-700">Script</h2>
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Script</h2>
             <div className="flex items-center space-x-4">
               <FormatDropdown onFormatChange={handleFormatChange} />
               <Button 
                 variant="outline" 
                 onClick={handleScriptDialogOpen}
-                className="bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm hover:shadow-sm"
+                className="bg-white border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm h-8 px-3 py-1 text-xs"
               >
-                Add Script
+                Add
               </Button>
             </div>
           </div>
           
           {/* Script content area */}
-          <div className="flex-1 p-4 animate-fade-in delay-150">
-            <div className="bg-white border border-gray-200 rounded-sm h-full shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="flex-1 p-4">
+            <div className="bg-white border border-gray-200 rounded-sm h-full shadow-sm hover:shadow transition-shadow duration-300">
               <Editor
                 height="100%"
                 language={state.scriptFormat}
@@ -199,8 +240,8 @@ export default function UpdatedCode() {
           
           {/* Script dialog would appear here */}
           {state.isScriptDialogOpen && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40 animate-fade-in">
-              <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4 animate-scale-in">
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40">
+              <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4 transform transition-all duration-200 opacity-100 scale-100">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Add Script</h2>
                 <div className="mb-4">
                   <Label htmlFor="scriptName" className="block text-sm font-medium text-gray-700 mb-1">Script Name</Label>
@@ -237,23 +278,16 @@ export default function UpdatedCode() {
             width: `${dimensions.rightWidth}px`,
             minWidth: '250px'
           }}
-          className="flex flex-col bg-gradient-to-b from-white to-blue-50/30 animate-fade-in delay-150"
+          className="flex flex-col bg-white"
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 border-t-0 bg-gradient-to-r from-gray-50 to-blue-50/40">
-            <h2 className="text-lg font-semibold text-gray-700">Output</h2>
-            <Button 
-              variant="outline" 
-              onClick={handleExport}
-              className="bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm hover:shadow-sm"
-            >
-              Export
-            </Button>
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Output</h2>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 animate-fade-in delay-300">
+          <div className="flex-1 overflow-y-auto p-4">
             <Label htmlFor="actualOutput" className="block text-sm font-medium text-gray-700 mb-2">
               Actual Output
             </Label>
-            <div className="rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 transform hover:translate-y-[-2px]">
+            <div className="rounded-sm border border-gray-200 shadow-sm transition-shadow duration-300">
               <Editor
                 height="30vh"
                 width="100%"
@@ -275,11 +309,11 @@ export default function UpdatedCode() {
               />
             </div>
             
-            <div className="mt-8">
+            <div className="mt-6">
               <Label htmlFor="expectedOutput" className="block text-sm font-medium text-gray-700 mb-2">
                 Expected Output
               </Label>
-              <div className="rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 transform hover:translate-y-[-2px]">
+              <div className="rounded-sm border border-gray-200 shadow-sm transition-shadow duration-300">
                 <Editor
                   height="20vh"
                   width="100%"
@@ -305,14 +339,14 @@ export default function UpdatedCode() {
       </div>
       
       {/* Footer */}
-      <div className="border-t border-gray-200 py-2 px-4 text-sm text-gray-500 bg-gradient-to-r from-gray-50 to-blue-50/30 animate-fade-in delay-300">
+      <div className="border-t border-gray-200 py-2 px-4 text-xs text-gray-500 bg-gray-50">
         <div className="flex justify-between items-center">
           <div>SnapLogic Playground – v1.0.0</div>
           <div className="flex items-center space-x-4">
-            <button className="text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200">
+            <button className="text-blue-600 hover:text-blue-800 transition-colors duration-200">
               Documentation
             </button>
-            <button className="text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200">
+            <button className="text-blue-600 hover:text-blue-800 transition-colors duration-200">
               Feedback
             </button>
           </div>
