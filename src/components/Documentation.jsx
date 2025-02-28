@@ -927,7 +927,7 @@ export function Documentation({ onBack }) {
                     key={`bookmark-${id}`}
                     className={`w-full text-left px-3 py-2 rounded-lg mb-1 text-sm flex items-center justify-between ${
                       activeSection === id 
-                        ? 'bg-blue-100 text-blue-700 font-medium shadow-sm' 
+                        ? 'bg-white text-black font-medium shadow-sm border border-blue-500' 
                         : 'text-gray-600 hover:bg-gray-100'
                     }`}
                     onClick={() => setActiveSection(id)}
@@ -950,7 +950,7 @@ export function Documentation({ onBack }) {
                     <button
                       className={`w-full text-left p-3 ${
                         activeSection === result.section.id 
-                          ? 'bg-blue-50 border-l-4 border-blue-500' 
+                          ? 'bg-white border-l-4 border-blue-500 text-black' 
                           : 'hover:bg-gray-50'
                       }`}
                       onClick={() => {
@@ -994,7 +994,7 @@ export function Documentation({ onBack }) {
                       key={section.id}
                       className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-150 flex items-center justify-between group ${
                         activeSection === section.id 
-                          ? 'bg-gradient-to-r from-blue-100 to-blue-50 text-blue-700 font-medium shadow-sm' 
+                          ? 'bg-white text-black font-medium shadow-sm border border-blue-500' 
                           : 'text-gray-600 hover:bg-gray-100'
                       } ${section.level === 1 ? 'font-medium' : 'pl-6 text-sm'}`}
                       onClick={() => setActiveSection(section.id)}
