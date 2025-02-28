@@ -539,7 +539,7 @@ export default function UpdatedCode() {
                     wrappingIndent: 'indent',
                     automaticLayout: true,
                     fontSize: 13,
-                    fontFamily: "'Manrope', 'Monaco', monospace',
+                    fontFamily: "'Manrope', 'Monaco', monospace",
                     padding: { top: 12, bottom: 12 }
                   }}
                   className="font-mono"
