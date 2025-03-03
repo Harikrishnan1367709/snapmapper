@@ -635,4 +635,11 @@ export default function UpdatedCode() {
               <div className="mb-4 text-blue-500">
                 <UploadCloud className="mx-auto h-14 w-14 text-blue-500 opacity-80" />
               </div>
-              <p className="text-base
+              <p className="text-base">Drag and drop your project file here or click to browse</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
