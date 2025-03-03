@@ -1,14 +1,14 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { FormatDropdown } from './FormatDropdown';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Coffee, Beer, UploadCloud, DownloadCloud } from "lucide-react";
-import { Documentation } from './Documentation';
 
 export default function UpdatedCode() {
+  const navigate = useNavigate();
   const resizeTimeoutRef = useRef(null);
   const [dimensions, setDimensions] = useState({
     leftWidth: 300,
@@ -26,7 +26,6 @@ export default function UpdatedCode() {
     actualOutput: '',
     importDialogOpen: false,
     activePage: 'playground',
-    showDocumentation: false,
   });
 
   // Debounced resize handler
@@ -105,167 +104,11 @@ export default function UpdatedCode() {
     }
     
     if (page === 'docs') {
-      setState(prev => ({ ...prev, showDocumentation: true, activePage: 'docs' }));
+      navigate('/docs');
     } else {
-      setState(prev => ({ ...prev, activePage: page, showDocumentation: false }));
+      setState(prev => ({ ...prev, activePage: page }));
     }
   };
-
-  if (state.showDocumentation) {
-    return (
-      <div className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']">
-        {/* Apply the background using an absolutely positioned div to ensure it covers everything */}
-        <div 
-          className="fixed inset-0 z-[-1]" 
-          style={{
-            backgroundImage: 'url("/lovable-uploads/e097fd02-e653-4b86-95e5-09646c987272.png")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
-          }} 
-        />
-        
-        {state.showToast && (
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 relative">
-            <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
-              Discover the Future of Integration. Explore SnapLogic Playground Highlights
-            </div>
-            <button
-              onClick={() => setState(prev => ({ ...prev, showToast: false }))}
-              className="absolute right-4 top-0 h-full bg-transparent text-white border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center hover:opacity-80 transition-opacity duration-200"
-            >
-              ×
-            </button>
-          </div>
-        )}
-
-        <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 bg-white/90 shadow-sm backdrop-blur-sm">
-          <div className="flex items-center space-x-3">
-            <img src="/sl-logo.svg" alt="SnapLogic Logo" className="h-8 w-8" />
-            <span className="text-lg font-semibold text-gray-800">SnapLogic Playground</span>
-          </div>
-          
-          {/* Navigation links */}
-          <div className="flex items-center space-x-8">
-            <button 
-              onClick={(e) => handleNavigation('blogs', e)}
-              className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'blogs' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
-            >
-              BLOGS
-            </button>
-            <button 
-              onClick={(e) => handleNavigation('docs', e)}
-              className={`px-2 py-1 text-sm font-medium transition-colors ${state.showDocumentation ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
-            >
-              DOCS
-            </button>
-            <button 
-              onClick={(e) => handleNavigation('tutorial', e)}
-              className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'tutorial' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
-            >
-              TUTORIAL
-            </button>
-            <button 
-              onClick={(e) => handleNavigation('playground', e)}
-              className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'playground' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
-            >
-              PLAYGROUND
-            </button>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <Button 
-              variant="outline" 
-              onClick={handleExport}
-              className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
-            >
-              <span className="mr-2">Export</span>
-              <DownloadCloud className="h-4 w-4 text-blue-600" />
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={openImportDialog}
-              className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
-            >
-              <span className="mr-2">Import</span>
-              <UploadCloud className="h-4 w-4 text-blue-600" />
-            </Button>
-          </div>
-        </div>
-
-        <Documentation onBack={() => setState(prev => ({ ...prev, showDocumentation: false, activePage: 'playground' }))} />
-
-        {/* Footer - Updated with new design and custom icons */}
-        <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white/90 shadow-sm relative backdrop-blur-sm">
-          <div className="flex justify-center items-center">
-            <img 
-              src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7" 
-              alt="Code background" 
-              className="h-6 mx-auto"
-            />
-          </div>
-          
-          <div className="font-['Manrope'] text-[0.69rem] text-gray-300 absolute left-[calc(45%+0px)] tracking-[0.04em] flex items-center h-full z-10 gap-2.5 font-medium">
-            <span className="text-gray-500">Made with</span>
-            <div className="inline-flex items-center gap-2.5">
-              {/* Tea Icon */}
-              <div className="relative w-[18px] h-[18px] animate-pulse transition-transform hover:scale-110">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2 19h18v2H2v-2zm2-8v5c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2zm15 0v5H5v-5h14zm-6.75-7L15 8H9l2.75-4z" fill="#374151"/>
-                  <path d="M19 10h2c0-2.21-1.79-4-4-4h-2l2 4z" fill="#374151"/>
-                </svg>
-              </div>
-              <span className="text-gray-500 font-semibold">&</span>
-              {/* Beer Icon */}
-              <div className="relative w-[18px] h-[18px] animate-bounce transition-transform hover:scale-110">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 3h10v2h-10z" fill="#D97706"/>
-                  <path d="M18 8c-0.4-2.3-2.4-4-4.8-4h-2.4c-2.4 0-4.4 1.7-4.8 4h-1v12h14v-12h-1zM8 18v-8h8v8h-8z" fill="#D97706"/>
-                  <path d="M10 11h4v3h-4z" fill="#ffffff"/>
-                </svg>
-              </div>
-            </div>
-            <span className="text-gray-500">in</span>
-            <span className="text-gray-500 font-semibold hover:text-blue-800 cursor-pointer transition-colors">
-              Tamil Nadu, India
-            </span>
-            <span className="mx-2.5 text-gray-400">|</span>
-            <span className="text-gray-500">Powered by</span>
-            <a 
-              href="https://www.mulecraft.in/" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-blue-500 font-semibold hover:text-blue-800 transition-colors relative group"
-            >
-              Mulecraft
-            </a>
-          </div>
-          
-          <style jsx>{`
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-            
-            .animate-pulse {
-              animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-            }
-            
-            .animate-bounce {
-              animation: bounce 1s infinite;
-            }
-            
-            @keyframes pulse {
-              0%, 100% { opacity: 1; }
-              50% { opacity: 0.7; }
-            }
-            
-            @keyframes bounce {
-              0%, 100% { transform: translateY(0); }
-              50% { transform: translateY(-25%); }
-            }
-          `}</style>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']">
@@ -310,7 +153,7 @@ export default function UpdatedCode() {
           </button>
           <button 
             onClick={(e) => handleNavigation('docs', e)}
-            className={`px-2 py-1 text-sm font-medium transition-colors ${state.showDocumentation ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+            className={`px-2 py-1 text-sm font-medium transition-colors text-gray-600 hover:text-blue-600`}
           >
             DOCS
           </button>

@@ -1,14 +1,18 @@
+
 import React from 'react'
-
-
-import UpdatedCode from './UpdatedCode'
-
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import UpdatedCode from './components/UpdatedCode'
+import { Documentation } from './components/Documentation'
 
 function App() {
   return (
-    <UpdatedCode/>
+    <Router>
+      <Routes>
+        <Route path="/" element={<UpdatedCode />} />
+        <Route path="/docs" element={<Documentation onBack={() => {}} />} />
+      </Routes>
+    </Router>
   )
 }
 
 export default App
-
