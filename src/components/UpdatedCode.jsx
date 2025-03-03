@@ -1,4 +1,3 @@
-<lov-code>
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button"
@@ -99,7 +98,6 @@ export default function UpdatedCode() {
   };
 
   const handleNavigation = (page, e) => {
-    // Prevent default browser navigation behavior
     if (e) {
       e.preventDefault();
     }
@@ -114,7 +112,6 @@ export default function UpdatedCode() {
   if (state.showDocumentation) {
     return (
       <div className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']">
-        {/* Apply the background using an absolutely positioned div to ensure it covers everything */}
         <div 
           className="fixed inset-0 z-[-1]" 
           style={{
@@ -145,7 +142,6 @@ export default function UpdatedCode() {
             <span className="text-lg font-semibold text-gray-800">SnapLogic Playground</span>
           </div>
           
-          {/* Navigation links */}
           <div className="flex items-center space-x-8">
             <button 
               onClick={(e) => handleNavigation('blogs', e)}
@@ -195,7 +191,6 @@ export default function UpdatedCode() {
 
         <Documentation onBack={() => setState(prev => ({ ...prev, showDocumentation: false, activePage: 'playground' }))} />
 
-        {/* Footer - Updated with new design and custom icons */}
         <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white/90 shadow-sm relative backdrop-blur-sm">
           <div className="flex justify-center items-center">
             <img 
@@ -208,7 +203,6 @@ export default function UpdatedCode() {
           <div className="font-['Manrope'] text-[0.69rem] text-gray-300 absolute left-[calc(45%+0px)] tracking-[0.04em] flex items-center h-full z-10 gap-2.5 font-medium">
             <span className="text-gray-500">Made with</span>
             <div className="inline-flex items-center gap-2.5">
-              {/* Tea Icon */}
               <div className="relative w-[18px] h-[18px] animate-pulse transition-transform hover:scale-110">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M2 19h18v2H2v-2zm2-8v5c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2zm15 0v5H5v-5h14zm-6.75-7L15 8H9l2.75-4z" fill="#374151"/>
@@ -216,7 +210,6 @@ export default function UpdatedCode() {
                 </svg>
               </div>
               <span className="text-gray-500 font-semibold">&</span>
-              {/* Beer Icon */}
               <div className="relative w-[18px] h-[18px] animate-bounce transition-transform hover:scale-110">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M7 3h10v2h-10z" fill="#D97706"/>
@@ -269,7 +262,6 @@ export default function UpdatedCode() {
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']">
-      {/* Apply the background using an absolutely positioned div to ensure it covers everything */}
       <div 
         className="fixed inset-0 z-[-1]" 
         style={{
@@ -300,7 +292,6 @@ export default function UpdatedCode() {
           <span className="text-lg font-semibold text-gray-800">SnapLogic Playground</span>
         </div>
         
-        {/* Navigation links - Updated to prevent default behavior */}
         <div className="flex items-center space-x-8">
           <button 
             onClick={(e) => handleNavigation('blogs', e)}
@@ -349,7 +340,6 @@ export default function UpdatedCode() {
       </div>
 
       <div className="flex-1 flex mx-4 my-4 rounded-md overflow-hidden shadow-xl">
-        {/* Left Panel */}
         <div
           style={{
             width: `${dimensions.leftWidth}px`,
@@ -369,7 +359,6 @@ export default function UpdatedCode() {
             </Button>
           </div>
           
-          {/* Input items would go here */}
           <div className="p-2">
             <div className="p-2 hover:bg-blue-50/60 cursor-pointer rounded-sm transition-colors duration-150 border border-transparent hover:border-blue-100">
               <div className="flex items-center">
@@ -379,7 +368,6 @@ export default function UpdatedCode() {
             </div>
           </div>
           
-          {/* Input dialog would appear here */}
           {state.isInputDialogOpen && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40">
               <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4 transform transition-all duration-200 opacity-100 scale-100">
@@ -413,7 +401,6 @@ export default function UpdatedCode() {
           )}
         </div>
 
-        {/* Middle Panel */}
         <div
           style={{
             width: `${dimensions.middleWidth}px`,
@@ -436,7 +423,6 @@ export default function UpdatedCode() {
             </div>
           </div>
           
-          {/* Script content area */}
           <div className="flex-1 p-4">
             <div className="bg-white border border-gray-200 rounded-sm h-full shadow-sm hover:shadow-md transition-shadow duration-300">
               <Editor
@@ -455,7 +441,6 @@ export default function UpdatedCode() {
             </div>
           </div>
           
-          {/* Script dialog would appear here */}
           {state.isScriptDialogOpen && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40">
               <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4 transform transition-all duration-200 opacity-100 scale-100">
@@ -489,7 +474,6 @@ export default function UpdatedCode() {
           )}
         </div>
 
-        {/* Right Panel */}
         <div
           style={{
             width: `${dimensions.rightWidth}px`,
@@ -555,7 +539,6 @@ export default function UpdatedCode() {
         </div>
       </div>
       
-      {/* Footer - Updated with new design and custom icons */}
       <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white/90 shadow-sm relative backdrop-blur-sm">
         <div className="flex justify-center items-center">
           <img 
@@ -568,7 +551,6 @@ export default function UpdatedCode() {
         <div className="font-['Manrope'] text-[0.69rem] text-gray-300 absolute left-[calc(45%+0px)] tracking-[0.04em] flex items-center h-full z-10 gap-2.5 font-medium">
           <span className="text-gray-500">Made with</span>
           <div className="inline-flex items-center gap-2.5">
-            {/* Tea Icon */}
             <div className="relative w-[18px] h-[18px] animate-pulse transition-transform hover:scale-110">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M2 19h18v2H2v-2zm2-8v5c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2zm15 0v5H5v-5h14zm-6.75-7L15 8H9l2.75-4z" fill="#374151"/>
@@ -576,7 +558,6 @@ export default function UpdatedCode() {
               </svg>
             </div>
             <span className="text-gray-500 font-semibold">&</span>
-            {/* Beer Icon */}
             <div className="relative w-[18px] h-[18px] animate-bounce transition-transform hover:scale-110">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7 3h10v2h-10z" fill="#D97706"/>
@@ -624,7 +605,6 @@ export default function UpdatedCode() {
         `}</style>
       </div>
 
-      {/* Import Project Dialog - Completely redesigned */}
       <Dialog open={state.importDialogOpen} onOpenChange={closeImportDialog}>
         <DialogContent className="sm:max-w-md w-full max-h-[90vh] bg-white p-0 rounded-none overflow-hidden border border-gray-300 shadow-xl">
           <DialogHeader className="px-6 pt-6 pb-2 border-b border-gray-200">
@@ -636,4 +616,11 @@ export default function UpdatedCode() {
               <div className="mb-4 text-blue-500">
                 <UploadCloud className="mx-auto h-14 w-14 text-blue-500 opacity-80" />
               </div>
-              <p className="text-
+              <p className="text-base">Drag and drop your project file here or click to browse</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
