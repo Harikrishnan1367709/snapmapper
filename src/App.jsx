@@ -1,12 +1,14 @@
+import React from 'react'
 
-import React from 'react';
-import { Router } from './router';
-import './App.css';
+
+import UpdatedCode from './UpdatedCode'
+
 
 function App() {
   return (
-    <Router />
-  );
+    <UpdatedCode/>
+  )
 }
 
-export default App;
+export default App
+
