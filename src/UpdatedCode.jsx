@@ -1,9 +1,8 @@
-
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { JSONPath } from 'jsonpath-plus';
 import { ChevronDown, Upload, Download, Terminal, Book, ChevronLeft } from "lucide-react";
 import { v4 as uuidv4 } from "uuid"
-
+import { Link } from 'react-router-dom';
 import JSZip from 'jszip';
 
 
@@ -30,7 +29,7 @@ import {
 import { Input } from "./components/ui/input"
 import { Label } from "./components/ui/label"
 import { Button } from './components/ui/button';
-import FormatDropdown from './FormatDropdown';
+
 import { handleJSON } from './utils/jsonHandler';
 import _ from 'lodash';
 import moment from 'moment';
@@ -41,7 +40,11 @@ import HighlightedScript from './utils/HighlightedScript';
 import HighlightedActualOutput from './utils/HighlightedActualOutput';
 import HighlightedExpectedOutput from './utils/HighlightedExpectedOutput';
 import SnapLogicFunctionsHandler from './utils/SnaplogicFunctionsHandler';
-import { Documentation } from './components/Documentation';
+import { Documentation } from './components/ui/Documentation';
+// import SupportButton from './components/ui/supportButton';
+
+import FormatDropdown from './FormatDropdown';
+import SupportButton from './components/SupportButton';
 
 
 
@@ -57,25 +60,64 @@ import { Documentation } from './components/Documentation';
 
 
 const UpdatedCode = () => {
+
+
+
+
+
+  // const [showDocumentation, setShowDocumentation] = useState(false);
   const [format, setFormat] = useState('json');
  
   const canvasRef = useRef(null);
   const [activeLineIndex, setActiveLineIndex] = useState(null);
+
+
+
+
   const [activeInput, setActiveInput] = useState('Payload');
+
+
   const [cursorPosition, setCursorPosition] = useState(0);
   const [focusedLine, setFocusedLine] = useState(null);
   const [wasChecked, setWasChecked] = useState(() =>
     localStorage.getItem('wasChecked') === 'true'
-  );
+);
+
+
+
+
   const [selectedFile, setSelectedFile] = useState(null);
-  const [hoveredLine, setHoveredLine] = useState(null);
-  const [highlightedLine, setHighlightedLine] = useState(null);
-  const [showInputContainer, setShowInputContainer] = useState(false);
-  const [showScriptContainer, setShowScriptContainer] = useState(false);
-  const [inputs, setInputs] = useState(['Payload']);
-  const [inputContents, setInputContents] = useState({
-    [inputs[0]]: '{}'  // Now we can safely use inputs[0]
-  });
+
+
+
+
+
+
+
+
+    const [hoveredLine, setHoveredLine] = useState(null);
+const [highlightedLine, setHighlightedLine] = useState(null);
+
+
+
+
+    const [showInputContainer, setShowInputContainer] = useState(false);
+    const [showScriptContainer, setShowScriptContainer] = useState(false);
+   
+const [inputs, setInputs] = useState(['Payload']);
+
+
+
+
+const [inputContents, setInputContents] = useState({
+  [inputs[0]]: JSON.stringify({
+    Message: "Hello World!"
+  }, null, 2)
+});
+
+
+
+
   const [isPayloadView, setIsPayloadView] = useState(false);
   const [selectedInputIndex, setSelectedInputIndex] = useState(null);
   const [payloadContent, setPayloadContent] = useState('{\n\n}');
@@ -86,7 +128,6 @@ const UpdatedCode = () => {
   const [isChecked, setIsChecked] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
   // const [activeInput, setActiveInput] = useState('Payload');
-  const [showDocumentation, setShowDocumentation] = useState(false);
  
   const [leftWidth, setLeftWidth] = useState(() =>
     parseInt(localStorage.getItem('leftWidth')) || 288
@@ -127,41 +168,29 @@ const UpdatedCode = () => {
   const [scripts, setScripts] = useState([
     {
       id: 1,
-      name: 'main.dwl',
+      name: 'main.slexpr',
       content: '$',
       lastModified: new Date()
     }
   ]);
-  
+ 
+
+
+
+
   // const [activeScript, setActiveScript] = useState(scripts[0]);
   const [activeScript, setActiveScript] = useState(null);
-  const [scriptContent, setScriptContent] = useState('');
+const [scriptContent, setScriptContent] = useState('');
   const [newScript, setNewScript] = useState("");
   // const [scriptContent, setScriptContent] = useState(scripts[0].content);
 
-  const handleNavigation = (page, e) => {
-    // Prevent default browser navigation behavior
-    if (e) {
-      e.preventDefault();
-    }
-    
-    if (page === 'docs') {
-      setShowDocumentation(true);
-      setActiveNavItem('docs');
-    } else {
-      setActiveNavItem(page);
-      setShowDocumentation(false);
-    }
-  };
-
   useEffect(() => {
     if (scripts.length > 0 && !activeScript) {
-      const mainScript = scripts.find(s => s.name === 'main.dwl') || scripts[0];
+      const mainScript = scripts.find(s => s.name === 'main.slexpr') || scripts[0];
       setActiveScript(mainScript);
       setScriptContent(mainScript.content);
     }
   }, []);
-  
   const resizableStyles = (width, panelType) => ({
     width: `${width}px`,
     minWidth: '250px', // Increased minimum width
@@ -169,7 +198,6 @@ const UpdatedCode = () => {
     cursor: panelType === 'middle' ? 'text' : 'pointer',
     userSelect: 'none'
   });
-  
   const ResizeHandle = () => (
     <div
       style={{
@@ -184,6 +212,9 @@ const UpdatedCode = () => {
     />
   );
 
+
+
+
   useEffect(() => {
     if (isDragging) {
       document.body.style.userSelect = 'none';
@@ -192,6 +223,9 @@ const UpdatedCode = () => {
     }
   }, [isDragging]);
 
+
+
+
   const handleMouseDown = (e, isLeft, isBottom) => {
     setIsDragging(true);
    
@@ -199,17 +233,26 @@ const UpdatedCode = () => {
       const startY = e.clientY;
       const startHeight = bottomHeight;
 
+
+
+
       const handleMouseMove = (e) => {
         const deltaY = startY - e.clientY;
         const newHeight = startHeight + deltaY;
         setBottomHeight(Math.max(32, Math.min(800, newHeight)));
       };
 
+
+
+
       const handleMouseUp = () => {
         setIsDragging(false);
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
       };
+
+
+
 
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
@@ -218,6 +261,9 @@ const UpdatedCode = () => {
     const startX = e.clientX;
     const startLeftWidth = leftWidth;
     const startRightWidth = rightWidth;
+
+
+
 
     const handleMouseMove = (e) => {
       if (isLeft) {
@@ -229,16 +275,21 @@ const UpdatedCode = () => {
       }
     };
 
+
+
+
     const handleMouseUp = () => {
       setIsDragging(false);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
 
+
+
+
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
-  
   const [editorLines, setEditorLines] = useState(['']);
  
   // Convert these direct declarations to useMemo to prevent unnecessary recalculations
@@ -247,19 +298,27 @@ const UpdatedCode = () => {
     [scriptContent]
   );
 
+
   const expectedLines = useMemo(() =>
     expectedOutput?.split('\n') || [''],
     [expectedOutput]
   );
+
 
   const actualLines = useMemo(() =>
     actualOutput?.split('\n') || [''],
     [actualOutput]
   );
 
+
   // Button disable conditions
   const isCreateInputDisabled = newInput.trim() === "";
   const isCreateScriptDisabled = newScript.trim() === "";
+
+
+
+
+
 
   const renderLineNumbers = (content) => {
     return (
@@ -273,10 +332,16 @@ const UpdatedCode = () => {
     );
   };
 
+
+
+
   const handleInputChange = (e) => {
     setNewInput(e.target.value);
     setPayloadContent(e.target.value);
   };
+
+
+
 
   const handleInputClick = (input, index) => {
     setIsPayloadView(true);
@@ -284,6 +349,9 @@ const UpdatedCode = () => {
     setActiveInput(input);
     setPayloadContent(inputContents[input] || '{\n  \n}');
   };
+
+
+
 
   const handleBackClick = () => {
     if (selectedInputIndex !== null) {
@@ -310,9 +378,15 @@ const UpdatedCode = () => {
     }
   };
 
+
+
+
   const handleScriptChange = (e) => {
     setNewScript(e.target.value);
   };
+
+
+
 
   const handleCreateScript = () => {
     if (newScript.trim() !== "") {
@@ -343,6 +417,9 @@ const UpdatedCode = () => {
     }
   };
 
+
+
+
   const handleScriptSelect = (script) => {
     // Save current script content before switching
     if (activeScript) {
@@ -360,10 +437,12 @@ const UpdatedCode = () => {
     setScriptContent(script.content);
   };
 
+
+
+
   const handleActualOutputChange = (newValue) => {
     setActualOutput(newValue);
   };
-  
   const scrollbarStyle = {
     WebkitScrollbar: {
       width: '8px',
@@ -381,7 +460,6 @@ const UpdatedCode = () => {
     },
     msOverflowStyle: '-ms-autohiding-scrollbar'
   };
-  
   const scrollbarStyle1 = {
     WebkitScrollbar: {
       width: '8px',
@@ -403,12 +481,14 @@ const UpdatedCode = () => {
   const handleExpectedOutputChange = (newValue) => {
     setExpectedOutput(newValue);
   };
-  
   const detectFunctionType = (script) => {
     if (script.startsWith('$')) return 'jsonPath';
     if (script.includes('match')) return 'match';
     return 'general';
   };
+
+
+
 
   useEffect(() => {
     if (activeScript && payloadContent) {
@@ -426,89 +506,124 @@ const UpdatedCode = () => {
       }
     }
   }, [payloadContent, scriptContent]);
+
+
+
+
  
-  const handleScriptContentChange = (e) => {
-    if (!e?.target) {
-      setActualOutput(JSON.stringify({ error: "Invalid event" }, null, 2));
+const handleScriptContentChange = (e) => {
+  if (!e?.target) {
+    setActualOutput(JSON.stringify({ error: "Invalid event" }, null, 2));
+    return;
+  }
+
+
+
+
+  const newContent = e.target.value || '';
+  setScriptContent(newContent);
+  
+  // Update script content in scripts array immediately
+  setScripts(prevScripts =>
+    prevScripts.map(script =>
+      script.id === activeScript?.id
+        ? { ...script, content: newContent, lastModified: new Date() }
+        : script
+    )
+  );
+
+
+
+
+  try {
+    const handler = new SnapLogicFunctionsHandler();
+   
+    // Handle multiple inputs case
+    if (inputs.length > 1 && newScript.trim() === '$') {
+      setActualOutput("Not valid, access with the help of input name");
       return;
     }
 
-    const newContent = e.target.value || '';
-    setScriptContent(newContent);
-    
-    // Update script content in scripts array immediately
-    setScripts(prevScripts =>
-      prevScripts.map(script =>
-        script.id === activeScript?.id
-          ? { ...script, content: newContent, lastModified: new Date() }
-          : script
-      )
-    );
 
-    try {
-      const handler = new SnapLogicFunctionsHandler();
-     
-      // Handle multiple inputs case
-      if (inputs.length > 1 && newScript.trim() === '$') {
-        setActualOutput("Not valid, access with the help of input name");
-        return;
-      }
 
-      // Handle single input case
-      if (inputs.length === 1 && newScript.trim() === '$') {
-        setActualOutput(inputContents[inputs[0]]);
-        return;
-      }
 
-      // For multiple inputs case
-      const inputMatch = newScript.match(/^\$(\w+)/);
-      if (inputMatch) {
-        const requestedInput = inputMatch[1];
-        if (inputContents[requestedInput]) {
-          // Just show input content for $inputName
-          if (newScript === `$${requestedInput}`) {
-            setActualOutput(inputContents[requestedInput]);
-            return;
-          }
+    // Handle single input case
+    if (inputs.length === 1 && newScript.trim() === '$') {
+      setActualOutput(inputContents[inputs[0]]);
+      return;
+    }
 
-          // Execute script with specific input
-          const path = newScript.replace(`$${requestedInput}`, '$');
-          const inputData = JSON.parse(inputContents[requestedInput]);
-          const result = handler.executeScript(path, inputData);
-          setActualOutput(JSON.stringify(result, null, 2));
+
+
+
+    // For multiple inputs case
+    const inputMatch = newScript.match(/^\$(\w+)/);
+    if (inputMatch) {
+      const requestedInput = inputMatch[1];
+      if (inputContents[requestedInput]) {
+        // Just show input content for $inputName
+        if (newScript === `$${requestedInput}`) {
+          setActualOutput(inputContents[requestedInput]);
           return;
         }
-      }
 
-      // Default to active input
-      const activeInput = inputs[selectedInputIndex] || inputs[0];
-      let inputData;
-     
-      try {
-        inputData = JSON.parse(inputContents[activeInput]);
-      } catch (error) {
-        setActualOutput(JSON.stringify({
-          error: "Invalid Input",
-          message: "Input data must be valid JSON",
-          input: inputContents[activeInput]
-        }, null, 2));
+
+
+
+        // Execute script with specific input
+        const path = newScript.replace(`$${requestedInput}`, '$');
+        const inputData = JSON.parse(inputContents[requestedInput]);
+        const result = handler.executeScript(path, inputData);
+        setActualOutput(JSON.stringify(result, null, 2));
         return;
       }
-
-      // Execute script with handler
-      const result = handler.executeScript(newScript, inputData);
-      setActualOutput(JSON.stringify(result, null, 2));
-
-    } catch (error) {
-      // console.error("Transformation Error:", error);
-      setActualOutput(JSON.stringify({
-        error: "Transformation Error",
-        message: error.message || "Unknown error occurred",
-        input: newScript,
-        hint: "Check syntax and ensure all referenced paths exist"
-      }, null, 2));
     }
-  };
+
+
+
+
+    // Default to active input
+    const activeInput = inputs[selectedInputIndex] || inputs[0];
+    let inputData;
+   
+    try {
+      inputData = JSON.parse(inputContents[activeInput]);
+    } catch (error) {
+      setActualOutput(JSON.stringify({
+        error: "Invalid Input",
+        message: "Input data must be valid JSON",
+        input: inputContents[activeInput]
+      }, null, 2));
+      return;
+    }
+
+
+
+
+    // Execute script with handler
+    const result = handler.executeScript(newScript, inputData);
+    setActualOutput(JSON.stringify(result, null, 2));
+
+
+
+
+  } catch (error) {
+    // console.error("Transformation Error:", error);
+    setActualOutput(JSON.stringify({
+      error: "Transformation Error",
+      message: error.message || "Unknown error occurred",
+      input: newScript,
+      hint: "Check syntax and ensure all referenced paths exist"
+    }, null, 2));
+  }
+};
+
+
+
+
+
+
+
 
   // useEffect(() => {
   //   console.log("Actual output updated:", actualOutput) // Debugging log
@@ -520,7 +635,6 @@ const UpdatedCode = () => {
     padding: '0',
     border: 'none'
   };
-  
   const normalizeJSON = (input) => {
     try {
       if (!input) return '';
@@ -572,6 +686,11 @@ const UpdatedCode = () => {
     compareOutputs();
   }, [actualOutput, expectedOutput]);
  
+
+
+
+
+ 
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file && file.name.endsWith('.zip')) {
@@ -592,6 +711,9 @@ const UpdatedCode = () => {
   const [shouldShowExportDialog, setShouldShowExportDialog] = useState(() =>
     localStorage.getItem('showExportDialog') !== 'false'
   );
+
+
+
 
   const handleExport = async () => {
     try {
@@ -651,42 +773,76 @@ const UpdatedCode = () => {
     }
   };
   
+ 
   const handleCheckboxChange = () => {
     setIsChecked(!isChecked);
     setWasChecked(true);
     localStorage.setItem('wasChecked', 'true');
     setShowExportDialog(false);
-  };
+};
 
-  const getNavLink = (item) => {
-    const links = {
-      blogs: 'https://www.snaplogic.com/blog',
-      docs: '#', // Changed to hash to prevent navigation
-      tutorial: 'https://www.youtube.com/snaplogic',
-      playground: '#'
-    };
-    return links[item];
-  };
 
-  const handleNavClick = (item, e) => {
-    if (e) {
-      e.preventDefault(); // Prevent default behavior
-    }
-    
-    if (item === 'docs') {
-      setShowDocumentation(true);
-      setActiveNavItem('docs');
-    } else {
-      setActiveNavItem(item);
-      setShowDocumentation(false);
-    }
-  };
+const handleNavigation = (page, e) => {
+  if (e) {
+    e.preventDefault();
+  }
   
+  if (page === 'docs') {
+    setShowDocumentation(true);
+    setActiveNavItem('docs');
+  } else {
+    setActiveNavItem(page);
+    setShowDocumentation(false);
+  }
+};
+
+
+const getNavLink = (item) => ({
+  blogs: 'https://blogs.mulecraft.in/',
+  docs: '/docs',  // <-- Internal Route
+  tutorial: 'https://www.youtube.com/snaplogic',
+  playground: '/'
+})[item];
+
+
+
+// const handleNavClick = (item, e) => {
+//   if (e) {
+//     e.preventDefault();
+//   }
+  
+//   const link = getNavLink(item);
+//   if (link.startsWith('http')) {
+//     window.open(link, '_blank');
+//   } else if (item === 'docs') {
+//     setShowDocumentation(true);
+//     setActiveNavItem('docs');
+//   } else {
+//     setActiveNavItem(item);
+//     setShowDocumentation(false);
+//   }
+// };
+const handleNavClick = (item, e) => {
+  if (getNavLink(item).startsWith('http')) {
+    e.preventDefault();
+    window.open(getNavLink(item), '_blank');
+    setActiveNavItem(item);
+  }
+  // No state changes here; let routing handle navigation
+};
+
   useEffect(() => {
     setIsBottomExpanded(false);
     setBottomHeight(32);
     setActiveTab(null);
   }, []);
+
+
+
+
+
+
+
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -699,6 +855,9 @@ const UpdatedCode = () => {
       ctx.stroke();
     }
   }, [scriptContent]);
+
+
+
 
   // Create active line border element
   const ActiveLineBorder = () => {
@@ -719,98 +878,137 @@ const UpdatedCode = () => {
     );
   };
 
-  const getLineCount = (content) => {
-    if (!content) return 1;
-    return content.split('\n').length;
-  };
 
-  // Add these responsive width calculations
-  const getResponsiveWidths = () => {
-    const screenWidth = window.innerWidth;
-   
-    if (screenWidth >= 1024) { // Laptop
-      return {
-        leftWidth: Math.floor(screenWidth * 0.25),
-        middleWidth: Math.floor(screenWidth * 0.45),
-        rightWidth: Math.floor(screenWidth * 0.30)
-      };
-    } else if (screenWidth >= 768) { // Tablet
-      return {
-        leftWidth: Math.floor(screenWidth * 0.30),
-        middleWidth: Math.floor(screenWidth * 0.40),
-        rightWidth: Math.floor(screenWidth * 0.30)
-      };
-    }
-    return { leftWidth, middleWidth, rightWidth }; // Default widths
-  };
 
-  // Add resize listener
-  useEffect(() => {
-    const handleResize = () => {
-      const { leftWidth: newLeft, middleWidth: newMiddle, rightWidth: newRight } = getResponsiveWidths();
-      setLeftWidth(newLeft);
-      setMiddleWidth(newMiddle);
-      setRightWidth(newRight);
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+const getLineCount = (content) => {
+  if (!content) return 1;
+  return content.split('\n').length;
+};
+
+
+
+
+// Add these responsive width calculations
+const getResponsiveWidths = () => {
+  const screenWidth = window.innerWidth;
+ 
+  if (screenWidth >= 1024) { // Laptop
+    return {
+      leftWidth: Math.floor(screenWidth * 0.25),
+      middleWidth: Math.floor(screenWidth * 0.45),
+      rightWidth: Math.floor(screenWidth * 0.30)
     };
+  } else if (screenWidth >= 768) { // Tablet
+    return {
+      leftWidth: Math.floor(screenWidth * 0.30),
+      middleWidth: Math.floor(screenWidth * 0.40),
+      rightWidth: Math.floor(screenWidth * 0.30)
+    };
+  }
+  return { leftWidth, middleWidth, rightWidth }; // Default widths
+};
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
-  // Add responsive styles
-  const responsiveStyles = {
-    mainContainer: {
-      minWidth: '768px',
-      maxWidth: '100vw',
-      overflow: 'auto'
-    },
-    panels: {
-      minWidth: '250px'
-    }
-   
-  };
-  
-  const useMediaQuery = (query) => {
-    const [matches, setMatches] = useState(window.matchMedia(query).matches);
 
-    useEffect(() => {
-      const media = window.matchMedia(query);
-      const listener = () => setMatches(media.matches);
-      media.addEventListener('change', listener);
-      return () => media.removeEventListener('change', listener);
-    }, [query]);
 
-    return matches;
+// Add resize listener
+useEffect(() => {
+  const handleResize = () => {
+    const { leftWidth: newLeft, middleWidth: newMiddle, rightWidth: newRight } = getResponsiveWidths();
+    setLeftWidth(newLeft);
+    setMiddleWidth(newMiddle);
+    setRightWidth(newRight);
   };
 
-  // In your component
-  const isTablet = useMediaQuery('(max-width: 1024px)');
 
-  const monacoStyles = `
-    .monaco-editor {
-      padding-top: 8px;
-    }
-   
-    .monaco-editor .margin {
-      background-color: #f8f9fa;
-    }
-   
-    .monaco-editor .line-numbers {
-      color: #3498db !important;
-      font-size: 12px;
-    }
-   
-    .monaco-editor .current-line {
-      border: none !important;
-    }
 
-    /* Disable editor widgets that might interfere with typing */
-    .monaco-editor .suggest-widget,
-    .monaco-editor .parameter-hints-widget,
-    .monaco-editor .monaco-hover {
-      display: none !important;
-    }
-  `;
+
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
+
+
+
+
+// Add responsive styles
+const responsiveStyles = {
+  mainContainer: {
+    minWidth: '768px',
+    maxWidth: '100vw',
+    overflow: 'auto'
+  },
+  panels: {
+    minWidth: '250px'
+  }
+ 
+};
+const useMediaQuery = (query) => {
+  const [matches, setMatches] = useState(window.matchMedia(query).matches);
+
+
+
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    const listener = () => setMatches(media.matches);
+    media.addEventListener('change', listener);
+    return () => media.removeEventListener('change', listener);
+  }, [query]);
+
+
+
+
+  return matches;
+};
+
+
+
+
+// In your component
+const isTablet = useMediaQuery('(max-width: 1024px)');
+
+
+const monacoStyles = `
+  .monaco-editor {
+    padding-top: 8px;
+  }
+ 
+  .monaco-editor .margin {
+    background-color: #f8f9fa;
+  }
+ 
+  .monaco-editor .line-numbers {
+    color: #3498db !important;
+    font-size: 12px;
+  }
+ 
+  .monaco-editor .current-line {
+    border: none !important;
+  }
+
+
+  /* Disable editor widgets that might interfere with typing */
+  .monaco-editor .suggest-widget,
+  .monaco-editor .parameter-hints-widget,
+  .monaco-editor .monaco-hover {
+    display: none !important;
+  }
+`;
+
 
   const handlePayloadChange = (newContent) => {
     setPayloadContent(newContent);
@@ -820,116 +1018,115 @@ const UpdatedCode = () => {
       [activeInput]: newContent
     }));
   };
-  
   const handleFormatChange = (newFormat) => {
     setFormat(newFormat);
   };
+ 
+  // if (showDocumentation) {
+  //   return (
+  //     <div className="flex flex-col h-screen w-screen bg-white overflow-hidden">
+  //       {showToast && (
+  //         <div className="bg-[#E9EEF4] text-[#00044C] py-2 text-[12px] relative">
+  //           <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
+  //             Discover the Future of Integration. Explore SnapLogic Playground Highlights
+  //           </div>
+  //           <button
+  //             onClick={() => setShowToast(false)}
+  //             className="absolute right-4 top-0 h-full bg-[#E9EEF4] text-[#00044C] border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center font-bold"
+  //           >
+  //             ×
+  //           </button>
+  //         </div>
+  //       )}
 
-  // If showing documentation, render the Documentation component
-  if (showDocumentation) {
-    return (
-      <div className="flex flex-col h-screen w-screen bg-white overflow-hidden">
-        {showToast && (
-          <div className="bg-[#E9EEF4] text-[#00044C] py-2 text-[12px] relative">
-            <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
-              Discover the Future of Integration. Explore SnapLogic Playground Highlights
-            </div>
-            <button
-              onClick={() => setShowToast(false)}
-              className="absolute right-4 top-0 h-full bg-[#E9EEF4] text-[#00044C] border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center font-bold"
-            >
-              ×
-            </button>
-          </div>
-        )}
-
-        <div className="flex items-center justify-between px-6 py-2 border-b">
-          <div className="flex items-center space-x-3">
-            <img
-              src="/sl-logo.svg"
-              alt="SnapLogic Logo"
-              className="object-contain"
-              style={{
-                width: isTablet ? '22px' : '32px',
-                height: isTablet ? '22px' : '32px'
-              }}
-            />
-            <img
-              src="/LogoN.svg"
-              alt="SnapLogic"
-              className="object-contain"
-              style={{
-                height: isTablet ? '20px' : '32px'
-              }}
-            />
-          </div>
+  //       <div className="flex items-center justify-between px-6 py-2 border-b">
+  //         <div className="flex items-center space-x-3">
+  //           <img
+  //             src="/sl-logo.svg"
+  //             alt="SnapLogic Logo"
+  //             className="object-contain"
+  //             style={{
+  //               width: isTablet ? '22px' : '32px',
+  //               height: isTablet ? '22px' : '32px'
+  //             }}
+  //           />
+  //           <img
+  //             src="/LogoN.svg"
+  //             alt="SnapLogic"
+  //             className="object-contain"
+  //             style={{
+  //               height: isTablet ? '20px' : '32px'
+  //             }}
+  //           />
+  //         </div>
           
-          <div className="space-x-8 text-[0.82rem] font-bold text-[#333333] relative font-['Manrope'] flex items-center">
-            {['blogs', 'docs', 'tutorial', 'playground'].map(item => (
-              <a
-                key={item}
-                href={getNavLink(item)}
-                className={`text-black hover:text-blue-500 px-2 py-2 relative ${
-                  activeNavItem === item
-                    ? 'after:content-[""] after:absolute after:left-0 after:right-0 after:h-0.5 after:bg-[#1B4E8D] after:-bottom-[0.5rem] z-10'
-                    : ''
-                }`}
-                onClick={(e) => handleNavClick(item, e)}
-              >
-                {item.toUpperCase()}
-              </a>
-            ))}
-          </div>
+  //         <div className="space-x-8 text-[0.82rem] font-bold text-[#333333] relative font-['Manrope'] flex items-center">
+  //           {['blogs', 'docs', 'tutorial', 'playground'].map(item => (
+  //             <a
+  //               key={item}
+  //               href={getNavLink(item)}
+  //               className={`text-black hover:text-blue-500 px-2 py-2 relative ${
+  //                 activeNavItem === item
+  //                   ? 'after:content-[""] after:absolute after:left-0 after:right-0 after:h-0.5 after:bg-[#1B4E8D] after:-bottom-[0.5rem] z-10'
+  //                   : ''
+  //               }`}
+  //               onClick={(e) => handleNavClick(item, e)}
+  //             >
+  //               {item.toUpperCase()}
+  //             </a>
+  //           ))}
+  //         </div>
           
-          <div className="flex items-center">
-            <button
-              onClick={() => {
-                handleExport();
-                if (!wasChecked) {
-                  setShowExportDialog(true);
-                }
-              }}
-              className="flex items-center px-4 py-1.5 bg-white rounded border-none focus:outline-none group hover:text-blue-500 -ml-3"
-            >
-              <img
-                src="/cloud-upload-Hover.svg"
-                alt="SnapLogic Logo"
-                className="mr-2 text-gray-700 group-hover:text-blue-500 text-gray-500 h-4 w-4"
-              />
-              <span className="text-gray-700 font-['Manrope'] group-hover:text-blue-500 text-[0.9rem] tracking-[0.09em] font-['Manrope'] font-normal">Export</span>
-            </button>
+  //         <div className="flex items-center">
+  //           <button
+  //             onClick={() => {
+  //               handleExport();
+  //               if (!wasChecked) {
+  //                 setShowExportDialog(true);
+  //               }
+  //             }}
+  //             className="flex items-center px-4 py-1.5 bg-white rounded border-none focus:outline-none group hover:text-blue-500 -ml-3"
+  //           >
+  //             <img
+  //               src="/cloud-upload-Hover.svg"
+  //               alt="SnapLogic Logo"
+  //               className="mr-2 text-gray-700 group-hover:text-blue-500 text-gray-500 h-4 w-4"
+  //             />
+  //             <span className="text-gray-700 font-['Manrope'] group-hover:text-blue-500 text-[0.9rem] tracking-[0.09em] font-['Manrope'] font-normal">Export</span>
+  //           </button>
             
-            <button
-              onClick={() => {setShowImportDialog(true); setSelectedFile(null);}} 
-              className="flex items-center px-4 py-1.5 bg-white rounded border-none focus:outline-none group hover:text-blue-500 -ml-4"
-            >
-              <img
-                src="/cloud-download-Hover.svg"
-                alt="SnapLogic Logo"
-                className="mr-2 group-hover:text-blue-500 text-gray-500 h-4 w-4"
-              />
-              <span className="text-gray-700 group-hover:text-blue-500 text-[0.9rem] font-['Manrope'] tracking-[0.09em] font-normal">Import</span>
-            </button>
+  //           <button
+  //             onClick={() => {setShowImportDialog(true); setSelectedFile(null);}} 
+  //             className="flex items-center px-4 py-1.5 bg-white rounded border-none focus:outline-none group hover:text-blue-500 -ml-4"
+  //           >
+  //             <img
+  //               src="/cloud-download-Hover.svg"
+  //               alt="SnapLogic Logo"
+  //               className="mr-2 group-hover:text-blue-500 text-gray-500 h-4 w-4"
+  //             />
+  //             <span className="text-gray-700 group-hover:text-blue-500 text-[0.9rem] font-['Manrope'] tracking-[0.09em] font-normal">Import</span>
+  //           </button>
 
-            <div className="h-6 w-[1px] bg-gray-500 mx-4"></div>
-          </div>
-        </div>
+  //           <div className="h-6 w-[1px] bg-gray-500 mx-4"></div>
+  //         </div>
+  //       </div>
 
-        <Documentation onBack={() => {
-          setShowDocumentation(false);
-          setActiveNavItem('playground');
-        }} />
-      </div>
-    );
-  }
+  //       <Documentation onBack={() => {
+  //         setShowDocumentation(false);
+  //         setActiveNavItem('playground');
+  //       }} />
+  //     </div>
+  //   );
+  // }
+
 
   return (
     <div className="flex flex-col h-screen w-screen bg-white overflow-hidden">
       {showToast && (
         <div className="bg-[#E9EEF4] text-[#00044C] py-2 text-[12px] relative">
-          <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
+          <div className="text-center px-12 font-bold font-['Manrope'] text-[13px] tracking-[0.09em]">
            
-            Discover the Future of Integration. Explore SnapLogic Playground Highlights
+            Discover the Future of Integration. Explore MuleCraft Playground Highlights
           </div>
           <button
             onClick={() => setShowToast(false)}
@@ -939,6 +1136,9 @@ const UpdatedCode = () => {
           </button>
         </div>
       )}
+
+
+
 
       <div className="flex items-center justify-between px-6 py-2 border-b">
         <div className="flex items-center space-x-3">
@@ -982,6 +1182,21 @@ const UpdatedCode = () => {
   <span className="text-gray-700 font-['Manrope'] group-hover:text-blue-500 text-[0.9rem] tracking-[0.09em] font-['Manrope'] font-normal">Export</span>
 </button>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           {showExportDialog && (
             <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
               <div className="bg-white h-[19rem] w-205" style={{ borderRadius: 0 }}>
@@ -1013,6 +1228,9 @@ const UpdatedCode = () => {
   Don't show popup again
 </label>
 
+
+
+
                     <button
                       onClick={() => setShowExportDialog(false)}
                       className="px-3 py-2.5 text-sm bg-white border border-gray-400 hover:border-gray-400 hover:bg-gray-200 focus:border-none focus:outline-none"
@@ -1025,86 +1243,115 @@ const UpdatedCode = () => {
               </div>
             </div>
           )}
-          <button
-            onClick={() => {setShowImportDialog(true); setSelectedFile(null);}} 
+                    <button
+            onClick={() => {setShowImportDialog(true);
+              setSelectedFile(null);
+                } }
             className="flex items-center px-4 py-1.5 bg-white rounded border-none focus:outline-none group hover:text-blue-500 -ml-4"
           >
             <img
-              src="/cloud-download-Hover.svg"
-              alt="SnapLogic Logo"
-              className="mr-2 group-hover:text-blue-500 text-gray-500 h-4 w-4"
-            />
+  src="/cloud-download-Hover.svg"
+  alt="SnapLogic Logo"
+ className="mr-2 group-hover:text-blue-500 text-gray-500 h-4 w-4"
+/>
+            {/* <Download className="mr-2 group-hover:text-blue-500 text-gray-500 h-3 w-3" /> */}
             <span className="text-gray-700 group-hover:text-blue-500 text-[0.9rem] font-['Manrope'] tracking-[0.09em] font-normal">Import</span>
           </button>
 
+
+
+
           {showImportDialog && (
-            <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
-              <div className="bg-white h-[28.5rem] w-[31rem]" style={{ borderRadius: 0 }}>
-                <div className="p-8 pt-10 flex flex-col h-full">
-                  <h2 className="text-[1.9rem] font-bold text-gray-700">Import project</h2>
-                  <div className="h-[1px] bg-gray-200 w-[calc(100%+48px)] -mx-6 mt-4 mb-[0.4rem]"></div>
-                  <div className="mt-6 flex-1 font-['Manrope']">
-                    <div
-                      className="border-2 border-dashed border-gray-600 h-[11rem] w-[27.2rem] mx-auto flex flex-col items-center justify-center cursor-pointer hover:border-gray-400"
-                      onClick={() => document.getElementById('fileInput').click()}
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={handleFileDrop}
-                    >
-                      <input
-                        id="fileInput"
-                        type="file"
-                        accept=".zip"
-                        onChange={handleFileSelect}
-                        className="hidden"
-                      />
-                      <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <p className="text-sm text-center mt-2 text-gray-500">
-                        {selectedFile ? selectedFile.name : "Drop project zip here or click to upload"}
-                      </p>
-                    </div>
-                    <div className="mt-4 w-[28rem] mx-auto mb-[2.2rem]">
-                      <p className="text-[#FF0000] text-sm">Upload functionality is only intended for playground exported projects</p>
-                      <p className="text-[#FF0000] text-sm mt-1 ml-[3.5rem]">Importing modified files may yield an invalid project.</p>
-                    </div>
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      onClick={() => setShowImportDialog(false)}
-                      className="px-3 py-2.5 text-sm bg-white border border-gray-400 hover:border-gray-400 hover:bg-gray-200 focus:border-none focus:outline-none"
-                      style={{ borderRadius: 0 }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+  <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
+    <div className="bg-white h-[28.5rem] w-[31rem]" style={{ borderRadius: 0 }}>
+      <div className="p-8 pt-10 flex flex-col h-full">
+        <h2 className="text-[1.9rem] font-bold text-gray-700">Import project</h2>
+        <div className="h-[1px] bg-gray-200 w-[calc(100%+48px)] -mx-6 mt-4 mb-[0.4rem]"></div>
+        <div className="mt-6 flex-1 font-['Manrope']">
+          <div
+            className="border-2 border-dashed border-gray-600 h-[11rem] w-[27.2rem] mx-auto flex flex-col items-center justify-center cursor-pointer hover:border-gray-400"
+            onClick={() => document.getElementById('fileInput').click()}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleFileDrop}
+          >
+            <input
+              id="fileInput"
+              type="file"
+              accept=".zip"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <p className="text-sm text-center mt-2 text-gray-500">
+              {selectedFile ? selectedFile.name : "Drop project zip here or click to upload"}
+            </p>
+          </div>
+          <div className="mt-4 w-[28rem] mx-auto mb-[2.2rem]">
+            <p className="text-[#FF0000] text-[0.8rem] ml-3">Upload functionality is only intended for playground exported projects</p>
+            <p className="text-[#FF0000] text-[0.7rem] mt-1 ml-[3.9rem]">Importing modified files may yield an invalid project.</p>
+          </div>
+        </div>
+        <div className="flex justify-end">
+          <button
+            onClick={() => setShowImportDialog(false)}
+            className="px-3 py-2.5 text-sm bg-white border border-gray-400 hover:border-gray-400 hover:bg-gray-200 focus:border-none focus:outline-none"
+            style={{ borderRadius: 0 }}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+
+
+
+
 
           <div className="h-6 w-[1px] bg-gray-500 mx-4"></div>
 
+
+
+
           <div className="space-x-8 text-[0.82rem] font-bold text-[#333333] relative font-['Manrope'] flex items-center">
-            {['blogs', 'docs', 'tutorial', 'playground'].map(item => (
-              <a
-                key={item}
-                href={getNavLink(item)}
-                className={`text-black hover:text-blue-500 px-2 py-2 relative ${
+          {['blogs', 'docs', 'tutorial', 'playground'].map(item => (
+              <Link
+              key={item}
+              to={getNavLink(item)}
+              className={`text-black hover:text-blue-500 px-2 py-2 relative ${
                   activeNavItem === item
                     ? 'after:content-[""] after:absolute after:left-0 after:right-0 after:h-0.5 after:bg-[#1B4E8D] after:-bottom-[0.5rem] z-10'
                     : ''
                 }`}
-                onClick={(e) => handleNavClick(item, e)}
-              >
-                {item.toUpperCase()}
-              </a>
+              target={"_blank"} 
+              rel={getNavLink(item).startsWith('http') ? 'noopener noreferrer' : undefined}
+              onClick={(e) => {
+                if (getNavLink(item).startsWith('http')) {
+                  e.preventDefault();  // Prevent React Router navigation for external links
+                  window.open(getNavLink(item), '_blank');
+                }
+              }}
+            >
+              {item.toUpperCase()}
+            </Link>
+            
+            
             ))}
           </div>
+
         </div>
       </div>
+{/* main content */}
 
-      {/* main content */}
+
+
+
       <div className="flex flex-1 overflow-hidden h-[calc(100vh-100px)]" style={responsiveStyles.mainContainer}>
         <div style={{...resizableStyles(leftWidth,'left'),...responsiveStyles.panels}} className="flex-shrink-0 border-r flex flex-col relative h-full overflow-hidden ">
           {isPayloadView ? (
@@ -1654,10 +1901,82 @@ const UpdatedCode = () => {
   </TooltipProvider>
 </div>
 
-    <span className=" font-['Manrope'] text-sm text-gray-400 absolute left-[calc(45%+0px)] tracking-[0.03em] flex items-center h-full z-10">
+    {/* <span className=" font-['Manrope'] text-sm text-gray-400 absolute left-[calc(45%+0px)] tracking-[0.03em] flex items-center h-full z-10"> */}
       {/* ©2023 Snaplogic LLC, a Salesforce company */}
-      SnapLogic Playground – Redefining Integration.
+      {/* SnapLogic Playground – Redefining Integration.
+    </span> */}
+    <div className="font-['Manrope'] text-[0.69rem] text-gray-300 absolute left-[calc(45%+0px)] tracking-[0.04em] flex items-center h-full z-10 gap-2.5 font-medium">
+  <span className="text-gray-500">Made</span>
+  {/* <div className="inline-flex items-center gap-2.5"> */}
+    {/* Tea Icon */}
+    {/* <div className="relative w-[18px] h-[18px] animate-pulse transition-transform hover:scale-110">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 19h18v2H2v-2zm2-8v5c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2zm15 0v5H5v-5h14zm-6.75-7L15 8H9l2.75-4z" fill="#374151"/>
+        <path d="M19 10h2c0-2.21-1.79-4-4-4h-2l2 4z" fill="#374151"/>
+      </svg>
+    </div> */}
+    {/* <span className="text-gray-500 font-semibold">&</span> */}
+    {/* Beer Icon */}
+    {/* <div className="relative w-[18px] h-[18px] animate-bounce transition-transform hover:scale-110">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7 3h10v2h-10z" fill="#D97706"/>
+        <path d="M18 8c-0.4-2.3-2.4-4-4.8-4h-2.4c-2.4 0-4.4 1.7-4.8 4h-1v12h14v-12h-1zM8 18v-8h8v8h-8z" fill="#D97706"/>
+        <path d="M10 11h4v3h-4z" fill="#ffffff"/>
+      </svg>
+    </div> */}
+  {/* </div> */}
+  <span className="text-gray-500">in</span>
+  <div className="flex items-center gap-1">
+    <span className="text-gray-500 font-semibold hover:text-blue-800  cursor-pointer transition-colors">
+      Tamil Nadu, India
     </span>
+    {/* Indian Flag */}
+    <div className=" ml-[2] w-4 h-3 relative flex-shrink-0">
+      <svg viewBox="0 0 6 4" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="6" height="1.33333" fill="#FF9933"/>
+        <rect y="1.33333" width="6" height="1.33333" fill="#FFFFFF"/>
+        <rect y="2.66667" width="6" height="1.33333" fill="#138808"/>
+        <circle cx="3" cy="2" r="0.4" fill="#000080"/>
+        <path d="M3 1.7L3.2 2.3L2.8 2.3L3 1.7Z" fill="#000080"/>
+      </svg>
+    </div>
+  </div>
+  <span className="mx-2.5 text-gray-400">|</span>
+  <span className="text-gray-500">Powered by</span>
+  <a 
+    href="https://www.mulecraft.in/" 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    className="text-blue-500 font-semibold hover:text-blue-800 transition-colors relative group"
+  >
+    Mulecraft
+  </a>
+{/* Support Button (Bottom Right) */}
+<div className="absolute bottom-2 right-2">
+    <SupportButton />
+  </div>
+  <style jsx>{`
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    
+    .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    .animate-bounce {
+      animation: bounce 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-25%); }
+    }
+  `}</style>
+</div>
     {/* Resize Handle */}
    
   </div>
@@ -1766,4 +2085,74 @@ const UpdatedCode = () => {
   );
 };
 
+
+
+
 export default UpdatedCode;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
