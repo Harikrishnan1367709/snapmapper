@@ -1,18 +1,18 @@
+
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { FormatDropdown } from './FormatDropdown';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Coffee, Beer, UploadCloud, DownloadCloud, PlusCircle, X } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
+import { Coffee, Beer, UploadCloud, DownloadCloud } from "lucide-react";
+import { Documentation } from './Documentation';
 
 export default function UpdatedCode() {
-  const navigate = useNavigate();
   const resizeTimeoutRef = useRef(null);
   const [dimensions, setDimensions] = useState({
-    leftWidth: 280,
-    middleWidth: 450,
+    leftWidth: 300,
+    middleWidth: 400,
     rightWidth: 300
   });
   
@@ -23,11 +23,13 @@ export default function UpdatedCode() {
     isScriptDialogOpen: false,
     showToast: true,
     scriptFormat: 'javascript',
-    actualOutput: '"Hello world!"',
+    actualOutput: '',
     importDialogOpen: false,
     activePage: 'playground',
+    showDocumentation: false,
   });
 
+  // Debounced resize handler
   const handleResize = useCallback(() => {
     if (resizeTimeoutRef.current) {
       window.cancelAnimationFrame(resizeTimeoutRef.current);
@@ -97,69 +99,230 @@ export default function UpdatedCode() {
   };
 
   const handleNavigation = (page, e) => {
+    // Prevent default browser navigation behavior
     if (e) {
       e.preventDefault();
     }
     
     if (page === 'docs') {
-      navigate('/docs');
-      setState(prev => ({ ...prev, activePage: 'docs' }));
+      setState(prev => ({ ...prev, showDocumentation: true, activePage: 'docs' }));
     } else {
-      setState(prev => ({ ...prev, activePage: page }));
+      setState(prev => ({ ...prev, activePage: page, showDocumentation: false }));
     }
   };
 
+  if (state.showDocumentation) {
+    return (
+      <div className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']">
+        {/* Apply the background using an absolutely positioned div to ensure it covers everything */}
+        <div 
+          className="fixed inset-0 z-[-1]" 
+          style={{
+            backgroundImage: 'url("/lovable-uploads/e097fd02-e653-4b86-95e5-09646c987272.png")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }} 
+        />
+        
+        {state.showToast && (
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 relative">
+            <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
+              Discover the Future of Integration. Explore SnapLogic Playground Highlights
+            </div>
+            <button
+              onClick={() => setState(prev => ({ ...prev, showToast: false }))}
+              className="absolute right-4 top-0 h-full bg-transparent text-white border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center hover:opacity-80 transition-opacity duration-200"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 bg-white/90 shadow-sm backdrop-blur-sm">
+          <div className="flex items-center space-x-3">
+            <img src="/sl-logo.svg" alt="SnapLogic Logo" className="h-8 w-8" />
+            <span className="text-lg font-semibold text-gray-800">SnapLogic Playground</span>
+          </div>
+          
+          {/* Navigation links */}
+          <div className="flex items-center space-x-8">
+            <button 
+              onClick={(e) => handleNavigation('blogs', e)}
+              className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'blogs' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+            >
+              BLOGS
+            </button>
+            <button 
+              onClick={(e) => handleNavigation('docs', e)}
+              className={`px-2 py-1 text-sm font-medium transition-colors ${state.showDocumentation ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+            >
+              DOCS
+            </button>
+            <button 
+              onClick={(e) => handleNavigation('tutorial', e)}
+              className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'tutorial' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+            >
+              TUTORIAL
+            </button>
+            <button 
+              onClick={(e) => handleNavigation('playground', e)}
+              className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'playground' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+            >
+              PLAYGROUND
+            </button>
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            <Button 
+              variant="outline" 
+              onClick={handleExport}
+              className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
+            >
+              <span className="mr-2">Export</span>
+              <DownloadCloud className="h-4 w-4 text-blue-600" />
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={openImportDialog}
+              className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
+            >
+              <span className="mr-2">Import</span>
+              <UploadCloud className="h-4 w-4 text-blue-600" />
+            </Button>
+          </div>
+        </div>
+
+        <Documentation onBack={() => setState(prev => ({ ...prev, showDocumentation: false, activePage: 'playground' }))} />
+
+        {/* Footer - Updated with new design and custom icons */}
+        <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white/90 shadow-sm relative backdrop-blur-sm">
+          <div className="flex justify-center items-center">
+            <img 
+              src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7" 
+              alt="Code background" 
+              className="h-6 mx-auto"
+            />
+          </div>
+          
+          <div className="font-['Manrope'] text-[0.69rem] text-gray-300 absolute left-[calc(45%+0px)] tracking-[0.04em] flex items-center h-full z-10 gap-2.5 font-medium">
+            <span className="text-gray-500">Made with</span>
+            <div className="inline-flex items-center gap-2.5">
+              {/* Tea Icon */}
+              <div className="relative w-[18px] h-[18px] animate-pulse transition-transform hover:scale-110">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2 19h18v2H2v-2zm2-8v5c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2zm15 0v5H5v-5h14zm-6.75-7L15 8H9l2.75-4z" fill="#374151"/>
+                  <path d="M19 10h2c0-2.21-1.79-4-4-4h-2l2 4z" fill="#374151"/>
+                </svg>
+              </div>
+              <span className="text-gray-500 font-semibold">&</span>
+              {/* Beer Icon */}
+              <div className="relative w-[18px] h-[18px] animate-bounce transition-transform hover:scale-110">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 3h10v2h-10z" fill="#D97706"/>
+                  <path d="M18 8c-0.4-2.3-2.4-4-4.8-4h-2.4c-2.4 0-4.4 1.7-4.8 4h-1v12h14v-12h-1zM8 18v-8h8v8h-8z" fill="#D97706"/>
+                  <path d="M10 11h4v3h-4z" fill="#ffffff"/>
+                </svg>
+              </div>
+            </div>
+            <span className="text-gray-500">in</span>
+            <span className="text-gray-500 font-semibold hover:text-blue-800 cursor-pointer transition-colors">
+              Tamil Nadu, India
+            </span>
+            <span className="mx-2.5 text-gray-400">|</span>
+            <span className="text-gray-500">Powered by</span>
+            <a 
+              href="https://www.mulecraft.in/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-blue-500 font-semibold hover:text-blue-800 transition-colors relative group"
+            >
+              Mulecraft
+            </a>
+          </div>
+          
+          <style jsx>{`
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+            
+            .animate-pulse {
+              animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+            
+            .animate-bounce {
+              animation: bounce 1s infinite;
+            }
+            
+            @keyframes pulse {
+              0%, 100% { opacity: 1; }
+              50% { opacity: 0.7; }
+            }
+            
+            @keyframes bounce {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-25%); }
+            }
+          `}</style>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']">
-      <div className="fixed inset-0 z-[-1] bg-white" />
+      {/* Apply the background using an absolutely positioned div to ensure it covers everything */}
+      <div 
+        className="fixed inset-0 z-[-1]" 
+        style={{
+          backgroundImage: 'url("/lovable-uploads/e097fd02-e653-4b86-95e5-09646c987272.png")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }} 
+      />
       
       {state.showToast && (
-        <div className="bg-dataweave-blue text-white py-2 relative">
-          <div className="text-center px-12 font-semibold tracking-wide">
-            EXPERIENCE INNOVATION, UNLEASHED. WATCH THE HIGHLIGHTS FROM CONNECT '22
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 relative">
+          <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
+            Discover the Future of Integration. Explore SnapLogic Playground Highlights
           </div>
           <button
             onClick={() => setState(prev => ({ ...prev, showToast: false }))}
-            className="absolute right-4 top-0 h-full flex items-center text-white"
+            className="absolute right-4 top-0 h-full bg-transparent text-white border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center hover:opacity-80 transition-opacity duration-200"
           >
-            <X className="h-4 w-4" />
+            ×
           </button>
         </div>
       )}
 
-      <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 bg-white/90 shadow-sm backdrop-blur-sm">
         <div className="flex items-center space-x-3">
-          <img 
-            src="/lovable-uploads/d11a9e99-9c20-4aed-9025-1973db87d692.png" 
-            alt="DataWeave Logo" 
-            className="h-8" 
-            style={{ marginTop: '3px', marginLeft: '5px' }}
-          />
-          <span className="text-lg font-semibold text-gray-800">DataWeave</span>
+          <img src="/sl-logo.svg" alt="SnapLogic Logo" className="h-8 w-8" />
+          <span className="text-lg font-semibold text-gray-800">SnapLogic Playground</span>
         </div>
         
-        <div className="flex items-center space-x-10">
+        {/* Navigation links - Updated to prevent default behavior */}
+        <div className="flex items-center space-x-8">
           <button 
             onClick={(e) => handleNavigation('blogs', e)}
-            className={`dataweave-nav ${state.activePage === 'blogs' ? 'dataweave-nav-active' : ''}`}
+            className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'blogs' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
           >
             BLOGS
           </button>
           <button 
             onClick={(e) => handleNavigation('docs', e)}
-            className={`dataweave-nav ${state.activePage === 'docs' ? 'dataweave-nav-active' : ''}`}
+            className={`px-2 py-1 text-sm font-medium transition-colors ${state.showDocumentation ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
           >
             DOCS
           </button>
           <button 
             onClick={(e) => handleNavigation('tutorial', e)}
-            className={`dataweave-nav ${state.activePage === 'tutorial' ? 'dataweave-nav-active' : ''}`}
+            className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'tutorial' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
           >
             TUTORIAL
           </button>
           <button 
             onClick={(e) => handleNavigation('playground', e)}
-            className={`dataweave-nav ${state.activePage === 'playground' ? 'dataweave-nav-active' : ''}`}
+            className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'playground' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
           >
             PLAYGROUND
           </button>
@@ -169,59 +332,64 @@ export default function UpdatedCode() {
           <Button 
             variant="outline" 
             onClick={handleExport}
-            className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 h-9 flex items-center justify-center"
+            className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
           >
             <span className="mr-2">Export</span>
-            <DownloadCloud className="h-4 w-4 text-dataweave-blue" />
+            <DownloadCloud className="h-4 w-4 text-blue-600" />
           </Button>
           <Button 
             variant="outline" 
             onClick={openImportDialog}
-            className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 h-9 flex items-center justify-center"
+            className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
           >
             <span className="mr-2">Import</span>
-            <UploadCloud className="h-4 w-4 text-dataweave-blue" />
+            <UploadCloud className="h-4 w-4 text-blue-600" />
           </Button>
         </div>
       </div>
 
-      <div className="flex-1 flex m-0 overflow-hidden">
+      <div className="flex-1 flex mx-4 my-4 rounded-md overflow-hidden shadow-xl">
         {/* Left Panel */}
         <div
           style={{
             width: `${dimensions.leftWidth}px`,
-            minWidth: '250px'
+            minWidth: '250px',
+            borderRight: '1px solid #e5e7eb'
           }}
-          className="dataweave-panel overflow-y-auto"
+          className="overflow-y-auto bg-white/95 backdrop-blur-sm"
         >
-          <div className="dataweave-panel-header">
-            <h2>INPUT EXPLORER</h2>
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Inputs</h2>
             <Button 
-              variant="ghost" 
+              variant="outline" 
               onClick={handleInputDialogOpen}
-              className="h-6 w-6 p-0 rounded-full"
+              className="bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm h-8 px-3 py-1 text-xs"
             >
-              <PlusCircle className="h-5 w-5 text-gray-500" />
+              Add
             </Button>
           </div>
           
-          <div className="p-0">
-            <div className="dataweave-item border-l-2 border-dataweave-blue pl-2">
-              <div className="text-xs font-bold text-dataweave-blue mr-2">JSON</div>
-              <span className="text-gray-700">payload</span>
+          {/* Input items would go here */}
+          <div className="p-2">
+            <div className="p-2 hover:bg-blue-50/60 cursor-pointer rounded-sm transition-colors duration-150 border border-transparent hover:border-blue-100">
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                <span className="text-sm text-gray-700">input.json</span>
+              </div>
             </div>
           </div>
           
+          {/* Input dialog would appear here */}
           {state.isInputDialogOpen && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40">
-              <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4">
+              <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4 transform transition-all duration-200 opacity-100 scale-100">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Add Input</h2>
                 <div className="mb-4">
                   <Label htmlFor="inputName" className="block text-sm font-medium text-gray-700 mb-1">Input Name</Label>
                   <input
                     id="inputName"
                     type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-dataweave-blue focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     placeholder="Enter input name"
                   />
                 </div>
@@ -235,7 +403,7 @@ export default function UpdatedCode() {
                   </Button>
                   <Button
                     onClick={handleInputDialogClose}
-                    className="bg-dataweave-blue hover:bg-opacity-90 text-white"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     Add
                   </Button>
@@ -249,59 +417,55 @@ export default function UpdatedCode() {
         <div
           style={{
             width: `${dimensions.middleWidth}px`,
-            minWidth: '250px'
+            minWidth: '250px',
+            borderRight: '1px solid #e5e7eb'
           }}
-          className="dataweave-panel flex flex-col"
+          className="flex flex-col bg-white/95 backdrop-blur-sm"
         >
-          <div className="dataweave-panel-header">
-            <h2>SCRIPT</h2>
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Script</h2>
             <div className="flex items-center space-x-4">
               <FormatDropdown onFormatChange={handleFormatChange} />
               <Button 
-                variant="ghost" 
+                variant="outline" 
                 onClick={handleScriptDialogOpen}
-                className="h-6 w-6 p-0 rounded-full"
+                className="bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm h-8 px-3 py-1 text-xs"
               >
-                <PlusCircle className="h-5 w-5 text-gray-500" />
+                Add
               </Button>
             </div>
           </div>
           
-          <div className="flex-1">
-            <Editor
-              height="100%"
-              language="javascript"
-              theme="light"
-              value={`%dw 2.0
-output application/json
----
-payload.message`}
-              options={{
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                fontFamily: "'Manrope', 'Monaco', monospace",
-                fontSize: 13,
-                lineNumbers: 'on',
-                renderLineHighlight: 'all',
-                scrollbar: {
-                  vertical: 'visible',
-                  horizontal: 'visible'
-                }
-              }}
-              className="dataweave-editor"
-            />
+          {/* Script content area */}
+          <div className="flex-1 p-4">
+            <div className="bg-white border border-gray-200 rounded-sm h-full shadow-sm hover:shadow-md transition-shadow duration-300">
+              <Editor
+                height="100%"
+                language={state.scriptFormat}
+                theme="light"
+                value=""
+                options={{
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  fontFamily: "'Manrope', 'Monaco', monospace",
+                  fontSize: 13,
+                  padding: { top: 12, bottom: 12 }
+                }}
+              />
+            </div>
           </div>
           
+          {/* Script dialog would appear here */}
           {state.isScriptDialogOpen && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40">
-              <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4">
+              <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4 transform transition-all duration-200 opacity-100 scale-100">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Add Script</h2>
                 <div className="mb-4">
                   <Label htmlFor="scriptName" className="block text-sm font-medium text-gray-700 mb-1">Script Name</Label>
                   <input
                     id="scriptName"
                     type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-dataweave-blue focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     placeholder="Enter script name"
                   />
                 </div>
@@ -315,7 +479,7 @@ payload.message`}
                   </Button>
                   <Button
                     onClick={handleScriptDialogClose}
-                    className="bg-dataweave-blue hover:bg-opacity-90 text-white"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     Add
                   </Button>
@@ -331,18 +495,23 @@ payload.message`}
             width: `${dimensions.rightWidth}px`,
             minWidth: '250px'
           }}
-          className="flex flex-col bg-white border-l border-gray-200 h-full"
+          className="flex flex-col bg-white/95 backdrop-blur-sm"
         >
-          <div className="dataweave-panel-header">
-            <h2>OUTPUT</h2>
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Output</h2>
           </div>
-          <div className="flex-1 overflow-hidden">
-            <div className="h-full">
+          <div className="flex-1 overflow-y-auto p-4">
+            <Label htmlFor="actualOutput" className="block text-sm font-medium text-gray-700 mb-2">
+              Actual Output
+            </Label>
+            <div className="rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white">
               <Editor
-                height="100%"
+                height="30vh"
+                width="100%"
                 language="json"
                 theme="light"
                 value={state.actualOutput}
+                onChange={(value) => setState(prev => ({ ...prev, actualOutput: value }))}
                 options={{
                   minimap: { enabled: false },
                   scrollBeyondLastLine: false,
@@ -351,35 +520,121 @@ payload.message`}
                   automaticLayout: true,
                   fontSize: 13,
                   fontFamily: "'Manrope', 'Monaco', monospace",
-                  readOnly: true,
-                  lineNumbers: 'on',
-                  renderLineHighlight: 'all',
-                  scrollbar: {
-                    vertical: 'visible',
-                    horizontal: 'visible'
-                  }
+                  padding: { top: 12, bottom: 12 }
                 }}
+                className="font-mono"
               />
+            </div>
+            
+            <div className="mt-6">
+              <Label htmlFor="expectedOutput" className="block text-sm font-medium text-gray-700 mb-2">
+                Expected Output
+              </Label>
+              <div className="rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white">
+                <Editor
+                  height="20vh"
+                  width="100%"
+                  language="json"
+                  theme="light"
+                  value=""
+                  options={{
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'on',
+                    wrappingIndent: 'indent',
+                    automaticLayout: true,
+                    fontSize: 13,
+                    fontFamily: "'Manrope', 'Monaco', monospace",
+                    padding: { top: 12, bottom: 12 }
+                  }}
+                  className="font-mono"
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
       
-      <div className="border-t border-gray-200 py-2 px-6 text-xs text-gray-600 bg-white text-center">
-        ©2023 MuleSoft LLC, a Salesforce company
+      {/* Footer - Updated with new design and custom icons */}
+      <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white/90 shadow-sm relative backdrop-blur-sm">
+        <div className="flex justify-center items-center">
+          <img 
+            src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7" 
+            alt="Code background" 
+            className="h-6 mx-auto"
+          />
+        </div>
+        
+        <div className="font-['Manrope'] text-[0.69rem] text-gray-300 absolute left-[calc(45%+0px)] tracking-[0.04em] flex items-center h-full z-10 gap-2.5 font-medium">
+          <span className="text-gray-500">Made with</span>
+          <div className="inline-flex items-center gap-2.5">
+            {/* Tea Icon */}
+            <div className="relative w-[18px] h-[18px] animate-pulse transition-transform hover:scale-110">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 19h18v2H2v-2zm2-8v5c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2zm15 0v5H5v-5h14zm-6.75-7L15 8H9l2.75-4z" fill="#374151"/>
+                <path d="M19 10h2c0-2.21-1.79-4-4-4h-2l2 4z" fill="#374151"/>
+              </svg>
+            </div>
+            <span className="text-gray-500 font-semibold">&</span>
+            {/* Beer Icon */}
+            <div className="relative w-[18px] h-[18px] animate-bounce transition-transform hover:scale-110">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 3h10v2h-10z" fill="#D97706"/>
+                <path d="M18 8c-0.4-2.3-2.4-4-4.8-4h-2.4c-2.4 0-4.4 1.7-4.8 4h-1v12h14v-12h-1zM8 18v-8h8v8h-8z" fill="#D97706"/>
+                <path d="M10 11h4v3h-4z" fill="#ffffff"/>
+              </svg>
+            </div>
+          </div>
+          <span className="text-gray-500">in</span>
+          <span className="text-gray-500 font-semibold hover:text-blue-800 cursor-pointer transition-colors">
+            Tamil Nadu, India
+          </span>
+          <span className="mx-2.5 text-gray-400">|</span>
+          <span className="text-gray-500">Powered by</span>
+          <a 
+            href="https://www.mulecraft.in/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-blue-500 font-semibold hover:text-blue-800 transition-colors relative group"
+          >
+            Mulecraft
+          </a>
+        </div>
+        
+        <style jsx>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+          
+          .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          }
+          
+          .animate-bounce {
+            animation: bounce 1s infinite;
+          }
+          
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+          }
+          
+          @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-25%); }
+          }
+        `}</style>
       </div>
 
-      {/* Import Project Dialog */}
+      {/* Import Project Dialog - Completely redesigned */}
       <Dialog open={state.importDialogOpen} onOpenChange={closeImportDialog}>
-        <DialogContent className="sm:max-w-md w-full bg-white p-0 rounded-sm overflow-hidden border border-gray-300 shadow-xl">
+        <DialogContent className="sm:max-w-md w-full max-h-[90vh] bg-white p-0 rounded-none overflow-hidden border border-gray-300 shadow-xl">
           <DialogHeader className="px-6 pt-6 pb-2 border-b border-gray-200">
             <DialogTitle className="text-2xl font-bold text-gray-800">Import project</DialogTitle>
           </DialogHeader>
           
           <div className="p-6">
-            <div className="border-2 border-dashed border-gray-300 rounded-sm p-10 flex flex-col items-center justify-center text-center hover:border-gray-400 transition-colors duration-200 cursor-pointer">
-              <div className="mb-4 text-dataweave-blue">
-                <UploadCloud className="mx-auto h-14 w-14 opacity-80" />
+            <div className="border-2 border-dashed border-gray-300 rounded-none p-10 flex flex-col items-center justify-center text-center hover:border-gray-400 transition-colors duration-200 cursor-pointer">
+              <div className="mb-4 text-blue-500">
+                <UploadCloud className="mx-auto h-14 w-14 text-blue-500 opacity-80" />
               </div>
               <p className="text-base font-medium text-gray-600 mb-1">
                 Drop project zip here or click to upload
@@ -403,7 +658,7 @@ payload.message`}
             <Button 
               variant="outline" 
               onClick={closeImportDialog} 
-              className="px-5 py-2 text-sm rounded-sm bg-white border border-gray-300 hover:bg-gray-100 text-gray-700"
+              className="px-5 py-2 text-sm rounded-none bg-white border border-gray-300 hover:bg-gray-100 text-gray-700"
             >
               Cancel
             </Button>

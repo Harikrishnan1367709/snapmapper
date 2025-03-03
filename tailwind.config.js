@@ -55,13 +55,20 @@ module.exports = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))'
         },
-        // Adding DataWeave color palette
-        dataweave: {
-          blue: '#00A4DD',
-          dark: '#333333',
-          light: '#f8f9fa',
-          border: '#e5e7eb',
-          highlight: '#e6f7fc'
+        // Adding new color palette
+        purple: {
+          light: '#9b87f5',
+          DEFAULT: '#7c64e8',
+          dark: '#5a3fd6'
+        },
+        slate: {
+          50: '#f8fafc',
+          100: '#f1f5f9',
+          900: '#0f172a'
+        },
+        indigo: {
+          DEFAULT: '#4f46e5',
+          dark: '#3730a3'
         }
       },
       backgroundImage: {
