@@ -1,3 +1,4 @@
+<lov-code>
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button"
@@ -5,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { FormatDropdown } from './FormatDropdown';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Coffee, Beer, UploadCloud, DownloadCloud } from "lucide-react";
-import { Documentation } from '@/components/Documentation';
+import { Documentation } from "@/components/Documentation";
 
 export default function UpdatedCode() {
   const resizeTimeoutRef = useRef(null);
@@ -635,11 +636,4 @@ export default function UpdatedCode() {
               <div className="mb-4 text-blue-500">
                 <UploadCloud className="mx-auto h-14 w-14 text-blue-500 opacity-80" />
               </div>
-              <p className="text-base">Drag and drop your project file here or click to browse</p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
+              <p className="text-
