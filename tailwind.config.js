@@ -54,16 +54,34 @@ module.exports = {
           '3': 'hsl(var(--chart-3))',
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))'
+        },
+        // Adding new color palette
+        purple: {
+          light: '#9b87f5',
+          DEFAULT: '#7c64e8',
+          dark: '#5a3fd6'
+        },
+        slate: {
+          50: '#f8fafc',
+          100: '#f1f5f9',
+          900: '#0f172a'
+        },
+        indigo: {
+          DEFAULT: '#4f46e5',
+          dark: '#3730a3'
         }
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'gradient-blur': 'linear-gradient(to right, rgba(251,221,186,0.6), rgba(254,100,121,0.6))',
+        'gradient-docs': 'linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)',
       },
       animation: {
         'fade-in': 'fadeIn 0.4s ease-out forwards',
         'scale-in': 'scaleIn 0.4s ease-out forwards',
         'slide-in': 'slideIn 0.4s ease-out forwards',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       keyframes: {
         fadeIn: {
@@ -79,6 +97,11 @@ module.exports = {
           to: { transform: 'translateY(0)', opacity: 1 },
         },
       },
+      boxShadow: {
+        'subtle': '0 2px 10px rgba(0, 0, 0, 0.05)',
+        'glass': '0 8px 32px rgba(0, 0, 0, 0.1)',
+        'highlight': '0 0 15px rgba(155, 135, 245, 0.5)',
+      }
     }
   },
   plugins: [require("tailwindcss-animate")],
