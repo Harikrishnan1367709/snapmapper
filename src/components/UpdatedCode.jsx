@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button"
@@ -6,7 +5,7 @@ import { Label } from "@/components/ui/label"
 import { FormatDropdown } from './FormatDropdown';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Coffee, Beer, UploadCloud, DownloadCloud } from "lucide-react";
-import { Documentation } from './Documentation';
+import { Documentation } from '@/components/Documentation';
 
 export default function UpdatedCode() {
   const resizeTimeoutRef = useRef(null);
@@ -636,35 +635,4 @@ export default function UpdatedCode() {
               <div className="mb-4 text-blue-500">
                 <UploadCloud className="mx-auto h-14 w-14 text-blue-500 opacity-80" />
               </div>
-              <p className="text-base font-medium text-gray-600 mb-1">
-                Drop project zip here or click to upload
-              </p>
-              <p className="text-sm text-gray-500">
-                Supported format: .zip
-              </p>
-            </div>
-            
-            <div className="mt-6">
-              <p className="text-center text-sm text-red-500 mb-1">
-                Upload functionality is only intended for playground exported projects
-              </p>
-              <p className="text-center text-sm text-gray-500">
-                Importing modified files may yield an invalid project.
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex justify-end p-4 border-t border-gray-200 bg-gray-50">
-            <Button 
-              variant="outline" 
-              onClick={closeImportDialog} 
-              className="px-5 py-2 text-sm rounded-none bg-white border border-gray-300 hover:bg-gray-100 text-gray-700"
-            >
-              Cancel
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
+              <p className="text-base

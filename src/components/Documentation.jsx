@@ -118,14 +118,14 @@ export function Documentation({ onBack }) {
       }
       
       .doc-scrollbar::-webkit-scrollbar-track {
-        background: #fff;
+        background: #222;
         border-radius: 4px;
       }
       
       .doc-scrollbar::-webkit-scrollbar-thumb {
         background: #3b82f6; /* Blue scrollbar thumb */
         border-radius: 4px;
-        border: 2px solid #fff;
+        border: 2px solid #222;
       }
       
       .doc-scrollbar::-webkit-scrollbar-thumb:hover {
@@ -557,7 +557,38 @@ export function Documentation({ onBack }) {
             </div>
             
             <CodeBlock 
-              code={`// Sample complex JSON structure\nconst testData = {\n  "users": [\n    {\n      "name": "John",\n      "age": 30,\n      "role": "admin",\n      "permissions": ["read", "write", "delete"],\n      "friends": [\n        { "name": "Mike", "status": "active" },\n        { "name": "Sarah", "status": "inactive" }\n      ]\n    }\n  ]\n};\n\n// JSONPath examples\n\n// Nested array filtering and mapping\n$.users[?(@.age>25)].friends[?(@.status=='active')].name\n\n// Multiple conditions with logical operators\n$.users[?(@.age>25 && @.role=='admin')].permissions[*]\n\n// Recursive descent to find all price properties\n$..price`}
+              code={`// Sample complex JSON structure
+const testData = {
+  "users": [
+    {
+      "name": "John",
+      "age": 30,
+      "role": "admin",
+      "permissions": ["read", "write", "delete"],
+      "friends": [
+        {"name": "Sarah", "age": 28},
+        {"name": "Mike", "age": 32}
+      ]
+    },
+    {
+      "name": "Lisa",
+      "age": 25,
+      "role": "user",
+      "permissions": ["read"],
+      "friends": [
+        {"name": "John", "age": 30},
+        {"name": "David", "age": 27}
+      ]
+    }
+  ]
+}
+
+// Different JSONPath expressions to access data
+$.users[0].name                   // Result: "John"
+$.users[*].name                   // Result: ["John", "Lisa"]
+$.users[?(@.age > 25)].name       // Result: ["John"]
+$.users[0].friends[*].name        // Result: ["Sarah", "Mike"]
+$..name                           // Result: ["John", "Sarah", "Mike", "Lisa", "John", "David"]`}
               sectionId="json-path-example"
             />
           </div>
@@ -567,33 +598,41 @@ export function Documentation({ onBack }) {
         return (
           <div>
             <p className="mb-6 text-gray-700 leading-relaxed">
-              The match operator provides a concise way to perform pattern matching and conditional checks, similar to switch statements but with more powerful pattern matching capabilities.
+              The match operator provides powerful pattern matching capabilities for string data, allowing for flexible text filtering and extraction.
             </p>
             
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-5 rounded-lg mb-6 border border-blue-100">
-              <h3 className="text-lg font-semibold mb-4 text-indigo-700">Match Operator Patterns</h3>
-              <ul className="space-y-3 text-gray-700">
-                <li className="flex">
-                  <span className="font-medium mr-2">•</span>
-                  <span><strong>Object Patterns</strong> - Match specific object structures</span>
-                </li>
-                <li className="flex">
-                  <span className="font-medium mr-2">•</span>
-                  <span><strong>Regular Expressions</strong> - Match string patterns</span>
-                </li>
-                <li className="flex">
-                  <span className="font-medium mr-2">•</span>
-                  <span><strong>Range Patterns</strong> - Match value ranges like <code className="text-xs bg-blue-100 px-1 py-0.5 rounded">3..5</code></span>
-                </li>
-                <li className="flex">
-                  <span className="font-medium mr-2">•</span>
-                  <span><strong>Wildcard Pattern</strong> - Catch-all pattern with underscore <code className="text-xs bg-blue-100 px-1 py-0.5 rounded">_</code></span>
-                </li>
+            <div className="bg-blue-50 rounded-lg p-4 mb-6 border-l-4 border-blue-500">
+              <h3 className="text-lg font-semibold mb-3 text-blue-700">Key Match Operator Features</h3>
+              <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                <li>Support for basic string equality checks</li>
+                <li>Regular expression pattern matching</li>
+                <li>Case-insensitive matching options</li>
+                <li>Extraction of matched groups</li>
               </ul>
             </div>
             
             <CodeBlock 
-              code={`// Sample JSON for match operations\n{\n  "user": {\n    "type": "admin",\n    "active": true,\n    "level": 4\n  },\n  "message": "ERROR: Database connection failed"\n}\n\n// Match example for user object\nmatch $.user {\n  { "type": "admin", "active": true } => "Active Administrator"\n  { "type": "user", "level": 3..5 } => "Advanced User"\n  { "type": "guest" } => "Guest Access"\n  _ => "Unknown User Type"\n}\n\n// Match example for message string with regex\nmatch $.message {\n  /^ERROR:/ => "Error Message"\n  /^WARN:/ => "Warning Message"\n  /^INFO:/ => "Info Message"\n  _ => "Unknown Message Type"\n}`}
+              code={`// Sample input
+const text = "Hello World 123";
+const emails = ["user@example.com", "admin@company.org", "test123@test.co.uk"];
+
+// Basic string matching
+$text == "Hello World 123"           // true
+$text.match("World")                 // ["World"]
+$text.match(/\\d+/)                   // ["123"]
+
+// Case insensitive matching
+$text.match(/hello/i)                // ["Hello"]
+
+// Extract all email domains
+emails.map(email => {
+  const matches = email.match(/@([\\w.-]+)/);
+  return matches ? matches[1] : null;
+})                                   // ["example.com", "company.org", "test.co.uk"]
+
+// Replace patterns
+$text.replace(/\\d+/, "456")          // "Hello World 456"
+$text.replace(/world/i, "Universe")  // "Hello Universe 123"`}
               sectionId="match-operator-example"
             />
           </div>
@@ -603,45 +642,39 @@ export function Documentation({ onBack }) {
         return (
           <div>
             <p className="mb-6 text-gray-700 leading-relaxed">
-              Global operations provide utility functions for handling common tasks like encoding/decoding, type checking, and evaluation.
+              Global operations provide system-wide functions that can be used across different contexts within SnapLogic scripts.
             </p>
             
-            <div className="mb-6 grid md:grid-cols-2 gap-4">
-              <div className="bg-white rounded-lg shadow-md p-5 border border-gray-200">
-                <h3 className="text-lg font-semibold mb-3 text-blue-700">Encoding Functions</h3>
-                <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                  <li><code className="text-xs bg-blue-50 px-1 py-0.5 rounded">encodeURIComponent()</code> - Encode URI component</li>
-                  <li><code className="text-xs bg-blue-50 px-1 py-0.5 rounded">decodeURIComponent()</code> - Decode URI component</li>
-                </ul>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow-md p-5 border border-gray-200">
-                <h3 className="text-lg font-semibold mb-3 text-blue-700">Type Operations</h3>
-                <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                  <li><code className="text-xs bg-blue-50 px-1 py-0.5 rounded">typeof</code> - Check data type</li>
-                  <li><code className="text-xs bg-blue-50 px-1 py-0.5 rounded">isNaN()</code> - Check for not-a-number</li>
-                </ul>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow-md p-5 border border-gray-200">
-                <h3 className="text-lg font-semibold mb-3 text-blue-700">Parsing Functions</h3>
-                <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                  <li><code className="text-xs bg-blue-50 px-1 py-0.5 rounded">parseInt()</code> - Parse string to integer</li>
-                  <li><code className="text-xs bg-blue-50 px-1 py-0.5 rounded">parseFloat()</code> - Parse string to float</li>
-                </ul>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow-md p-5 border border-gray-200">
-                <h3 className="text-lg font-semibold mb-3 text-blue-700">Evaluation</h3>
-                <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                  <li><code className="text-xs bg-blue-50 px-1 py-0.5 rounded">eval()</code> - Evaluate expressions</li>
-                  <li><code className="text-xs bg-blue-50 px-1 py-0.5 rounded">jsonPath()</code> - JSONPath utility</li>
-                </ul>
-              </div>
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3 text-blue-700">Available Global Functions</h3>
+              <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                <li>UUID generation for creating unique identifiers</li>
+                <li>Environment variable access for configuration</li>
+                <li>Logging functions for debugging and monitoring</li>
+                <li>Type conversion utilities for data transformation</li>
+              </ul>
             </div>
             
             <CodeBlock 
-              code={`// URI Component operations\ndecodeURIComponent($.encodedString)\nencodeURIComponent($.rawString)\n\n// Parsing operations\nparseInt($.integerString)\nparseFloat($.floatString)\n\n// Type checking\ntypeof $.simpleArray  // Result: "array"\ntypeof $.user        // Result: "object"\nisNaN($.invalidNumber) // Result: true\n\n// JSONPath utility\njsonPath($, "$.user.profile.name") // Result: "John Doe"\n\n// Evaluation\neval("5 + 2")  // Result: 7\neval("$.user.scores[0] > 80") // Result: true`}
+              code={`// Generate a UUID
+const newId = generateUUID();  // e.g. "550e8400-e29b-41d4-a716-446655440000"
+
+// Access environment variables
+const apiKey = env.get("API_KEY");
+const debugMode = env.get("DEBUG_MODE", "false") === "true";
+
+// Logging at different levels
+log.debug("Debug information");
+log.info("Process started");
+log.warn("Warning: resource usage high");
+log.error("Failed to connect to external API");
+
+// Type conversions
+const stringValue = toString(42);                 // "42"
+const numberValue = toNumber("42.5");             // 42.5
+const booleanValue = toBoolean("true");           // true
+const dateValue = toDate("2024-03-28");           // Date object
+const jsonValue = parseJson('{"name":"John"}');   // {name: "John"}`}
               sectionId="global-operations-example"
             />
           </div>
@@ -651,41 +684,46 @@ export function Documentation({ onBack }) {
         return (
           <div>
             <p className="mb-6 text-gray-700 leading-relaxed">
-              SnapLogic Playground includes additional tools to enhance productivity and collaboration:
+              SnapLogic Playground includes several advanced features that cater to complex integration scenarios and specialized requirements.
             </p>
             
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-gradient-to-br from-white to-blue-50 rounded-lg shadow-md p-5 border border-blue-100 hover:shadow-lg transition-shadow duration-200 flex flex-col">
-                <h3 className="text-lg font-semibold mb-3 text-blue-700">Import/Export Capability</h3>
-                <ul className="list-disc pl-5 space-y-2 text-gray-700 flex-grow">
-                  <li>Export projects for sharing or backup.</li>
-                  <li>Import functionality supports ZIP files and VSCode integration.</li>
+            <div className="grid md:grid-cols-2 gap-6 mb-6">
+              <div className="bg-white rounded-lg shadow-md p-5 border border-gray-200 hover:shadow-lg transition-shadow duration-200">
+                <h3 className="text-lg font-semibold mb-3 text-blue-700">Error Handling</h3>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Try-catch mechanisms for graceful error recovery</li>
+                  <li>Detailed error reporting with context information</li>
+                  <li>Custom error types for specific scenarios</li>
                 </ul>
-                <div className="mt-4 text-blue-500">
-                  <ExternalLink className="h-4 w-4 inline-block mr-1" /> Learn more
-                </div>
               </div>
               
-              <div className="bg-gradient-to-br from-white to-blue-50 rounded-lg shadow-md p-5 border border-blue-100 hover:shadow-lg transition-shadow duration-200 flex flex-col">
-                <h3 className="text-lg font-semibold mb-3 text-blue-700">Debugging Tools</h3>
-                <ul className="list-disc pl-5 space-y-2 text-gray-700 flex-grow">
-                  <li>Real-time validation during script development.</li>
-                  <li>Line-by-line debugging for error identification.</li>
+              <div className="bg-white rounded-lg shadow-md p-5 border border-gray-200 hover:shadow-lg transition-shadow duration-200">
+                <h3 className="text-lg font-semibold mb-3 text-blue-700">Performance Optimization</h3>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Lazy evaluation for improved processing efficiency</li>
+                  <li>Parallel processing for high-volume data operations</li>
+                  <li>Memory usage optimization techniques</li>
                 </ul>
-                <div className="mt-4 text-blue-500">
-                  <ExternalLink className="h-4 w-4 inline-block mr-1" /> Learn more
-                </div>
+              </div>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-lg shadow-md p-5 border border-gray-200 hover:shadow-lg transition-shadow duration-200">
+                <h3 className="text-lg font-semibold mb-3 text-blue-700">Custom Functions</h3>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Define reusable functions for common operations</li>
+                  <li>Import external libraries and modules</li>
+                  <li>Create domain-specific function collections</li>
+                </ul>
               </div>
               
-              <div className="bg-gradient-to-br from-white to-blue-50 rounded-lg shadow-md p-5 border border-blue-100 hover:shadow-lg transition-shadow duration-200 flex flex-col">
-                <h3 className="text-lg font-semibold mb-3 text-blue-700">Resizable Containers</h3>
-                <ul className="list-disc pl-5 space-y-2 text-gray-700 flex-grow">
-                  <li>Added resizable containers for left, right, and bottom panels.</li>
-                  <li>Customize workspace to fit your workflow needs.</li>
+              <div className="bg-white rounded-lg shadow-md p-5 border border-gray-200 hover:shadow-lg transition-shadow duration-200">
+                <h3 className="text-lg font-semibold mb-3 text-blue-700">Advanced Data Mapping</h3>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Complex data structure transformation utilities</li>
+                  <li>Advanced pattern matching and validation</li>
+                  <li>Schema-based data mapping and validation</li>
                 </ul>
-                <div className="mt-4 text-blue-500">
-                  <ExternalLink className="h-4 w-4 inline-block mr-1" /> Learn more
-                </div>
               </div>
             </div>
           </div>
@@ -694,54 +732,42 @@ export function Documentation({ onBack }) {
       case 'benefits':
         return (
           <div>
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white rounded-lg shadow-md p-5 border-t-4 border-green-500 hover:shadow-lg transition-shadow duration-200">
-                <h3 className="text-lg font-semibold mb-4 text-green-700">Development Efficiency</h3>
-                <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                  <li>Rapid prototyping using pre-built templates.</li>
-                  <li>Real-time validation saves debugging time.</li>
-                  <li>Iterative development with immediate feedback.</li>
-                </ul>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow-md p-5 border-t-4 border-blue-500 hover:shadow-lg transition-shadow duration-200">
-                <h3 className="text-lg font-semibold mb-4 text-blue-700">Learning Support</h3>
-                <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                  <li>Built-in tutorials and interactive documentation.</li>
-                  <li>Real-time feedback ensures quick learning.</li>
-                  <li>Try concepts without affecting production systems.</li>
-                </ul>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow-md p-5 border-t-4 border-purple-500 hover:shadow-lg transition-shadow duration-200">
-                <h3 className="text-lg font-semibold mb-4 text-purple-700">Enterprise Integration</h3>
-                <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                  <li>Standardized workflows and reusable components.</li>
-                  <li>Scalable solutions tailored to enterprise needs.</li>
-                  <li>Secure development environment for sensitive data.</li>
-                </ul>
-              </div>
-            </div>
+            <p className="mb-6 text-gray-700 leading-relaxed">
+              SnapLogic Playground offers significant advantages for different types of users involved in integration projects.
+            </p>
             
-            <div className="bg-blue-50 p-5 rounded-lg border border-blue-100 mb-6">
-              <h3 className="text-lg font-semibold mb-3 text-blue-700">Measurable Benefits</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <p className="text-3xl font-bold text-blue-600 mb-2">60%</p>
-                  <p className="text-sm text-gray-600">Faster Development</p>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <p className="text-3xl font-bold text-blue-600 mb-2">40%</p>
-                  <p className="text-sm text-gray-600">Reduced Errors</p>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <p className="text-3xl font-bold text-blue-600 mb-2">75%</p>
-                  <p className="text-sm text-gray-600">Improved Readability</p>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <p className="text-3xl font-bold text-blue-600 mb-2">80%</p>
-                  <p className="text-sm text-gray-600">User Satisfaction</p>
-                </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-lg shadow-md p-5 border border-gray-200 hover:shadow-lg transition-shadow duration-200">
+                <h3 className="text-lg font-semibold mb-3 text-blue-700">For Developers</h3>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Rapid prototyping without deployment overhead</li>
+                  <li>Real-time feedback during script development</li>
+                  <li>No risk of affecting production environments</li>
+                  <li>Learning platform for SnapLogic capabilities</li>
+                  <li>Simplified debugging and troubleshooting</li>
+                </ul>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-md p-5 border border-gray-200 hover:shadow-lg transition-shadow duration-200">
+                <h3 className="text-lg font-semibold mb-3 text-blue-700">For Business Analysts</h3>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Low barrier to entry for non-technical users</li>
+                  <li>Visualization of data transformations</li>
+                  <li>Ability to validate business rules without IT</li>
+                  <li>Data exploration without coding complexity</li>
+                  <li>Greater independence in integration projects</li>
+                </ul>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-md p-5 border border-gray-200 hover:shadow-lg transition-shadow duration-200">
+                <h3 className="text-lg font-semibold mb-3 text-blue-700">For Organizations</h3>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Accelerated integration development cycles</li>
+                  <li>Reduced training costs for new team members</li>
+                  <li>Standardized approaches to common challenges</li>
+                  <li>Knowledge sharing across different projects</li>
+                  <li>Improved collaboration between IT and business</li>
+                </ul>
               </div>
             </div>
           </div>
@@ -750,411 +776,319 @@ export function Documentation({ onBack }) {
       case 'future-enhancements':
         return (
           <div>
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-5 text-gray-800 pb-2 border-b border-gray-200">Planned Improvements</h3>
+            <p className="mb-6 text-gray-700 leading-relaxed">
+              The SnapLogic Playground roadmap includes several planned improvements to enhance user experience and expand functionality.
+            </p>
+            
+            <div className="bg-blue-50 rounded-lg p-5 mb-6 border border-blue-200">
+              <h3 className="text-lg font-semibold mb-4 text-blue-700">Upcoming Features</h3>
               
-              <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow-md p-5 border-l-4 border-blue-500">
-                  <h4 className="font-medium text-blue-700 mb-3">1. Extended Functionality</h4>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-medium text-blue-700 mb-2">Enhanced User Interface</h4>
                   <ul className="list-disc pl-6 space-y-2 text-gray-700">
-                    <li>Advanced data transformation capabilities.</li>
-                    <li>Implement operators to work with complex data structures.</li>
-                    <li>Implement transformations for complex multi-function scripts.</li>
-                    <li>Provide color difference for working script in the middle panel.</li>
+                    <li>Dark mode and customizable themes</li>
+                    <li>Split-pane view for input and output comparison</li>
+                    <li>Expandable panels for larger screens</li>
+                    <li>Improved keyboard shortcuts</li>
                   </ul>
                 </div>
                 
-                <div className="bg-white rounded-lg shadow-md p-5 border-l-4 border-green-500">
-                  <h4 className="font-medium text-green-700 mb-3">2. Enhanced Debugging</h4>
+                <div>
+                  <h4 className="font-medium text-blue-700 mb-2">Collaborative Features</h4>
                   <ul className="list-disc pl-6 space-y-2 text-gray-700">
-                    <li>Breakpoint support and variable inspection.</li>
-                    <li>Step-by-step execution with value tracking.</li>
-                    <li>Advanced error reporting with inline suggestions.</li>
+                    <li>Shared workspaces for team collaboration</li>
+                    <li>Real-time co-editing capabilities</li>
+                    <li>Version control integration</li>
+                    <li>Comments and annotations</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-6 mt-6">
+                <div>
+                  <h4 className="font-medium text-blue-700 mb-2">Advanced Integration</h4>
+                  <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                    <li>Sample API connectors library</li>
+                    <li>Expanded transformation templates</li>
+                    <li>Direct deployment to SnapLogic platform</li>
+                    <li>Integration with other development tools</li>
                   </ul>
                 </div>
                 
-                <div className="bg-white rounded-lg shadow-md p-5 border-l-4 border-purple-500">
-                  <h4 className="font-medium text-purple-700 mb-3">3. Collaboration Features</h4>
+                <div>
+                  <h4 className="font-medium text-blue-700 mb-2">Developer Experience</h4>
                   <ul className="list-disc pl-6 space-y-2 text-gray-700">
-                    <li>Real-time collaboration with multiple users.</li>
-                    <li>Version history and change tracking.</li>
-                    <li>Commenting and annotation system.</li>
+                    <li>Advanced code completion suggestions</li>
+                    <li>Integrated debugging tools</li>
+                    <li>Performance profiling capabilities</li>
+                    <li>Custom function libraries and sharing</li>
                   </ul>
                 </div>
               </div>
             </div>
+            
+            <p className="text-gray-700 leading-relaxed">
+              These enhancements will continue to make SnapLogic Playground an even more powerful tool for integration development, 
+              learning, and collaboration across organizations.
+            </p>
           </div>
         );
       
       case 'conclusion':
         return (
           <div>
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg mb-8 border border-blue-100">
-              <h3 className="text-2xl font-bold text-blue-800 mb-4">SnapLogic Playground</h3>
-              <p className="text-lg text-gray-700 leading-relaxed mb-4">
-                SnapLogic Playground is a powerful tool for integration developers, business analysts, and system architects. It simplifies 
-                complex integration tasks through its visual interface and advanced features.
-              </p>
-              <p className="text-lg text-gray-700 leading-relaxed mb-4">
-                By offering a dedicated environment for testing and learning, the Playground ensures users can develop reliable and scalable 
-                integration solutions with confidence.
-              </p>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                With future enhancements on the horizon, it aims to remain a leading platform in the integration space, continuing to evolve
-                to meet the needs of developers and businesses alike.
-              </p>
+            <p className="mb-6 text-gray-700 leading-relaxed">
+              SnapLogic Playground represents a significant advancement in making integration development more accessible, efficient, and 
+              collaborative for organizations of all sizes.
+            </p>
+            
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3 text-blue-700">Key Takeaways</h3>
+              <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                <li>Provides a safe, dedicated environment for learning and experimentation</li>
+                <li>Supports a comprehensive range of data transformation and integration operations</li>
+                <li>Offers benefits for developers, business analysts, and organizations as a whole</li>
+                <li>Continues to evolve with new features and capabilities</li>
+              </ul>
             </div>
             
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="bg-white rounded-lg shadow-md p-5 border border-gray-200 hover:shadow-lg transition-shadow duration-200 text-center">
-                <div className="text-blue-500 mb-3">
-                  <svg className="h-12 w-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold mb-2 text-gray-800">Power & Simplicity</h3>
-                <p className="text-gray-600">
-                  Complex integrations made simple with an intuitive interface.
-                </p>
-              </div>
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-lg border border-blue-100">
+              <h3 className="text-lg font-semibold mb-3 text-blue-700">Getting Started</h3>
+              <p className="mb-4 text-gray-700 leading-relaxed">
+                Experience SnapLogic Playground today by:
+              </p>
+              <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                <li>Exploring the documentation and tutorials</li>
+                <li>Trying the provided examples and sample transformations</li>
+                <li>Creating your own integration scenarios</li>
+                <li>Sharing feedback and suggestions for future improvements</li>
+              </ul>
               
-              <div className="bg-white rounded-lg shadow-md p-5 border border-gray-200 hover:shadow-lg transition-shadow duration-200 text-center">
-                <div className="text-blue-500 mb-3">
-                  <svg className="h-12 w-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold mb-2 text-gray-800">Customizable</h3>
-                <p className="text-gray-600">
-                  Adapt to your specific needs with flexible configuration options.
-                </p>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow-md p-5 border border-gray-200 hover:shadow-lg transition-shadow duration-200 text-center">
-                <div className="text-blue-500 mb-3">
-                  <svg className="h-12 w-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold mb-2 text-gray-800">Collaborative</h3>
-                <p className="text-gray-600">
-                  Work together with team members on complex integration projects.
-                </p>
+              <div className="mt-6 flex justify-center">
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md flex items-center gap-2"
+                  onClick={() => setActiveSection('introduction')}
+                >
+                  <Home className="h-4 w-4" />
+                  <span>Start Exploring</span>
+                </Button>
               </div>
             </div>
           </div>
         );
-      
+
       default:
-        return <p className="text-gray-700">No content available for this section.</p>;
+        return (
+          <div className="p-4 border rounded-md bg-blue-50">
+            <p className="text-gray-700">Select a section from the navigation menu to view its content.</p>
+          </div>
+        );
     }
   };
 
-  // Mobile menu toggle
-  const toggleMobileSidebar = () => {
-    setShowMobileSidebar(!showMobileSidebar);
-  };
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      // Ctrl/Cmd + K to focus search
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        focusSearch();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  // Handle search input changes safely
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-  };
-
   return (
-    <div className="flex h-full bg-gradient-to-br from-gray-50 to-blue-50/30 relative">
-      {/* Mobile menu button - only visible on small screens */}
-      <button
-        className="fixed top-20 left-4 z-50 md:hidden bg-white p-2 rounded-full shadow-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
-        onClick={toggleMobileSidebar}
+    <div className="flex h-full">
+      {/* Mobile sidebar toggle for smaller screens */}
+      <div className="md:hidden fixed top-16 left-4 z-50">
+        <Button 
+          variant="outline" 
+          className="bg-white shadow-md"
+          onClick={() => setShowMobileSidebar(!showMobileSidebar)}
+        >
+          {showMobileSidebar ? <X className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        </Button>
+      </div>
+      
+      {/* Documentation sidebar - with mobile responsive behavior */}
+      <div 
+        className={`fixed md:relative md:block bg-white shadow-lg md:shadow-none h-full overflow-y-auto doc-scrollbar transition-all duration-300 z-40 w-72 
+                   ${showMobileSidebar ? 'left-0' : '-left-72'} md:left-0 md:w-72`}
       >
-        {showMobileSidebar ? (
-          <X className="h-5 w-5 text-blue-600" />
-        ) : (
-          <ChevronRight className="h-5 w-5 text-blue-600" />
-        )}
-      </button>
-
-      {/* Sidebar - enhanced with better styling */}
-      <div className={`w-72 bg-[#1a1a1a] overflow-y-auto flex flex-col h-full transition-all duration-300 ease-in-out shadow-lg rounded-r-xl doc-scrollbar
-        ${showMobileSidebar ? 'translate-x-0' : '-translate-x-full'} 
-        md:translate-x-0 md:static fixed left-0 top-0 bottom-0 z-40`}
-      >
-        <div className="sticky top-0 z-10 bg-[#232323] border-b border-gray-700 p-4">
-          <div className="flex items-center justify-between mb-4">
-            <Button 
-              variant="default" 
-              size="sm" 
-              className="flex items-center justify-center px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 border-none transition-colors duration-200 shadow-md w-full font-medium"
-              onClick={onBack}
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Playground
-            </Button>
-          </div>
+        <div className="sticky top-0 bg-white p-4 border-b border-gray-200 z-10">
+          <Button
+            variant="outline"
+            className="mb-4 w-full justify-start text-gray-600 hover:text-blue-600"
+            onClick={onBack}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            <span>Back to Playground</span>
+          </Button>
           
-          <div className="relative mt-4 group">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-400" />
+          <div className="relative">
             <input
               ref={searchInputRef}
               type="text"
-              placeholder="Search documentation... "
-              className="w-full bg-[#333333] rounded-lg border border-gray-700 py-2 pl-10 pr-10 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm group-focus-within:shadow-md"
+              placeholder="Search documentation..."
+              className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               value={searchQuery}
-              onChange={handleSearchChange}
-              onFocus={() => setIsSearching(true)}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             {searchQuery && (
-              <button
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center justify-center h-6 w-6 text-gray-400 hover:text-gray-300"
+              <Button
+                variant="ghost"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
                 onClick={() => setSearchQuery('')}
               >
-                x
-              </button>
+                <X className="h-3 w-3" />
+              </Button>
             )}
           </div>
-
-          {searchQuery && (
-            <div className="text-xs text-gray-400 mt-2 flex justify-between items-center">
-              <span>{filteredSections.length} result{filteredSections.length !== 1 ? 's' : ''}</span>
-              <button 
-                className="text-blue-400 hover:text-blue-300 text-xs"
-                onClick={() => setSearchQuery('')}
-              >
-                Clear
-              </button>
+          
+          {isSearching && (
+            <div className="mt-2 text-xs text-gray-500">
+              {filteredSections.length === 0 ? 
+                "No results found" : 
+                `Found ${filteredSections.length} results`
+              }
             </div>
           )}
         </div>
         
-        <div className="flex-1 p-4">
-        {bookmarkedSections.length > 0 && !isSearching && (
-  <div className="mb-5">
-    <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">BOOKMARKS</h3>
-    {bookmarkedSections.map((id) => {
-      const section = allSections.find(s => s.id === id);
-      if (!section) return null;
-      
-      return (
-        <button
-          key={`bookmark-${id}`}
-          className={`w-full text-left px-3 py-2 rounded-lg mb-1 text-sm flex items-center justify-between ${
-            activeSection === id 
-              ? 'bg-[#1e3a8a] text-white font-medium shadow-sm border border-blue-500' 
-              : 'text-white bg-[#232323] hover:bg-[#2d2d2d]'  // Added dark background here
-          }`}
-          onClick={() => setActiveSection(id)}
-        >
-          <span className="truncate">{section.title}</span>
-          <BookmarkCheck className={`h-4 w-4 text-white flex-shrink-0`} />
-        </button>
-      );
-    })}
-    <div className="border-t border-gray-700 my-3"></div>
-  </div>
-)}
-          
-          {isSearching && searchResults.length > 0 && (
-            <div className="mb-5 mt-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">Search Results</h3>
-              <div className="space-y-3">
-                {searchResults.map((result, index) => (
-                  <div key={`result-${index}`} className="bg-[#252525] rounded-lg shadow-sm border border-gray-700 overflow-hidden">
-                    <button
-                      className={`w-full text-left p-3 ${
-                        activeSection === result.section.id 
-                          ? 'bg-[#1e3a8a] border-l-4 border-blue-500 text-white' 
-                          : 'hover:bg-[#2d2d2d] text-white'
-                      }`}
-                      onClick={() => {
-                        setActiveSection(result.section.id);
-                        setIsSearching(false);
-                      }}
-                    >
-                      <h4 className={`font-medium text-white mb-1`}>{result.section.title}</h4>
-                      <p 
-                        className={`text-xs text-gray-300 line-clamp-2`}
-                        dangerouslySetInnerHTML={{ __html: result.snippet }}
-                      ></p>
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <button
-                className="w-full mt-4 text-center text-sm text-blue-400 hover:text-blue-300 py-2"
-                onClick={() => setIsSearching(false)}
-              >
-                Show all sections
-              </button>
-            </div>
-          )}
-          
-          {(!isSearching || (isSearching && searchResults.length === 0 && searchQuery === '')) && (
+        <div className="p-4">
+          {isSearching && searchResults.length > 0 ? (
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">CONTENT</h3>
-              {filteredSections.length === 0 && searchQuery !== '' ? (
-                <div className="text-center py-8">
-                  <div className="text-gray-500 mb-2">
-                    <Search className="h-8 w-8 mx-auto" />
-                  </div>
-                  <h3 className="text-lg font-medium text-white mb-2">No results found</h3>
-                  <p className="text-gray-400">Try searching with different keywords</p>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                
-
-{filteredSections.map((section) => (
-  <button
-    key={section.id}
-    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-150 flex items-center justify-between group ${
-      activeSection === section.id 
-        ? 'bg-[#1e3a8a] text-white font-medium shadow-sm border border-blue-500' 
-        : 'text-white bg-[#232323] hover:bg-[#2d2d2d]'  // Changed this line to add dark background
-    } ${section.level === 1 ? 'font-medium' : 'pl-6 text-sm'}`}
-    onClick={() => setActiveSection(section.id)}
-  >
-    <span className={`truncate ${section.level === 1 ? '' : 'opacity-90'}`}>
-      {section.title}
-    </span>
-    
-    <button
-      className={`opacity-0 group-hover:opacity-100 hover:text-blue-400 transition-opacity duration-200 ${
-        bookmarkedSections.includes(section.id) ? 'text-white' : 'text-gray-400'
-      }`}
-      onClick={(e) => {
-        e.stopPropagation();
-        toggleBookmark(section.id);
-      }}
-    >
-      {bookmarkedSections.includes(section.id) ? (
-        <BookmarkCheck className="h-3.5 w-3.5" />
-      ) : (
-        <Bookmark className="h-3.5 w-3.5" />
-      )}
-    </button>
-  </button>
-))}
+              <h3 className="font-medium text-gray-700 mb-3">Search Results</h3>
+              <ul className="space-y-2">
+                {searchResults.map(result => (
+                  <li 
+                    key={result.section.id}
+                    className="border border-gray-200 rounded-md p-2 hover:bg-blue-50 cursor-pointer"
+                    onClick={() => {
+                      setActiveSection(result.section.id);
+                      setSearchQuery('');
+                      if (window.innerWidth < 768) {
+                        setShowMobileSidebar(false);
+                      }
+                    }}
+                  >
+                    <div className="font-medium text-blue-600">{result.section.title}</div>
+                    <div 
+                      className="text-xs text-gray-600 mt-1"
+                      dangerouslySetInnerHTML={{ __html: result.snippet }}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <>
+              {bookmarkedSections.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="font-medium text-gray-700 mb-3 flex items-center">
+                    <BookmarkCheck className="h-4 w-4 text-blue-500 mr-2" />
+                    Bookmarked Sections
+                  </h3>
+                  <ul className="space-y-1">
+                    {bookmarkedSections.map(sectionId => {
+                      const section = allSections.find(s => s.id === sectionId);
+                      if (!section) return null;
+                      
+                      return (
+                        <li key={sectionId}>
+                          <Button
+                            variant="ghost"
+                            className={`w-full justify-start text-left text-sm py-1 ${activeSection === sectionId ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:text-blue-600'}`}
+                            onClick={() => {
+                              setActiveSection(sectionId);
+                              if (window.innerWidth < 768) {
+                                setShowMobileSidebar(false);
+                              }
+                            }}
+                          >
+                            {section.title}
+                          </Button>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
               )}
-            </div>
+              
+              <div>
+                <h3 className="font-medium text-gray-700 mb-3">Documentation</h3>
+                <ul className="space-y-1">
+                  {filteredSections.map(section => (
+                    <li key={section.id} className={section.level === 2 ? 'pl-4' : ''}>
+                      <div className="flex items-center">
+                        <Button
+                          variant="ghost"
+                          className={`flex-grow justify-start text-left text-sm py-1 ${activeSection === section.id ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:text-blue-600'}`}
+                          onClick={() => {
+                            setActiveSection(section.id);
+                            if (window.innerWidth < 768) {
+                              setShowMobileSidebar(false);
+                            }
+                          }}
+                        >
+                          {section.title}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 ml-1 text-gray-400 hover:text-blue-500"
+                          onClick={() => toggleBookmark(section.id)}
+                        >
+                          {bookmarkedSections.includes(section.id) ? (
+                            <BookmarkCheck className="h-4 w-4" />
+                          ) : (
+                            <Bookmark className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </>
           )}
-        </div>
-        
-        <div className="p-4 border-t border-gray-700 bg-[#232323]">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-400">
-              SnapLogic Playground Docs v1.0
-            </p>
-            <div className="flex space-x-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="p-1 h-7 w-7 rounded-full hover:bg-gray-700 text-white"
-                onClick={() => setActiveSection('introduction')}
-                title="Home"
-              >
-                <Home className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="p-1 h-7 w-7 rounded-full hover:bg-gray-700 text-white"
-                onClick={focusSearch}
-                title="Search (Ctrl+K)"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
         </div>
       </div>
       
-      {/* Main content - with improved styling */}
-      <div className="flex-1 overflow-y-auto bg-white doc-scrollbar" ref={contentRef}>
-        <div className="max-w-4xl mx-auto px-6 py-8 bg-white shadow-sm rounded-lg m-4 min-h-[calc(100%-2rem)]">
-          <div className="mb-8 flex justify-between items-start">
-            <div>
-              <div className="flex items-center mb-2">
-                {bookmarkedSections.includes(activeSection) ? (
-                  <BookmarkCheck 
-                    className="h-5 w-5 text-blue-500 mr-2 cursor-pointer" 
-                    onClick={() => toggleBookmark(activeSection)}
-                  />
-                ) : (
-                  <Bookmark 
-                    className="h-5 w-5 text-gray-400 mr-2 cursor-pointer hover:text-blue-500 transition-colors duration-200" 
-                    onClick={() => toggleBookmark(activeSection)}
-                  />
-                )}
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {allSections.find(s => s.id === activeSection)?.title || 'Documentation'}
-                </h1>
-              </div>
-              <div className="w-32 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>
-            </div>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              className="md:hidden bg-white text-blue-600 border-blue-200 shadow-sm hover:bg-blue-50 hover:border-blue-300"
-              onClick={toggleMobileSidebar}
+      {/* Content area */}
+      <div 
+        ref={contentRef}
+        className="flex-1 overflow-y-auto p-4 md:p-8 max-w-4xl mx-auto doc-scrollbar"
+      >
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            {allSections.find(s => s.id === activeSection)?.title || 'Documentation'}
+          </h1>
+          <div className="flex items-center space-x-4">
+            <button 
+              className={`flex items-center text-sm ${bookmarkedSections.includes(activeSection) ? 'text-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+              onClick={() => toggleBookmark(activeSection)}
             >
-              Contents
-            </Button>
+              {bookmarkedSections.includes(activeSection) ? (
+                <>
+                  <BookmarkCheck className="h-4 w-4 mr-1" />
+                  Bookmarked
+                </>
+              ) : (
+                <>
+                  <Bookmark className="h-4 w-4 mr-1" />
+                  Bookmark
+                </>
+              )}
+            </button>
+            <a 
+              href="#" 
+              className="flex items-center text-sm text-gray-600 hover:text-blue-600"
+              onClick={(e) => {
+                e.preventDefault();
+                // This would typically open in a new tab or window
+                alert('This would open the full documentation in a new tab.');
+              }}
+            >
+              <ExternalLink className="h-4 w-4 mr-1" />
+              Open in new tab
+            </a>
           </div>
-          
-          <div className="prose prose-blue max-w-none">
-            {getContentForSection(activeSection)}
-          </div>
-          
-          <div className="mt-12 pt-6 border-t border-gray-200">
-            <div className="flex justify-between items-center">
-              <button 
-                className={`flex items-center px-3 py-2 text-blue-600 hover:text-blue-800 transition-colors rounded-lg hover:bg-blue-50 ${
-                  allSections.findIndex(s => s.id === activeSection) === 0 ? 'invisible' : ''
-                }`}
-                onClick={() => {
-                  const currentIndex = allSections.findIndex(s => s.id === activeSection);
-                  if (currentIndex > 0) {
-                    setActiveSection(allSections[currentIndex - 1].id);
-                  }
-                }}
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Previous
-              </button>
-              
-              <button 
-                className={`flex items-center px-3 py-2 text-blue-600 hover:text-blue-800 transition-colors rounded-lg hover:bg-blue-50 ${
-                  allSections.findIndex(s => s.id === activeSection) === allSections.length - 1 ? 'invisible' : ''
-                }`}
-                onClick={() => {
-                  const currentIndex = allSections.findIndex(s => s.id === activeSection);
-                  if (currentIndex < allSections.length - 1) {
-                    setActiveSection(allSections[currentIndex + 1].id);
-                  }
-                }}
-              >
-                Next
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </button>
-            </div>
-          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100">
+          {getContentForSection(activeSection)}
         </div>
       </div>
     </div>
