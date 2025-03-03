@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button"
@@ -6,9 +5,10 @@ import { Label } from "@/components/ui/label"
 import { FormatDropdown } from './FormatDropdown';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Coffee, Beer, UploadCloud, DownloadCloud, PlusCircle, X } from "lucide-react";
-import { Documentation } from './Documentation';
+import { useNavigate } from 'react-router-dom';
 
 export default function UpdatedCode() {
+  const navigate = useNavigate();
   const resizeTimeoutRef = useRef(null);
   const [dimensions, setDimensions] = useState({
     leftWidth: 280,
@@ -26,10 +26,8 @@ export default function UpdatedCode() {
     actualOutput: '"Hello world!"',
     importDialogOpen: false,
     activePage: 'playground',
-    showDocumentation: false,
   });
 
-  // Debounced resize handler
   const handleResize = useCallback(() => {
     if (resizeTimeoutRef.current) {
       window.cancelAnimationFrame(resizeTimeoutRef.current);
@@ -104,97 +102,12 @@ export default function UpdatedCode() {
     }
     
     if (page === 'docs') {
-      setState(prev => ({ ...prev, showDocumentation: true, activePage: 'docs' }));
+      navigate('/docs');
+      setState(prev => ({ ...prev, activePage: 'docs' }));
     } else {
-      setState(prev => ({ ...prev, activePage: page, showDocumentation: false }));
+      setState(prev => ({ ...prev, activePage: page }));
     }
   };
-
-  if (state.showDocumentation) {
-    return (
-      <div className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']">
-        <div className="fixed inset-0 z-[-1] bg-white" />
-        
-        {state.showToast && (
-          <div className="bg-dataweave-blue text-white py-2 relative">
-            <div className="text-center px-12 font-semibold tracking-wide">
-              EXPERIENCE INNOVATION, UNLEASHED. WATCH THE HIGHLIGHTS FROM CONNECT '22
-            </div>
-            <button
-              onClick={() => setState(prev => ({ ...prev, showToast: false }))}
-              className="absolute right-4 top-0 h-full flex items-center text-white"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-
-        <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 bg-white shadow-sm">
-          <div className="flex items-center space-x-3">
-            <img 
-              src="/lovable-uploads/d11a9e99-9c20-4aed-9025-1973db87d692.png" 
-              alt="DataWeave Logo" 
-              className="h-8"
-              style={{ marginTop: '3px', marginLeft: '5px' }} 
-            />
-            <span className="text-lg font-semibold text-gray-800">DataWeave</span>
-          </div>
-          
-          <div className="flex items-center space-x-10">
-            <button 
-              onClick={(e) => handleNavigation('blogs', e)}
-              className={`dataweave-nav ${state.activePage === 'blogs' ? 'dataweave-nav-active' : ''}`}
-            >
-              BLOGS
-            </button>
-            <button 
-              onClick={(e) => handleNavigation('docs', e)}
-              className={`dataweave-nav ${state.showDocumentation ? 'dataweave-nav-active' : ''}`}
-            >
-              DOCS
-            </button>
-            <button 
-              onClick={(e) => handleNavigation('tutorial', e)}
-              className={`dataweave-nav ${state.activePage === 'tutorial' ? 'dataweave-nav-active' : ''}`}
-            >
-              TUTORIAL
-            </button>
-            <button 
-              onClick={(e) => handleNavigation('playground', e)}
-              className={`dataweave-nav ${state.activePage === 'playground' ? 'dataweave-nav-active' : ''}`}
-            >
-              PLAYGROUND
-            </button>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <Button 
-              variant="outline" 
-              onClick={handleExport}
-              className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 h-9 flex items-center justify-center"
-            >
-              <span className="mr-2">Export</span>
-              <DownloadCloud className="h-4 w-4 text-dataweave-blue" />
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={openImportDialog}
-              className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 h-9 flex items-center justify-center"
-            >
-              <span className="mr-2">Import</span>
-              <UploadCloud className="h-4 w-4 text-dataweave-blue" />
-            </Button>
-          </div>
-        </div>
-
-        <Documentation onBack={() => setState(prev => ({ ...prev, showDocumentation: false, activePage: 'playground' }))} />
-
-        <div className="border-t border-gray-200 py-2 px-6 text-xs text-gray-600 bg-white text-center">
-          ©2023 MuleSoft LLC, a Salesforce company
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']">
@@ -234,7 +147,7 @@ export default function UpdatedCode() {
           </button>
           <button 
             onClick={(e) => handleNavigation('docs', e)}
-            className={`dataweave-nav ${state.showDocumentation ? 'dataweave-nav-active' : ''}`}
+            className={`dataweave-nav ${state.activePage === 'docs' ? 'dataweave-nav-active' : ''}`}
           >
             DOCS
           </button>
