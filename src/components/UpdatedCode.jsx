@@ -3,7 +3,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { FormatDropdown } from '../FormatDropdown';
+import FormatDropdown from '../FormatDropdown'; // Changed from { FormatDropdown }
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Coffee, Beer, UploadCloud, DownloadCloud, HelpCircle, MessageSquare } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
