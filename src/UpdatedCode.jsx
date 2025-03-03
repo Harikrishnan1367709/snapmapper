@@ -7,8 +7,7 @@ import JSZip from 'jszip';
 
 const UpdatedCode = () => {
   const navigate = useNavigate();
-  const [activeNavItem, setActiveNavItem] = useState('playground');
-  
+
   const getNavLink = (item) => {
     const links = {
       blogs: 'https://www.snaplogic.com/blog',
