@@ -1,3 +1,4 @@
+<lov-code>
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Search, Copy, CheckCircle, X, ExternalLink, Bookmark, BookmarkCheck, ChevronRight, ArrowLeft, Home } from "lucide-react";
@@ -556,4 +557,12 @@ export function Documentation({ onBack }) {
             </div>
             
             <CodeBlock 
-              code={`// Sample complex JSON structure\nconst testData = {\n  "users": [\n    {\n      "name": "John",\n      "age": 30,\n      "role": "admin",\n      "permissions": ["read", "write", "delete"],\n      "friends": [\
+              code={`// Sample complex JSON structure
+const testData = {
+  "users": [
+    {
+      "name": "John",
+      "age": 30,
+      "role": "admin",
+      "permissions": ["read", "write", "delete"],
+      "friends": ["Mike
