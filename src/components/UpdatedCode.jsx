@@ -1,4 +1,3 @@
-<lov-code>
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { JSONPath } from 'jsonpath-plus';
 import { ChevronDown, Upload, Download, Terminal, Book, ChevronLeft } from "lucide-react";
@@ -970,4 +969,4 @@ const UpdatedCode = () => {
       setShowExportDialog(true);
     }
   }}
-  
+  className
