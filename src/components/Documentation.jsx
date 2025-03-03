@@ -1,4 +1,3 @@
-<lov-code>
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Search, Copy, CheckCircle, X, ExternalLink, Bookmark, BookmarkCheck, ChevronRight, ArrowLeft, Home } from "lucide-react";
@@ -118,14 +117,14 @@ export function Documentation({ onBack }) {
       }
       
       .doc-scrollbar::-webkit-scrollbar-track {
-        background: #fff;
+        background: #222;
         border-radius: 4px;
       }
       
       .doc-scrollbar::-webkit-scrollbar-thumb {
         background: #3b82f6; /* Blue scrollbar thumb */
         border-radius: 4px;
-        border: 2px solid #fff;
+        border: 2px solid #222;
       }
       
       .doc-scrollbar::-webkit-scrollbar-thumb:hover {
@@ -557,4 +556,4 @@ export function Documentation({ onBack }) {
             </div>
             
             <CodeBlock 
-              code={`// Sample complex JSON structure\nconst testData = {\n  "users": [\n    {\n      "name": "John",\n      "age": 30,\n      "role": "admin",\n      "permissions": ["read", "write", "delete"],\n      "friends": [\n
+              code={`// Sample complex JSON structure\nconst testData = {\n  "users": [\n    {\n      "name": "John",\n      "age": 30,\n      "role": "admin",\n      "permissions": ["read", "write", "delete"],\n      "friends": [\
