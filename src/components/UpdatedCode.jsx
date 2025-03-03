@@ -1,14 +1,16 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Editor from "@monaco-editor/react";
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { FormatDropdown } from './FormatDropdown';
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { FormatDropdown } from '../FormatDropdown';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Coffee, Beer, UploadCloud, DownloadCloud } from "lucide-react";
-import { Documentation } from './Documentation';
+import { Coffee, Beer, UploadCloud, DownloadCloud, HelpCircle, MessageSquare } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
+import { isSupabaseInitialized } from '../utils/supabase';
 
 export default function UpdatedCode() {
+  const navigate = useNavigate();
   const resizeTimeoutRef = useRef(null);
   const [dimensions, setDimensions] = useState({
     leftWidth: 300,
@@ -26,7 +28,10 @@ export default function UpdatedCode() {
     actualOutput: '',
     importDialogOpen: false,
     activePage: 'playground',
-    showDocumentation: false,
+    isSupportDialogOpen: false,
+    supportComment: '',
+    supportEmail: '',
+    supportSubmitted: false,
   });
 
   // Debounced resize handler
@@ -87,7 +92,7 @@ export default function UpdatedCode() {
   };
   
   const handleScriptDialogClose = () => {
-    setState(prev => ({ ...prev, isScriptDialogOpen: false }));
+    setState(prev => ({ ...prev, isScriptDialogClose: false }));
   };
 
   const openImportDialog = () => {
@@ -105,167 +110,77 @@ export default function UpdatedCode() {
     }
     
     if (page === 'docs') {
-      setState(prev => ({ ...prev, showDocumentation: true, activePage: 'docs' }));
+      navigate('/docs');
     } else {
-      setState(prev => ({ ...prev, activePage: page, showDocumentation: false }));
+      setState(prev => ({ ...prev, activePage: page }));
     }
   };
 
-  if (state.showDocumentation) {
-    return (
-      <div className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']">
-        {/* Apply the background using an absolutely positioned div to ensure it covers everything */}
-        <div 
-          className="fixed inset-0 z-[-1]" 
-          style={{
-            backgroundImage: 'url("/lovable-uploads/e097fd02-e653-4b86-95e5-09646c987272.png")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
-          }} 
-        />
-        
-        {state.showToast && (
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 relative">
-            <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
-              Discover the Future of Integration. Explore SnapLogic Playground Highlights
-            </div>
-            <button
-              onClick={() => setState(prev => ({ ...prev, showToast: false }))}
-              className="absolute right-4 top-0 h-full bg-transparent text-white border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center hover:opacity-80 transition-opacity duration-200"
-            >
-              ×
-            </button>
-          </div>
-        )}
+  const openSupportDialog = () => {
+    setState(prev => ({ ...prev, isSupportDialogOpen: true, supportSubmitted: false }));
+  };
 
-        <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 bg-white/90 shadow-sm backdrop-blur-sm">
-          <div className="flex items-center space-x-3">
-            <img src="/sl-logo.svg" alt="SnapLogic Logo" className="h-8 w-8" />
-            <span className="text-lg font-semibold text-gray-800">SnapLogic Playground</span>
-          </div>
-          
-          {/* Navigation links */}
-          <div className="flex items-center space-x-8">
-            <button 
-              onClick={(e) => handleNavigation('blogs', e)}
-              className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'blogs' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
-            >
-              BLOGS
-            </button>
-            <button 
-              onClick={(e) => handleNavigation('docs', e)}
-              className={`px-2 py-1 text-sm font-medium transition-colors ${state.showDocumentation ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
-            >
-              DOCS
-            </button>
-            <button 
-              onClick={(e) => handleNavigation('tutorial', e)}
-              className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'tutorial' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
-            >
-              TUTORIAL
-            </button>
-            <button 
-              onClick={(e) => handleNavigation('playground', e)}
-              className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'playground' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
-            >
-              PLAYGROUND
-            </button>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <Button 
-              variant="outline" 
-              onClick={handleExport}
-              className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
-            >
-              <span className="mr-2">Export</span>
-              <DownloadCloud className="h-4 w-4 text-blue-600" />
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={openImportDialog}
-              className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
-            >
-              <span className="mr-2">Import</span>
-              <UploadCloud className="h-4 w-4 text-blue-600" />
-            </Button>
-          </div>
-        </div>
+  const closeSupportDialog = () => {
+    setState(prev => ({ ...prev, isSupportDialogOpen: false }));
+  };
 
-        <Documentation onBack={() => setState(prev => ({ ...prev, showDocumentation: false, activePage: 'playground' }))} />
+  const handleSupportCommentChange = (e) => {
+    setState(prev => ({ ...prev, supportComment: e.target.value }));
+  };
 
-        {/* Footer - Updated with new design and custom icons */}
-        <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white/90 shadow-sm relative backdrop-blur-sm">
-          <div className="flex justify-center items-center">
-            <img 
-              src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7" 
-              alt="Code background" 
-              className="h-6 mx-auto"
-            />
-          </div>
-          
-          <div className="font-['Manrope'] text-[0.69rem] text-gray-300 absolute left-[calc(45%+0px)] tracking-[0.04em] flex items-center h-full z-10 gap-2.5 font-medium">
-            <span className="text-gray-500">Made with</span>
-            <div className="inline-flex items-center gap-2.5">
-              {/* Tea Icon */}
-              <div className="relative w-[18px] h-[18px] animate-pulse transition-transform hover:scale-110">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2 19h18v2H2v-2zm2-8v5c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2zm15 0v5H5v-5h14zm-6.75-7L15 8H9l2.75-4z" fill="#374151"/>
-                  <path d="M19 10h2c0-2.21-1.79-4-4-4h-2l2 4z" fill="#374151"/>
-                </svg>
-              </div>
-              <span className="text-gray-500 font-semibold">&</span>
-              {/* Beer Icon */}
-              <div className="relative w-[18px] h-[18px] animate-bounce transition-transform hover:scale-110">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 3h10v2h-10z" fill="#D97706"/>
-                  <path d="M18 8c-0.4-2.3-2.4-4-4.8-4h-2.4c-2.4 0-4.4 1.7-4.8 4h-1v12h14v-12h-1zM8 18v-8h8v8h-8z" fill="#D97706"/>
-                  <path d="M10 11h4v3h-4z" fill="#ffffff"/>
-                </svg>
-              </div>
-            </div>
-            <span className="text-gray-500">in</span>
-            <span className="text-gray-500 font-semibold hover:text-blue-800 cursor-pointer transition-colors">
-              Tamil Nadu, India
-            </span>
-            <span className="mx-2.5 text-gray-400">|</span>
-            <span className="text-gray-500">Powered by</span>
-            <a 
-              href="https://www.mulecraft.in/" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-blue-500 font-semibold hover:text-blue-800 transition-colors relative group"
-            >
-              Mulecraft
-            </a>
-          </div>
-          
-          <style jsx>{`
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-            
-            .animate-pulse {
-              animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-            }
-            
-            .animate-bounce {
-              animation: bounce 1s infinite;
-            }
-            
-            @keyframes pulse {
-              0%, 100% { opacity: 1; }
-              50% { opacity: 0.7; }
-            }
-            
-            @keyframes bounce {
-              0%, 100% { transform: translateY(0); }
-              50% { transform: translateY(-25%); }
-            }
-          `}</style>
-        </div>
-      </div>
-    );
-  }
+  const handleSupportEmailChange = (e) => {
+    setState(prev => ({ ...prev, supportEmail: e.target.value }));
+  };
+
+  const submitSupportComment = async () => {
+    if (!state.supportComment) {
+      alert("Please enter a comment before submitting.");
+      return;
+    }
+
+    try {
+      // If Supabase is not initialized, show an error
+      if (!isSupabaseInitialized()) {
+        alert("Supabase connection is not available. Please check your environment variables.");
+        return;
+      }
+
+      // Import using dynamic import to prevent issues at build time
+      const { default: supabase } = await import('@supabase/supabase-js');
+      
+      // Insert support comment into Supabase
+      const { error } = await supabase
+        .from('support_comments')
+        .insert([
+          { 
+            comment: state.supportComment,
+            email: state.supportEmail || null
+          }
+        ]);
+
+      if (error) {
+        console.error("Error submitting support comment:", error);
+        alert("Failed to submit your comment. Please try again later.");
+        return;
+      }
+
+      // Clear form and show success message
+      setState(prev => ({ 
+        ...prev, 
+        supportComment: '', 
+        supportEmail: '',
+        supportSubmitted: true 
+      }));
+
+      // Close dialog after 2 seconds
+      setTimeout(() => {
+        closeSupportDialog();
+      }, 2000);
+    } catch (error) {
+      console.error("Error in support comment submission:", error);
+      alert("An error occurred. Please try again later.");
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']">
@@ -300,7 +215,7 @@ export default function UpdatedCode() {
           <span className="text-lg font-semibold text-gray-800">SnapLogic Playground</span>
         </div>
         
-        {/* Navigation links - Updated to prevent default behavior */}
+        {/* Navigation links - Updated to use React Router */}
         <div className="flex items-center space-x-8">
           <button 
             onClick={(e) => handleNavigation('blogs', e)}
@@ -310,7 +225,7 @@ export default function UpdatedCode() {
           </button>
           <button 
             onClick={(e) => handleNavigation('docs', e)}
-            className={`px-2 py-1 text-sm font-medium transition-colors ${state.showDocumentation ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+            className={`px-2 py-1 text-sm font-medium transition-colors text-gray-600 hover:text-blue-600`}
           >
             DOCS
           </button>
@@ -555,7 +470,7 @@ export default function UpdatedCode() {
         </div>
       </div>
       
-      {/* Footer - Updated with new design and custom icons */}
+      {/* Footer - Updated with new design and support icon */}
       <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white/90 shadow-sm relative backdrop-blur-sm">
         <div className="flex justify-center items-center">
           <img 
@@ -601,6 +516,18 @@ export default function UpdatedCode() {
           </a>
         </div>
         
+        {/* Support Button */}
+        <div className="absolute right-6 bottom-3">
+          <Button 
+            variant="ghost" 
+            onClick={openSupportDialog}
+            className="rounded-full h-10 w-10 p-0 bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg transition-all"
+            title="Get Support"
+          >
+            <HelpCircle className="h-5 w-5" />
+          </Button>
+        </div>
+
         <style jsx>{`
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
           
@@ -624,7 +551,7 @@ export default function UpdatedCode() {
         `}</style>
       </div>
 
-      {/* Import Project Dialog - Completely redesigned */}
+      {/* Import Project Dialog */}
       <Dialog open={state.importDialogOpen} onOpenChange={closeImportDialog}>
         <DialogContent className="sm:max-w-md w-full max-h-[90vh] bg-white p-0 rounded-none overflow-hidden border border-gray-300 shadow-xl">
           <DialogHeader className="px-6 pt-6 pb-2 border-b border-gray-200">
@@ -662,6 +589,87 @@ export default function UpdatedCode() {
             >
               Cancel
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Support Dialog */}
+      <Dialog open={state.isSupportDialogOpen} onOpenChange={closeSupportDialog}>
+        <DialogContent className="sm:max-w-md w-full max-h-[90vh] bg-white p-0 rounded-lg overflow-hidden border border-gray-300 shadow-xl">
+          <DialogHeader className="px-6 pt-6 pb-2 border-b border-gray-200">
+            <DialogTitle className="text-xl font-semibold text-gray-800">
+              {state.supportSubmitted ? "Thank You!" : "Send Feedback"}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="p-6">
+            {state.supportSubmitted ? (
+              <div className="text-center py-4">
+                <div className="flex justify-center mb-4">
+                  <div className="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center">
+                    <MessageSquare className="h-8 w-8 text-green-600" />
+                  </div>
+                </div>
+                <p className="text-lg font-medium text-gray-700 mb-1">
+                  Your feedback has been received!
+                </p>
+                <p className="text-sm text-gray-500">
+                  Thank you for helping us improve SnapLogic Playground.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="mb-4">
+                  <Label htmlFor="supportComment" className="block text-sm font-medium text-gray-700 mb-1">
+                    Your Feedback
+                  </Label>
+                  <textarea
+                    id="supportComment"
+                    value={state.supportComment}
+                    onChange={handleSupportCommentChange}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    placeholder="Tell us your thoughts, suggestions, or report issues..."
+                  />
+                </div>
+                <div className="mb-4">
+                  <Label htmlFor="supportEmail" className="block text-sm font-medium text-gray-700 mb-1">
+                    Your Email (optional)
+                  </Label>
+                  <input
+                    id="supportEmail"
+                    type="email"
+                    value={state.supportEmail}
+                    onChange={handleSupportEmailChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    placeholder="youremail@example.com"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    We'll only use this to follow up on your feedback if needed.
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+          
+          <div className="flex justify-end p-4 border-t border-gray-200 bg-gray-50">
+            {!state.supportSubmitted && (
+              <>
+                <Button 
+                  variant="outline" 
+                  onClick={closeSupportDialog} 
+                  className="px-4 py-2 text-sm bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 mr-2"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={submitSupportComment} 
+                  className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Submit Feedback
+                </Button>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>
