@@ -1,142 +1,102 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { JSONPath } from 'jsonpath-plus';
-import { ChevronDown, Upload, Download, Terminal, Book, ChevronLeft } from "lucide-react";
-import { v4 as uuidv4 } from "uuid";
 
-import JSZip from 'jszip';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import Editor from "@monaco-editor/react";
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { FormatDropdown } from './FormatDropdown';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Coffee, Beer, UploadCloud, DownloadCloud } from "lucide-react";
+import { Documentation } from './Documentation';
 
-
-// import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-// import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import Editor from '@monaco-editor/react';
-
-
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./components/ui/tooltip";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./components/ui/dialog";
-import { Input } from "./components/ui/input";
-import { Label } from "./components/ui/label";
-import { Button } from './components/ui/button';
-import FormatDropdown from '../FormatDropdown';
-import { handleJSON } from './utils/jsonHandler';
-import _ from 'lodash';
-import moment from 'moment';
-import * as R from 'ramda';
-
-import HighLightedJSON from './utils/HighLightedJson';
-import HighlightedScript from './utils/HighlightedScript';
-import HighlightedActualOutput from './utils/HighlightedActualOutput';
-import HighlightedExpectedOutput from './utils/HighlightedExpectedOutput';
-import SnapLogicFunctionsHandler from './utils/SnaplogicFunctionsHandler';
-import { Documentation } from './components/Documentation';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const UpdatedCode = () => {
-  const [format, setFormat] = useState('json');
- 
-  const canvasRef = useRef(null);
-  const [activeLineIndex, setActiveLineIndex] = useState(null);
-  const [activeInput, setActiveInput] = useState('Payload');
-  const [cursorPosition, setCursorPosition] = useState(0);
-  const [focusedLine, setFocusedLine] = useState(null);
-  const [wasChecked, setWasChecked] = useState(() =>
-    localStorage.getItem('wasChecked') === 'true'
-  );
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [hoveredLine, setHoveredLine] = useState(null);
-  const [highlightedLine, setHighlightedLine] = useState(null);
-  const [showInputContainer, setShowInputContainer] = useState(false);
-  const [showScriptContainer, setShowScriptContainer] = useState(false);
-  const [inputs, setInputs] = useState(['Payload']);
-  const [inputContents, setInputContents] = useState({
-    [inputs[0]]: '{}'  // Now we can safely use inputs[0]
+export default function UpdatedCode() {
+  const resizeTimeoutRef = useRef(null);
+  const [dimensions, setDimensions] = useState({
+    leftWidth: 300,
+    middleWidth: 400,
+    rightWidth: 300
   });
-  const [isPayloadView, setIsPayloadView] = useState(false);
-  const [selectedInputIndex, setSelectedInputIndex] = useState(null);
-  const [payloadContent, setPayloadContent] = useState('{\n\n}');
-  const [outputMatch, setOutputMatch] = useState(true);
-  const [activeNavItem, setActiveNavItem] = useState('playground');
-  const [currentView, setCurrentView] = useState('playground');
-  const [showImportDialog, setShowImportDialog] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
-  const [showExportDialog, setShowExportDialog] = useState(false);
-  // const [activeInput, setActiveInput] = useState('Payload');
-  const [showDocumentation, setShowDocumentation] = useState(false);
- 
-  const [leftWidth, setLeftWidth] = useState(() =>
-    parseInt(localStorage.getItem('leftWidth')) || 288
-  );
-  const [middleWidth, setMiddleWidth] = useState(() =>
-    parseInt(localStorage.getItem('middleWidth')) || 500
-  );
-  const [rightWidth, setRightWidth] = useState(() =>
-    parseInt(localStorage.getItem('rightWidth')) || 384
-  );
-  const data = {
-    "myarray": [3, 6, 8, 2, 9, 4],
-    "head": [1, 2],
-    "middle": [3, 4],
-    "tail": [5, 6],
-    "names": ["Fred", "Wilma", "Fred", "Betty", "Fred", "Barney"],
-    "Array": [0, 2, 4, 6, 8]
-  };
- 
-  useEffect(() => {
-    localStorage.setItem('leftWidth', leftWidth);
-    localStorage.setItem('middleWidth', middleWidth);
-    localStorage.setItem('rightWidth', rightWidth);
-  }, [leftWidth, middleWidth, rightWidth]);
- 
-  const [bottomHeight, setBottomHeight] = useState(32);
-  const [isBottomExpanded, setIsBottomExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState(null);
-  const [showToast, setShowToast] = useState(true);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isInputDialogOpen, setIsInputDialogOpen] = useState(false);
-  const [isScriptDialogOpen, setIsScriptDialogOpen] = useState(false);
- 
-  const [newInput, setNewInput] = useState("");
- 
-  const [expectedOutput, setExpectedOutput] = useState('');
-  const [actualOutput, setActualOutput] = useState('[\n  "Phone"\n]');
-  const [scripts, setScripts] = useState([
-    {
-      id: 1,
-      name: 'main.dwl',
-      content: '$',
-      lastModified: new Date()
-    }
-  ]);
   
-  // const [activeScript, setActiveScript] = useState(scripts[0]);
-  const [activeScript, setActiveScript] = useState(null);
-  const [scriptContent, setScriptContent] = useState('');
-  const [newScript, setNewScript] = useState("");
-  // const [scriptContent, setScriptContent] = useState(scripts[0].content);
+  const [state, setState] = useState({
+    isResizingLeft: false,
+    isResizingMiddle: false,
+    isInputDialogOpen: false,
+    isScriptDialogOpen: false,
+    showToast: true,
+    scriptFormat: 'javascript',
+    actualOutput: '',
+    importDialogOpen: false,
+    activePage: 'playground',
+    showDocumentation: false,
+  });
+
+  // Debounced resize handler
+  const handleResize = useCallback(() => {
+    if (resizeTimeoutRef.current) {
+      window.cancelAnimationFrame(resizeTimeoutRef.current);
+    }
+
+    resizeTimeoutRef.current = window.requestAnimationFrame(() => {
+      const container = document.querySelector('.flex-1.flex');
+      if (container) {
+        const totalWidth = container.clientWidth;
+        setDimensions(prev => {
+          const ratio = {
+            left: prev.leftWidth / totalWidth,
+            middle: prev.middleWidth / totalWidth,
+            right: prev.rightWidth / totalWidth
+          };
+          
+          return {
+            leftWidth: Math.max(250, Math.floor(totalWidth * ratio.left)),
+            middleWidth: Math.max(250, Math.floor(totalWidth * ratio.middle)),
+            rightWidth: Math.max(250, Math.floor(totalWidth * ratio.right))
+          };
+        });
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (resizeTimeoutRef.current) {
+        window.cancelAnimationFrame(resizeTimeoutRef.current);
+      }
+    };
+  }, [handleResize]);
+
+  const handleFormatChange = useCallback((format) => {
+    setState(prev => ({ ...prev, scriptFormat: format }));
+  }, []);
+
+  const handleExport = () => {
+    alert('Export functionality will be implemented here.');
+  };
+  
+  const handleInputDialogOpen = () => {
+    setState(prev => ({ ...prev, isInputDialogOpen: true }));
+  };
+  
+  const handleInputDialogClose = () => {
+    setState(prev => ({ ...prev, isInputDialogOpen: false }));
+  };
+  
+  const handleScriptDialogOpen = () => {
+    setState(prev => ({ ...prev, isScriptDialogOpen: true }));
+  };
+  
+  const handleScriptDialogClose = () => {
+    setState(prev => ({ ...prev, isScriptDialogOpen: false }));
+  };
+
+  const openImportDialog = () => {
+    setState(prev => ({ ...prev, importDialogOpen: true }));
+  };
+
+  const closeImportDialog = () => {
+    setState(prev => ({ ...prev, importDialogOpen: false }));
+  };
 
   const handleNavigation = (page, e) => {
     // Prevent default browser navigation behavior
@@ -145,828 +105,566 @@ const UpdatedCode = () => {
     }
     
     if (page === 'docs') {
-      setShowDocumentation(true);
-      setActiveNavItem('docs');
+      setState(prev => ({ ...prev, showDocumentation: true, activePage: 'docs' }));
     } else {
-      setActiveNavItem(page);
-      setShowDocumentation(false);
+      setState(prev => ({ ...prev, activePage: page, showDocumentation: false }));
     }
   };
 
-  useEffect(() => {
-    if (scripts.length > 0 && !activeScript) {
-      const mainScript = scripts.find(s => s.name === 'main.dwl') || scripts[0];
-      setActiveScript(mainScript);
-      setScriptContent(mainScript.content);
-    }
-  }, []);
-  
-  const resizableStyles = (width, panelType) => ({
-    width: `${width}px`,
-    minWidth: '250px', // Increased minimum width
-    position: 'relative',
-    cursor: panelType === 'middle' ? 'text' : 'pointer',
-    userSelect: 'none'
-  });
-  
-  const ResizeHandle = () => (
-    <div
-      style={{
-        position: 'absolute',
-        right: -3,
-        top: 0,
-        bottom: 0,
-        width: 6,
-        cursor: 'default',
-        zIndex: 10
-      }}
-    />
-  );
-
-  useEffect(() => {
-    if (isDragging) {
-      document.body.style.userSelect = 'none';
-    } else {
-      document.body.style.userSelect = 'text';
-    }
-  }, [isDragging]);
-
-  const handleMouseDown = (e, isLeft, isBottom) => {
-    setIsDragging(true);
-   
-    if (isBottom) {
-      const startY = e.clientY;
-      const startHeight = bottomHeight;
-
-      const handleMouseMove = (e) => {
-        const deltaY = startY - e.clientY;
-        const newHeight = startHeight + deltaY;
-        setBottomHeight(Math.max(32, Math.min(800, newHeight)));
-      };
-
-      const handleMouseUp = () => {
-        setIsDragging(false);
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      return;
-    }
-    const startX = e.clientX;
-    const startLeftWidth = leftWidth;
-    const startRightWidth = rightWidth;
-
-    const handleMouseMove = (e) => {
-      if (isLeft) {
-        const newWidth = startLeftWidth + (e.clientX - startX);
-        setLeftWidth(Math.max(200, Math.min(600, newWidth)));
-      } else {
-        const newWidth = startRightWidth - (e.clientX - startX);
-        setRightWidth(Math.max(200, Math.min(600, newWidth)));
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
-  
-  const [editorLines, setEditorLines] = useState(['']);
- 
-  // Convert these direct declarations to useMemo to prevent unnecessary recalculations
-  const scriptLines = useMemo(() =>
-    scriptContent?.split('\n') || [''],
-    [scriptContent]
-  );
-
-  const expectedLines = useMemo(() =>
-    expectedOutput?.split('\n') || [''],
-    [expectedOutput]
-  );
-
-  const actualLines = useMemo(() =>
-    actualOutput?.split('\n') || [''],
-    [actualOutput]
-  );
-
-  // Button disable conditions
-  const isCreateInputDisabled = newInput.trim() === "";
-  const isCreateScriptDisabled = newScript.trim() === "";
-
-  const renderLineNumbers = (content) => {
+  if (state.showDocumentation) {
     return (
-      <div className="pr-4 text-gray-400 select-none">
-        {Array.from({ length: content.length }, (_, i) => (
-          <div key={i} className="text-right text-blue-400 hover:text-blue-800 h-6">
-            {i + 1}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const handleInputChange = (e) => {
-    setNewInput(e.target.value);
-    setPayloadContent(e.target.value);
-  };
-
-  const handleInputClick = (input, index) => {
-    setIsPayloadView(true);
-    setSelectedInputIndex(index);
-    setActiveInput(input);
-    setPayloadContent(inputContents[input] || '{\n  \n}');
-  };
-
-  const handleBackClick = () => {
-    if (selectedInputIndex !== null) {
-      const currentInput = inputs[selectedInputIndex];
-      // Save content only for the current input
-      setInputContents(prev => ({
-        ...prev,
-        [currentInput]: payloadContent
-      }));
-    }
-    setIsPayloadView(false);
-  };
- 
-  const handleCreateInput = () => {
-    if (newInput.trim() !== "") {
-      const newInputName = newInput;
-      setInputs(prev => [...prev, newInputName]);
-      setInputContents(prev => ({
-        ...prev,
-        [newInputName]: '{\n  \n}'  // Initialize with empty object
-      }));
-      setNewInput("");
-      setIsInputDialogOpen(false);
-    }
-  };
-
-  const handleScriptChange = (e) => {
-    setNewScript(e.target.value);
-  };
-
-  const handleCreateScript = () => {
-    if (newScript.trim() !== "") {
-      // Save current script content before creating new one
-      if (activeScript) {
-        setScripts(prevScripts =>
-          prevScripts.map(s =>
-            s.id === activeScript.id
-              ? { ...s, content: scriptContent, lastModified: new Date() }
-              : s
-          )
-        );
-      }
-  
-      const scriptName = newScript.endsWith('.dwl') ? newScript : `${newScript}.dwl`;
-      const newScriptObj = {
-        id: Date.now(),
-        name: scriptName,
-        content: '',  // Initialize with empty content
-        lastModified: new Date()
-      };
-      
-      setScripts(prev => [...prev, newScriptObj]);
-      setActiveScript(newScriptObj);
-      setScriptContent('');  // Clear content for new script
-      setNewScript("");
-      setIsScriptDialogOpen(false);
-    }
-  };
-
-  const handleScriptSelect = (script) => {
-    // Save current script content before switching
-    if (activeScript) {
-      setScripts(prevScripts =>
-        prevScripts.map(s =>
-          s.id === activeScript.id
-            ? { ...s, content: scriptContent, lastModified: new Date() }
-            : s
-        )
-      );
-    }
-    
-    // Switch to selected script
-    setActiveScript(script);
-    setScriptContent(script.content);
-  };
-
-  const handleActualOutputChange = (newValue) => {
-    setActualOutput(newValue);
-  };
-  
-  const scrollbarStyle = {
-    WebkitScrollbar: {
-      width: '8px',
-      height: '8px'
-    },
-    WebkitScrollbarTrack: {
-      background: 'transparent'
-    },
-    WebkitScrollbarThumb: {
-      background: '#888',
-      borderRadius: '4px'
-    },
-    WebkitScrollbarCorner: {
-      background: 'transparent'
-    },
-    msOverflowStyle: '-ms-autohiding-scrollbar'
-  };
-  
-  const scrollbarStyle1 = {
-    WebkitScrollbar: {
-      width: '8px',
-      height: '8px'
-    },
-    WebkitScrollbarTrack: {
-      background: 'transparent'
-    },
-    WebkitScrollbarThumb: {
-      background: '#888',
-      borderRadius: '4px'
-    },
-    WebkitScrollbarCorner: {
-      background: 'transparent'
-    },
-    msOverflowStyle: '-ms-autohiding-scrollbar'
-  };
- 
-  const handleExpectedOutputChange = (newValue) => {
-    setExpectedOutput(newValue);
-  };
-  
-  const detectFunctionType = (script) => {
-    if (script.startsWith('$')) return 'jsonPath';
-    if (script.includes('match')) return 'match';
-    return 'general';
-  };
-
-  useEffect(() => {
-    if (activeScript && payloadContent) {
-      try {
-        const handler = new SnapLogicFunctionsHandler();
-        const inputData = JSON.parse(payloadContent);
-        const result = handler.executeScript(scriptContent, inputData);
-        setActualOutput(JSON.stringify(result, null, 2));
-      } catch (error) {
-        setActualOutput(JSON.stringify({
-          error: "Transformation Error",
-          message: error.message,
-          hint: "Check input format and script syntax"
-        }, null, 2));
-      }
-    }
-  }, [payloadContent, scriptContent]);
- 
-  const handleScriptContentChange = (e) => {
-    if (!e?.target) {
-      setActualOutput(JSON.stringify({ error: "Invalid event" }, null, 2));
-      return;
-    }
-
-    const newContent = e.target.value || '';
-    setScriptContent(newContent);
-    
-    // Update script content in scripts array immediately
-    setScripts(prevScripts =>
-      prevScripts.map(script =>
-        script.id === activeScript?.id
-          ? { ...script, content: newContent, lastModified: new Date() }
-          : script
-      )
-    );
-
-    try {
-      const handler = new SnapLogicFunctionsHandler();
-     
-      // Handle multiple inputs case
-      if (inputs.length > 1 && newScript.trim() === '$') {
-        setActualOutput("Not valid, access with the help of input name");
-        return;
-      }
-
-      // Handle single input case
-      if (inputs.length === 1 && newScript.trim() === '$') {
-        setActualOutput(inputContents[inputs[0]]);
-        return;
-      }
-
-      // For multiple inputs case
-      const inputMatch = newScript.match(/^\$(\w+)/);
-      if (inputMatch) {
-        const requestedInput = inputMatch[1];
-        if (inputContents[requestedInput]) {
-          // Just show input content for $inputName
-          if (newScript === `$${requestedInput}`) {
-            setActualOutput(inputContents[requestedInput]);
-            return;
-          }
-
-          // Execute script with specific input
-          const path = newScript.replace(`$${requestedInput}`, '$');
-          const inputData = JSON.parse(inputContents[requestedInput]);
-          const result = handler.executeScript(path, inputData);
-          setActualOutput(JSON.stringify(result, null, 2));
-          return;
-        }
-      }
-
-      // Default to active input
-      const activeInput = inputs[selectedInputIndex] || inputs[0];
-      let inputData;
-     
-      try {
-        inputData = JSON.parse(inputContents[activeInput]);
-      } catch (error) {
-        setActualOutput(JSON.stringify({
-          error: "Invalid Input",
-          message: "Input data must be valid JSON",
-          input: inputContents[activeInput]
-        }, null, 2));
-        return;
-      }
-
-      // Execute script with handler
-      const result = handler.executeScript(newScript, inputData);
-      setActualOutput(JSON.stringify(result, null, 2));
-
-    } catch (error) {
-      // console.error("Transformation Error:", error);
-      setActualOutput(JSON.stringify({
-        error: "Transformation Error",
-        message: error.message || "Unknown error occurred",
-        input: newScript,
-        hint: "Check syntax and ensure all referenced paths exist"
-      }, null, 2));
-    }
-  };
-
-  // useEffect(() => {
-  //   console.log("Actual output updated:", actualOutput) // Debugging log
-  // }, [actualOutput])
- 
-  const textAreaStyles = {
-    minHeight: '100px',
-    lineHeight: '1.5rem',
-    padding: '0',
-    border: 'none'
-  };
-  
-  const normalizeJSON = (input) => {
-    try {
-      if (!input) return '';
-     
-      // If input is already an object/array, stringify it
-      if (typeof input === 'object') {
-        return JSON.stringify(input);
-      }
- 
-      // If input is a string, try to parse and re-stringify to normalize
-      if (typeof input === 'string') {
-        const parsed = JSON.parse(input.trim());
-        return JSON.stringify(parsed);
-      }
- 
-      return String(input);
-    } catch (error) {
-      console.error('JSON normalization error:', error);
-      return String(input);
-    }
-  };
- 
-  useEffect(() => {
-    const compareOutputs = () => {
-      try {
-        if (!actualOutput || !expectedOutput) {
-          setOutputMatch(false);
-          return;
-        }
- 
-        const normalizeJSON = (input) => {
-          try {
-            return JSON.stringify(JSON.parse(input));
-          } catch {
-            return input;
-          }
-        };
- 
-        const normalizedActual = normalizeJSON(actualOutput);
-        const normalizedExpected = normalizeJSON(expectedOutput);
- 
-        setOutputMatch(normalizedActual === normalizedExpected);
-      } catch (error) {
-        console.error('Comparison error:', error);
-        setOutputMatch(false);
-      }
-    };
- 
-    compareOutputs();
-  }, [actualOutput, expectedOutput]);
- 
-  const handleFileSelect = (event) => {
-    const file = event.target.files[0];
-    if (file && file.name.endsWith('.zip')) {
-      setSelectedFile(file);
-      setShowImportDialog(false);
-    }
-  };
- 
-  const handleFileDrop = (event) => {
-    event.preventDefault();
-    const file = event.dataTransfer.files[0];
-    if (file && file.name.endsWith('.zip')) {
-      setSelectedFile(file);
-      setShowImportDialog(false);
-    }
-  };
- 
-  const [shouldShowExportDialog, setShouldShowExportDialog] = useState(() =>
-    localStorage.getItem('showExportDialog') !== 'false'
-  );
-
-  const handleExport = async () => {
-    try {
-      // Create a new JSZip instance
-      const zip = new JSZip();
-  
-      // Add files to the zip
-      // Add scripts
-      const scriptsFolder = zip.folder("scripts");
-      scripts.forEach(script => {
-        scriptsFolder.file(script.name, script.content);
-      });
-  
-      // Add inputs
-      const inputsFolder = zip.folder("inputs");
-      Object.entries(inputContents).forEach(([name, content]) => {
-        inputsFolder.file(`${name}.json`, content);
-      });
-  
-      // Add metadata
-      const metadata = {
-        version: "1.0",
-        exportDate: new Date().toISOString(),
-        scripts: scripts.map(s => ({
-          name: s.name,
-          lastModified: s.lastModified
-        })),
-        inputs: inputs,
-        expectedOutput: expectedOutput
-      };
-      zip.file("metadata.json", JSON.stringify(metadata, null, 2));
-  
-      // Generate the zip file
-      const content = await zip.generateAsync({
-        type: "blob",
-        compression: "DEFLATE",
-        compressionOptions: {
-          level: 9
-        }
-      });
-  
-      // Create download link and trigger download
-      const url = window.URL.createObjectURL(content);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `snaplogic-playground-export-${moment().format('YYYY-MM-DD-HH-mm')}.zip`;
-      document.body.appendChild(link);
-      link.click();
-      
-      // Cleanup
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error('Export failed:', error);
-      // Optionally show error to user
-      alert('Export failed. Please try again.');
-    }
-  };
-  
-  const handleCheckboxChange = () => {
-    setIsChecked(!isChecked);
-    setWasChecked(true);
-    localStorage.setItem('wasChecked', 'true');
-    setShowExportDialog(false);
-  };
-
-  const getNavLink = (item) => {
-    const links = {
-      blogs: 'https://www.snaplogic.com/blog',
-      docs: '#', // Changed to hash to prevent navigation
-      tutorial: 'https://www.youtube.com/snaplogic',
-      playground: '#'
-    };
-    return links[item];
-  };
-
-  const handleNavClick = (item, e) => {
-    if (e) {
-      e.preventDefault(); // Prevent default behavior
-    }
-    
-    if (item === 'docs') {
-      setShowDocumentation(true);
-      setActiveNavItem('docs');
-    } else {
-      setActiveNavItem(item);
-      setShowDocumentation(false);
-    }
-  };
-  
-  useEffect(() => {
-    setIsBottomExpanded(false);
-    setBottomHeight(32);
-    setActiveTab(null);
-  }, []);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(0, canvas.height);
-      ctx.strokeStyle = '#e5e7eb';
-      ctx.stroke();
-    }
-  }, [scriptContent]);
-
-  // Create active line border element
-  const ActiveLineBorder = () => {
-    const top = 8 + (activeLineIndex * 24); // 24px is line height
-    return (
-      <div
-        style={{
-          position: 'absolute',
-          top: `${top}px`,
-          left: '48px', // Adjust based on line numbers width
-          right: '0', // Extend all the way to the right
-          height: '24px', // Line height
-          border: '1px solid #e5e7eb',
-          pointerEvents: 'none',
-          zIndex: 5
-        }}
-      />
-    );
-  };
-
-  const getLineCount = (content) => {
-    if (!content) return 1;
-    return content.split('\n').length;
-  };
-
-  // Add these responsive width calculations
-  const getResponsiveWidths = () => {
-    const screenWidth = window.innerWidth;
-   
-    if (screenWidth >= 1024) { // Laptop
-      return {
-        leftWidth: Math.floor(screenWidth * 0.25),
-        middleWidth: Math.floor(screenWidth * 0.45),
-        rightWidth: Math.floor(screenWidth * 0.30)
-      };
-    } else if (screenWidth >= 768) { // Tablet
-      return {
-        leftWidth: Math.floor(screenWidth * 0.30),
-        middleWidth: Math.floor(screenWidth * 0.40),
-        rightWidth: Math.floor(screenWidth * 0.30)
-      };
-    }
-    return { leftWidth, middleWidth, rightWidth }; // Default widths
-  };
-
-  // Add resize listener
-  useEffect(() => {
-    const handleResize = () => {
-      const { leftWidth: newLeft, middleWidth: newMiddle, rightWidth: newRight } = getResponsiveWidths();
-      setLeftWidth(newLeft);
-      setMiddleWidth(newMiddle);
-      setRightWidth(newRight);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Add responsive styles
-  const responsiveStyles = {
-    mainContainer: {
-      minWidth: '768px',
-      maxWidth: '100vw',
-      overflow: 'auto'
-    },
-    panels: {
-      minWidth: '250px'
-    }
-   
-  };
-  
-  const useMediaQuery = (query) => {
-    const [matches, setMatches] = useState(window.matchMedia(query).matches);
-
-    useEffect(() => {
-      const media = window.matchMedia(query);
-      const listener = () => setMatches(media.matches);
-      media.addEventListener('change', listener);
-      return () => media.removeEventListener('change', listener);
-    }, [query]);
-
-    return matches;
-  };
-
-  // In your component
-  const isTablet = useMediaQuery('(max-width: 1024px)');
-
-  const monacoStyles = `
-    .monaco-editor {
-      padding-top: 8px;
-    }
-   
-    .monaco-editor .margin {
-      background-color: #f8f9fa;
-    }
-   
-    .monaco-editor .line-numbers {
-      color: #3498db !important;
-      font-size: 12px;
-    }
-   
-    .monaco-editor .current-line {
-      border: none !important;
-    }
-
-    /* Disable editor widgets that might interfere with typing */
-    .monaco-editor .suggest-widget,
-    .monaco-editor .parameter-hints-widget,
-    .monaco-editor .monaco-hover {
-      display: none !important;
-    }
-  `;
-
-  const handlePayloadChange = (newContent) => {
-    setPayloadContent(newContent);
-    // Update the content for the current active input only
-    setInputContents(prev => ({
-      ...prev,
-      [activeInput]: newContent
-    }));
-  };
-  
-  const handleFormatChange = (newFormat) => {
-    setFormat(newFormat);
-  };
-
-  // If showing documentation, render the Documentation component
-  if (showDocumentation) {
-    return (
-      <div className="flex flex-col h-screen w-screen bg-white overflow-hidden">
-        {showToast && (
-          <div className="bg-[#E9EEF4] text-[#00044C] py-2 text-[12px] relative">
+      <div className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']">
+        {/* Apply the background using an absolutely positioned div to ensure it covers everything */}
+        <div 
+          className="fixed inset-0 z-[-1]" 
+          style={{
+            backgroundImage: 'url("/lovable-uploads/e097fd02-e653-4b86-95e5-09646c987272.png")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }} 
+        />
+        
+        {state.showToast && (
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 relative">
             <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
               Discover the Future of Integration. Explore SnapLogic Playground Highlights
             </div>
             <button
-              onClick={() => setShowToast(false)}
-              className="absolute right-4 top-0 h-full bg-[#E9EEF4] text-[#00044C] border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center font-bold"
+              onClick={() => setState(prev => ({ ...prev, showToast: false }))}
+              className="absolute right-4 top-0 h-full bg-transparent text-white border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center hover:opacity-80 transition-opacity duration-200"
             >
               ×
             </button>
           </div>
         )}
 
-        <div className="flex items-center justify-between px-6 py-2 border-b">
+        <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 bg-white/90 shadow-sm backdrop-blur-sm">
           <div className="flex items-center space-x-3">
-            <img
-              src="/sl-logo.svg"
-              alt="SnapLogic Logo"
-              className="object-contain"
-              style={{
-                width: isTablet ? '22px' : '32px',
-                height: isTablet ? '22px' : '32px'
-              }}
-            />
-            <img
-              src="/LogoN.svg"
-              alt="SnapLogic"
-              className="object-contain"
-              style={{
-                height: isTablet ? '20px' : '32px'
-              }}
-            />
+            <img src="/sl-logo.svg" alt="SnapLogic Logo" className="h-8 w-8" />
+            <span className="text-lg font-semibold text-gray-800">SnapLogic Playground</span>
           </div>
           
-          <div className="space-x-8 text-[0.82rem] font-bold text-[#333333] relative font-['Manrope'] flex items-center">
-            {['blogs', 'docs', 'tutorial', 'playground'].map(item => (
-              <a
-                key={item}
-                href={getNavLink(item)}
-                className={`text-black hover:text-blue-500 px-2 py-2 relative ${
-                  activeNavItem === item
-                    ? 'after:content-[""] after:absolute after:left-0 after:right-0 after:h-0.5 after:bg-[#1B4E8D] after:-bottom-[0.5rem] z-10'
-                    : ''
-                }`}
-                onClick={(e) => handleNavClick(item, e)}
-              >
-                {item.toUpperCase()}
-              </a>
-            ))}
+          {/* Navigation links */}
+          <div className="flex items-center space-x-8">
+            <button 
+              onClick={(e) => handleNavigation('blogs', e)}
+              className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'blogs' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+            >
+              BLOGS
+            </button>
+            <button 
+              onClick={(e) => handleNavigation('docs', e)}
+              className={`px-2 py-1 text-sm font-medium transition-colors ${state.showDocumentation ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+            >
+              DOCS
+            </button>
+            <button 
+              onClick={(e) => handleNavigation('tutorial', e)}
+              className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'tutorial' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+            >
+              TUTORIAL
+            </button>
+            <button 
+              onClick={(e) => handleNavigation('playground', e)}
+              className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'playground' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+            >
+              PLAYGROUND
+            </button>
           </div>
           
-          <div className="flex items-center">
-            <button
-              onClick={() => {
-                handleExport();
-                if (!wasChecked) {
-                  setShowExportDialog(true);
-                }
-              }}
-              className="flex items-center px-4 py-1.5 bg-white rounded border-none focus:outline-none group hover:text-blue-500 -ml-3"
+          <div className="flex items-center space-x-3">
+            <Button 
+              variant="outline" 
+              onClick={handleExport}
+              className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
             >
-              <img
-                src="/cloud-upload-Hover.svg"
-                alt="SnapLogic Logo"
-                className="mr-2 text-gray-700 group-hover:text-blue-500 text-gray-500 h-4 w-4"
-              />
-              <span className="text-gray-700 font-['Manrope'] group-hover:text-blue-500 text-[0.9rem] tracking-[0.09em] font-['Manrope'] font-normal">Export</span>
-            </button>
-            
-            <button
-              onClick={() => {setShowImportDialog(true); setSelectedFile(null);}} 
-              className="flex items-center px-4 py-1.5 bg-white rounded border-none focus:outline-none group hover:text-blue-500 -ml-4"
+              <span className="mr-2">Export</span>
+              <DownloadCloud className="h-4 w-4 text-blue-600" />
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={openImportDialog}
+              className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
             >
-              <img
-                src="/cloud-download-Hover.svg"
-                alt="SnapLogic Logo"
-                className="mr-2 group-hover:text-blue-500 text-gray-500 h-4 w-4"
-              />
-              <span className="text-gray-700 group-hover:text-blue-500 text-[0.9rem] font-['Manrope'] tracking-[0.09em] font-normal">Import</span>
-            </button>
-
-            <div className="h-6 w-[1px] bg-gray-500 mx-4"></div>
+              <span className="mr-2">Import</span>
+              <UploadCloud className="h-4 w-4 text-blue-600" />
+            </Button>
           </div>
         </div>
 
-        <Documentation onBack={() => {
-          setShowDocumentation(false);
-          setActiveNavItem('playground');
-        }} />
+        <Documentation onBack={() => setState(prev => ({ ...prev, showDocumentation: false, activePage: 'playground' }))} />
+
+        {/* Footer - Updated with new design and custom icons */}
+        <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white/90 shadow-sm relative backdrop-blur-sm">
+          <div className="flex justify-center items-center">
+            <img 
+              src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7" 
+              alt="Code background" 
+              className="h-6 mx-auto"
+            />
+          </div>
+          
+          <div className="font-['Manrope'] text-[0.69rem] text-gray-300 absolute left-[calc(45%+0px)] tracking-[0.04em] flex items-center h-full z-10 gap-2.5 font-medium">
+            <span className="text-gray-500">Made with</span>
+            <div className="inline-flex items-center gap-2.5">
+              {/* Tea Icon */}
+              <div className="relative w-[18px] h-[18px] animate-pulse transition-transform hover:scale-110">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2 19h18v2H2v-2zm2-8v5c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2zm15 0v5H5v-5h14zm-6.75-7L15 8H9l2.75-4z" fill="#374151"/>
+                  <path d="M19 10h2c0-2.21-1.79-4-4-4h-2l2 4z" fill="#374151"/>
+                </svg>
+              </div>
+              <span className="text-gray-500 font-semibold">&</span>
+              {/* Beer Icon */}
+              <div className="relative w-[18px] h-[18px] animate-bounce transition-transform hover:scale-110">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 3h10v2h-10z" fill="#D97706"/>
+                  <path d="M18 8c-0.4-2.3-2.4-4-4.8-4h-2.4c-2.4 0-4.4 1.7-4.8 4h-1v12h14v-12h-1zM8 18v-8h8v8h-8z" fill="#D97706"/>
+                  <path d="M10 11h4v3h-4z" fill="#ffffff"/>
+                </svg>
+              </div>
+            </div>
+            <span className="text-gray-500">in</span>
+            <span className="text-gray-500 font-semibold hover:text-blue-800 cursor-pointer transition-colors">
+              Tamil Nadu, India
+            </span>
+            <span className="mx-2.5 text-gray-400">|</span>
+            <span className="text-gray-500">Powered by</span>
+            <a 
+              href="https://www.mulecraft.in/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-blue-500 font-semibold hover:text-blue-800 transition-colors relative group"
+            >
+              Mulecraft
+            </a>
+          </div>
+          
+          <style jsx>{`
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+            
+            .animate-pulse {
+              animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+            
+            .animate-bounce {
+              animation: bounce 1s infinite;
+            }
+            
+            @keyframes pulse {
+              0%, 100% { opacity: 1; }
+              50% { opacity: 0.7; }
+            }
+            
+            @keyframes bounce {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-25%); }
+            }
+          `}</style>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-white overflow-hidden">
-      {showToast && (
-        <div className="bg-[#E9EEF4] text-[#00044C] py-2 text-[12px] relative">
+    <div className="flex flex-col h-screen w-screen overflow-hidden font-['Manrope']">
+      {/* Apply the background using an absolutely positioned div to ensure it covers everything */}
+      <div 
+        className="fixed inset-0 z-[-1]" 
+        style={{
+          backgroundImage: 'url("/lovable-uploads/e097fd02-e653-4b86-95e5-09646c987272.png")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }} 
+      />
+      
+      {state.showToast && (
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 relative">
           <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
-           
             Discover the Future of Integration. Explore SnapLogic Playground Highlights
           </div>
           <button
-            onClick={() => setShowToast(false)}
-            className="absolute right-4 top-0 h-full bg-[#E9EEF4] text-[#00044C] border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center font-bold"
+            onClick={() => setState(prev => ({ ...prev, showToast: false }))}
+            className="absolute right-4 top-0 h-full bg-transparent text-white border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center hover:opacity-80 transition-opacity duration-200"
           >
             ×
           </button>
         </div>
       )}
 
-      <div className="flex items-center justify-between px-6 py-2 border-b">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 bg-white/90 shadow-sm backdrop-blur-sm">
         <div className="flex items-center space-x-3">
-          
-           <img
-  src="/sl-logo.svg"
-  alt="SnapLogic Logo"
-  className=" object-contain"
-  style={{
-    width: isTablet ? '22px' : '32px',
-    height: isTablet ? '22px' : '32px'
-  }}
-/>
-<img
-  src="/LogoN.svg"
-  alt="SnapLogic"
-  className=" object-contain"
-  style={{
-    height: isTablet ? '20px' : '32px'
-  }}
-/>
+          <img src="/sl-logo.svg" alt="SnapLogic Logo" className="h-8 w-8" />
+          <span className="text-lg font-semibold text-gray-800">SnapLogic Playground</span>
         </div>
-        <div className="flex items-center">
-        <button
-  onClick={() => {
-    handleExport();
-    // Show dialog if not checked in current session
-    if (!wasChecked) {
-      setShowExportDialog(true);
-    }
-  }}
-  className
+        
+        {/* Navigation links - Updated to prevent default behavior */}
+        <div className="flex items-center space-x-8">
+          <button 
+            onClick={(e) => handleNavigation('blogs', e)}
+            className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'blogs' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+          >
+            BLOGS
+          </button>
+          <button 
+            onClick={(e) => handleNavigation('docs', e)}
+            className={`px-2 py-1 text-sm font-medium transition-colors ${state.showDocumentation ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+          >
+            DOCS
+          </button>
+          <button 
+            onClick={(e) => handleNavigation('tutorial', e)}
+            className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'tutorial' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+          >
+            TUTORIAL
+          </button>
+          <button 
+            onClick={(e) => handleNavigation('playground', e)}
+            className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'playground' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+          >
+            PLAYGROUND
+          </button>
+        </div>
+        
+        <div className="flex items-center space-x-3">
+          <Button 
+            variant="outline" 
+            onClick={handleExport}
+            className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
+          >
+            <span className="mr-2">Export</span>
+            <DownloadCloud className="h-4 w-4 text-blue-600" />
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={openImportDialog}
+            className="bg-white border border-gray-300 hover:bg-gray-50 hover:border-blue-400 text-gray-700 transition-all duration-200 rounded shadow-sm px-4 py-2 h-9 flex items-center justify-center"
+          >
+            <span className="mr-2">Import</span>
+            <UploadCloud className="h-4 w-4 text-blue-600" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex-1 flex mx-4 my-4 rounded-md overflow-hidden shadow-xl">
+        {/* Left Panel */}
+        <div
+          style={{
+            width: `${dimensions.leftWidth}px`,
+            minWidth: '250px',
+            borderRight: '1px solid #e5e7eb'
+          }}
+          className="overflow-y-auto bg-white/95 backdrop-blur-sm"
+        >
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Inputs</h2>
+            <Button 
+              variant="outline" 
+              onClick={handleInputDialogOpen}
+              className="bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm h-8 px-3 py-1 text-xs"
+            >
+              Add
+            </Button>
+          </div>
+          
+          {/* Input items would go here */}
+          <div className="p-2">
+            <div className="p-2 hover:bg-blue-50/60 cursor-pointer rounded-sm transition-colors duration-150 border border-transparent hover:border-blue-100">
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                <span className="text-sm text-gray-700">input.json</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Input dialog would appear here */}
+          {state.isInputDialogOpen && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40">
+              <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4 transform transition-all duration-200 opacity-100 scale-100">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">Add Input</h2>
+                <div className="mb-4">
+                  <Label htmlFor="inputName" className="block text-sm font-medium text-gray-700 mb-1">Input Name</Label>
+                  <input
+                    id="inputName"
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    placeholder="Enter input name"
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={handleInputDialogClose}
+                    className="border-gray-300 hover:bg-gray-100 text-gray-700"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleInputDialogClose}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Add
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Middle Panel */}
+        <div
+          style={{
+            width: `${dimensions.middleWidth}px`,
+            minWidth: '250px',
+            borderRight: '1px solid #e5e7eb'
+          }}
+          className="flex flex-col bg-white/95 backdrop-blur-sm"
+        >
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Script</h2>
+            <div className="flex items-center space-x-4">
+              <FormatDropdown onFormatChange={handleFormatChange} />
+              <Button 
+                variant="outline" 
+                onClick={handleScriptDialogOpen}
+                className="bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm h-8 px-3 py-1 text-xs"
+              >
+                Add
+              </Button>
+            </div>
+          </div>
+          
+          {/* Script content area */}
+          <div className="flex-1 p-4">
+            <div className="bg-white border border-gray-200 rounded-sm h-full shadow-sm hover:shadow-md transition-shadow duration-300">
+              <Editor
+                height="100%"
+                language={state.scriptFormat}
+                theme="light"
+                value=""
+                options={{
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  fontFamily: "'Manrope', 'Monaco', monospace",
+                  fontSize: 13,
+                  padding: { top: 12, bottom: 12 }
+                }}
+              />
+            </div>
+          </div>
+          
+          {/* Script dialog would appear here */}
+          {state.isScriptDialogOpen && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40">
+              <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4 transform transition-all duration-200 opacity-100 scale-100">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">Add Script</h2>
+                <div className="mb-4">
+                  <Label htmlFor="scriptName" className="block text-sm font-medium text-gray-700 mb-1">Script Name</Label>
+                  <input
+                    id="scriptName"
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    placeholder="Enter script name"
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={handleScriptDialogClose}
+                    className="border-gray-300 hover:bg-gray-100 text-gray-700"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleScriptDialogClose}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Add
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right Panel */}
+        <div
+          style={{
+            width: `${dimensions.rightWidth}px`,
+            minWidth: '250px'
+          }}
+          className="flex flex-col bg-white/95 backdrop-blur-sm"
+        >
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Output</h2>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            <Label htmlFor="actualOutput" className="block text-sm font-medium text-gray-700 mb-2">
+              Actual Output
+            </Label>
+            <div className="rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white">
+              <Editor
+                height="30vh"
+                width="100%"
+                language="json"
+                theme="light"
+                value={state.actualOutput}
+                onChange={(value) => setState(prev => ({ ...prev, actualOutput: value }))}
+                options={{
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  wrappingIndent: 'indent',
+                  automaticLayout: true,
+                  fontSize: 13,
+                  fontFamily: "'Manrope', 'Monaco', monospace",
+                  padding: { top: 12, bottom: 12 }
+                }}
+                className="font-mono"
+              />
+            </div>
+            
+            <div className="mt-6">
+              <Label htmlFor="expectedOutput" className="block text-sm font-medium text-gray-700 mb-2">
+                Expected Output
+              </Label>
+              <div className="rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white">
+                <Editor
+                  height="20vh"
+                  width="100%"
+                  language="json"
+                  theme="light"
+                  value=""
+                  options={{
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'on',
+                    wrappingIndent: 'indent',
+                    automaticLayout: true,
+                    fontSize: 13,
+                    fontFamily: "'Manrope', 'Monaco', monospace",
+                    padding: { top: 12, bottom: 12 }
+                  }}
+                  className="font-mono"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Footer - Updated with new design and custom icons */}
+      <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white/90 shadow-sm relative backdrop-blur-sm">
+        <div className="flex justify-center items-center">
+          <img 
+            src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7" 
+            alt="Code background" 
+            className="h-6 mx-auto"
+          />
+        </div>
+        
+        <div className="font-['Manrope'] text-[0.69rem] text-gray-300 absolute left-[calc(45%+0px)] tracking-[0.04em] flex items-center h-full z-10 gap-2.5 font-medium">
+          <span className="text-gray-500">Made with</span>
+          <div className="inline-flex items-center gap-2.5">
+            {/* Tea Icon */}
+            <div className="relative w-[18px] h-[18px] animate-pulse transition-transform hover:scale-110">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 19h18v2H2v-2zm2-8v5c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2zm15 0v5H5v-5h14zm-6.75-7L15 8H9l2.75-4z" fill="#374151"/>
+                <path d="M19 10h2c0-2.21-1.79-4-4-4h-2l2 4z" fill="#374151"/>
+              </svg>
+            </div>
+            <span className="text-gray-500 font-semibold">&</span>
+            {/* Beer Icon */}
+            <div className="relative w-[18px] h-[18px] animate-bounce transition-transform hover:scale-110">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 3h10v2h-10z" fill="#D97706"/>
+                <path d="M18 8c-0.4-2.3-2.4-4-4.8-4h-2.4c-2.4 0-4.4 1.7-4.8 4h-1v12h14v-12h-1zM8 18v-8h8v8h-8z" fill="#D97706"/>
+                <path d="M10 11h4v3h-4z" fill="#ffffff"/>
+              </svg>
+            </div>
+          </div>
+          <span className="text-gray-500">in</span>
+          <span className="text-gray-500 font-semibold hover:text-blue-800 cursor-pointer transition-colors">
+            Tamil Nadu, India
+          </span>
+          <span className="mx-2.5 text-gray-400">|</span>
+          <span className="text-gray-500">Powered by</span>
+          <a 
+            href="https://www.mulecraft.in/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-blue-500 font-semibold hover:text-blue-800 transition-colors relative group"
+          >
+            Mulecraft
+          </a>
+        </div>
+        
+        <style jsx>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+          
+          .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          }
+          
+          .animate-bounce {
+            animation: bounce 1s infinite;
+          }
+          
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+          }
+          
+          @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-25%); }
+          }
+        `}</style>
+      </div>
+
+      {/* Import Project Dialog - Completely redesigned */}
+      <Dialog open={state.importDialogOpen} onOpenChange={closeImportDialog}>
+        <DialogContent className="sm:max-w-md w-full max-h-[90vh] bg-white p-0 rounded-none overflow-hidden border border-gray-300 shadow-xl">
+          <DialogHeader className="px-6 pt-6 pb-2 border-b border-gray-200">
+            <DialogTitle className="text-2xl font-bold text-gray-800">Import project</DialogTitle>
+          </DialogHeader>
+          
+          <div className="p-6">
+            <div className="border-2 border-dashed border-gray-300 rounded-none p-10 flex flex-col items-center justify-center text-center hover:border-gray-400 transition-colors duration-200 cursor-pointer">
+              <div className="mb-4 text-blue-500">
+                <UploadCloud className="mx-auto h-14 w-14 text-blue-500 opacity-80" />
+              </div>
+              <p className="text-base font-medium text-gray-600 mb-1">
+                Drop project zip here or click to upload
+              </p>
+              <p className="text-sm text-gray-500">
+                Supported format: .zip
+              </p>
+            </div>
+            
+            <div className="mt-6">
+              <p className="text-center text-sm text-red-500 mb-1">
+                Upload functionality is only intended for playground exported projects
+              </p>
+              <p className="text-center text-sm text-gray-500">
+                Importing modified files may yield an invalid project.
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex justify-end p-4 border-t border-gray-200 bg-gray-50">
+            <Button 
+              variant="outline" 
+              onClick={closeImportDialog} 
+              className="px-5 py-2 text-sm rounded-none bg-white border border-gray-300 hover:bg-gray-100 text-gray-700"
+            >
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
