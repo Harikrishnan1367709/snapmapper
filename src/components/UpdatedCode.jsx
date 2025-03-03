@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button"
@@ -5,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import FormatDropdown from '../FormatDropdown';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Coffee, Beer, UploadCloud, DownloadCloud, HelpCircle, MessageSquare } from "lucide-react";
-import { Documentation } from './Documentation';
+import { Documentation } from '../components/Documentation';
 import SupportButton from './SupportButton';
 
 export default function UpdatedCode() {
