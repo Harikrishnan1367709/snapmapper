@@ -1,8 +1,8 @@
-<lov-code>
+
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { JSONPath } from 'jsonpath-plus';
 import { ChevronDown, Upload, Download, Terminal, Book, ChevronLeft } from "lucide-react";
-import { v4 as uuidv4 } from "uuid"
+import { v4 as uuidv4 } from "uuid";
 
 import JSZip from 'jszip';
 
@@ -17,7 +17,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "./components/ui/tooltip"
+} from "./components/ui/tooltip";
 import {
   Dialog,
   DialogContent,
@@ -26,9 +26,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./components/ui/dialog"
-import { Input } from "./components/ui/input"
-import { Label } from "./components/ui/label"
+} from "./components/ui/dialog";
+import { Input } from "./components/ui/input";
+import { Label } from "./components/ui/label";
 import { Button } from './components/ui/button';
 import FormatDropdown from '../FormatDropdown';
 import { handleJSON } from './utils/jsonHandler';
