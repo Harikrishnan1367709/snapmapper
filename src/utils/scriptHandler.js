@@ -1,4 +1,3 @@
-
 import { JsonPathEvaluator } from './jsonPathEvaluator';
 import { snaplogicHelpers } from './snaplogicHelpers';
 
@@ -41,89 +40,8 @@ export class ScriptHandler {
       return this.parseArray(script);
     }
 
-    // Handle special combined expressions (like the date comparison with event types)
-    if (script.includes('&&') || script.includes('||')) {
-      return this.evaluateOperatorExpression(script);
-    }
-
     // Handle primitive values
     return this.parsePrimitive(script);
-  }
-
-  evaluateOperatorExpression(expr) {
-    try {
-      // Handle Date.parse and event type comparison expressions
-      if (expr.includes('Date.parse') && (expr.includes('EventLiteTypeID') || expr.includes('$Event'))) {
-        // Split the expression by logical operators
-        const parts = this.splitExpression(expr);
-        
-        // Evaluate each part and combine with logical operators
-        return this.evaluateExpressionParts(parts, expr);
-      }
-      
-      // For other expressions with operators, fall back to basic evaluation
-      // This is a simplified approach - in a production environment, you'd want a proper parser
-      return expr;
-    } catch (error) {
-      console.error("Error evaluating operator expression:", error);
-      return `Error: ${error.message}`;
-    }
-  }
-
-  splitExpression(expr) {
-    // Simple splitting by && and || while respecting parentheses
-    let parts = [];
-    let currentPart = "";
-    let parenLevel = 0;
-    
-    for (let i = 0; i < expr.length; i++) {
-      const char = expr[i];
-      
-      if (char === '(') parenLevel++;
-      if (char === ')') parenLevel--;
-      
-      // Check for && or || operators at the top level
-      if (parenLevel === 0 && i < expr.length - 1) {
-        if ((char === '&' && expr[i+1] === '&') || 
-            (char === '|' && expr[i+1] === '|')) {
-          parts.push({
-            expr: currentPart.trim(),
-            operator: expr.substr(i, 2)
-          });
-          currentPart = "";
-          i++; // Skip the next character since we've processed the operator
-          continue;
-        }
-      }
-      
-      currentPart += char;
-    }
-    
-    // Add the last part
-    if (currentPart.trim()) {
-      parts.push({
-        expr: currentPart.trim(),
-        operator: null
-      });
-    }
-    
-    return parts;
-  }
-
-  evaluateExpressionParts(parts, originalExpr) {
-    // For handling expressions like:
-    // Date.parse($EffectiveMoment) <= Date.now() && ($EventLiteTypeID == "Time Off Entry" || ...)
-    
-    // This is a simplified implementation that would need to be expanded
-    // based on your specific requirements
-    
-    // For now, just return the original expression to avoid breaking functionality
-    return originalExpr;
-    
-    // In a complete implementation, you would:
-    // 1. Evaluate each part of the expression
-    // 2. Combine the results according to the operators
-    // 3. Return the final boolean result
   }
 
   evaluateHelper(expr) {

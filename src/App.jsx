@@ -1,20 +1,14 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-// import UpdatedCode from './UpdatedCode';
+import React from 'react'
 
-import UpdatedCode from './UpdatedCode';
-import { Documentation } from './components/Documentation';
+
+import UpdatedCode from './UpdatedCode'
+
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen">
-        <Routes>
-          <Route exact path="/" element={<UpdatedCode />} />
-          <Route path="/docs" element={<Documentation />} />
-        </Routes>
-      </div>
-    </Router>
-  );
+    <UpdatedCode/>
+  )
 }
 
-export default App;
+export default App
+

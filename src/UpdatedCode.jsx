@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { JSONPath } from 'jsonpath-plus';
 import { ChevronDown, Upload, Download, Terminal, Book, ChevronLeft } from "lucide-react";
 import { v4 as uuidv4 } from "uuid"
-import { Link } from 'react-router-dom';
+
 import JSZip from 'jszip';
 
 
@@ -29,7 +29,7 @@ import {
 import { Input } from "./components/ui/input"
 import { Label } from "./components/ui/label"
 import { Button } from './components/ui/button';
-
+import FormatDropdown from './FormatDropdown';
 import { handleJSON } from './utils/jsonHandler';
 import _ from 'lodash';
 import moment from 'moment';
@@ -41,10 +41,6 @@ import HighlightedActualOutput from './utils/HighlightedActualOutput';
 import HighlightedExpectedOutput from './utils/HighlightedExpectedOutput';
 import SnapLogicFunctionsHandler from './utils/SnaplogicFunctionsHandler';
 import { Documentation } from './components/ui/Documentation';
-// import SupportButton from './components/ui/supportButton';
-
-import FormatDropdown from './FormatDropdown';
-import SupportButton from './components/SupportButton';
 
 
 
@@ -65,7 +61,7 @@ const UpdatedCode = () => {
 
 
 
-  // const [showDocumentation, setShowDocumentation] = useState(false);
+  const [showDocumentation, setShowDocumentation] = useState(false);
   const [format, setFormat] = useState('json');
  
   const canvasRef = useRef(null);
@@ -797,40 +793,34 @@ const handleNavigation = (page, e) => {
 };
 
 
-const getNavLink = (item) => ({
-  blogs: 'https://blogs.mulecraft.in/',
-  docs: '/docs',  // <-- Internal Route
-  tutorial: 'https://www.youtube.com/snaplogic',
-  playground: '/'
-})[item];
-
-
-
-// const handleNavClick = (item, e) => {
-//   if (e) {
-//     e.preventDefault();
-//   }
-  
-//   const link = getNavLink(item);
-//   if (link.startsWith('http')) {
-//     window.open(link, '_blank');
-//   } else if (item === 'docs') {
-//     setShowDocumentation(true);
-//     setActiveNavItem('docs');
-//   } else {
-//     setActiveNavItem(item);
-//     setShowDocumentation(false);
-//   }
-// };
-const handleNavClick = (item, e) => {
-  if (getNavLink(item).startsWith('http')) {
-    e.preventDefault();
-    window.open(getNavLink(item), '_blank');
-    setActiveNavItem(item);
-  }
-  // No state changes here; let routing handle navigation
+const getNavLink = (item) => {
+  const links = {
+    blogs: 'https://blogs.mulecraft.in/',
+    docs: '#',
+    tutorial: 'https://www.youtube.com/snaplogic',
+    playground: '#'
+  };
+  return links[item];
 };
 
+
+
+const handleNavClick = (item, e) => {
+  if (e) {
+    e.preventDefault();
+  }
+  
+  const link = getNavLink(item);
+  if (link.startsWith('http')) {
+    window.open(link, '_blank');
+  } else if (item === 'docs') {
+    setShowDocumentation(true);
+    setActiveNavItem('docs');
+  } else {
+    setActiveNavItem(item);
+    setShowDocumentation(false);
+  }
+};
   useEffect(() => {
     setIsBottomExpanded(false);
     setBottomHeight(32);
@@ -1022,102 +1012,102 @@ const monacoStyles = `
     setFormat(newFormat);
   };
  
-  // if (showDocumentation) {
-  //   return (
-  //     <div className="flex flex-col h-screen w-screen bg-white overflow-hidden">
-  //       {showToast && (
-  //         <div className="bg-[#E9EEF4] text-[#00044C] py-2 text-[12px] relative">
-  //           <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
-  //             Discover the Future of Integration. Explore SnapLogic Playground Highlights
-  //           </div>
-  //           <button
-  //             onClick={() => setShowToast(false)}
-  //             className="absolute right-4 top-0 h-full bg-[#E9EEF4] text-[#00044C] border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center font-bold"
-  //           >
-  //             ×
-  //           </button>
-  //         </div>
-  //       )}
+  if (showDocumentation) {
+    return (
+      <div className="flex flex-col h-screen w-screen bg-white overflow-hidden">
+        {showToast && (
+          <div className="bg-[#E9EEF4] text-[#00044C] py-2 text-[12px] relative">
+            <div className="text-center px-12 font-bold font-['Manrope'] text-[1rem] tracking-[0.09em]">
+              Discover the Future of Integration. Explore SnapLogic Playground Highlights
+            </div>
+            <button
+              onClick={() => setShowToast(false)}
+              className="absolute right-4 top-0 h-full bg-[#E9EEF4] text-[#00044C] border-none outline-none focus:outline-none font-bold text-[18px] flex items-center justify-center font-bold"
+            >
+              ×
+            </button>
+          </div>
+        )}
 
-  //       <div className="flex items-center justify-between px-6 py-2 border-b">
-  //         <div className="flex items-center space-x-3">
-  //           <img
-  //             src="/sl-logo.svg"
-  //             alt="SnapLogic Logo"
-  //             className="object-contain"
-  //             style={{
-  //               width: isTablet ? '22px' : '32px',
-  //               height: isTablet ? '22px' : '32px'
-  //             }}
-  //           />
-  //           <img
-  //             src="/LogoN.svg"
-  //             alt="SnapLogic"
-  //             className="object-contain"
-  //             style={{
-  //               height: isTablet ? '20px' : '32px'
-  //             }}
-  //           />
-  //         </div>
+        <div className="flex items-center justify-between px-6 py-2 border-b">
+          <div className="flex items-center space-x-3">
+            <img
+              src="/sl-logo.svg"
+              alt="SnapLogic Logo"
+              className="object-contain"
+              style={{
+                width: isTablet ? '22px' : '32px',
+                height: isTablet ? '22px' : '32px'
+              }}
+            />
+            <img
+              src="/LogoN.svg"
+              alt="SnapLogic"
+              className="object-contain"
+              style={{
+                height: isTablet ? '20px' : '32px'
+              }}
+            />
+          </div>
           
-  //         <div className="space-x-8 text-[0.82rem] font-bold text-[#333333] relative font-['Manrope'] flex items-center">
-  //           {['blogs', 'docs', 'tutorial', 'playground'].map(item => (
-  //             <a
-  //               key={item}
-  //               href={getNavLink(item)}
-  //               className={`text-black hover:text-blue-500 px-2 py-2 relative ${
-  //                 activeNavItem === item
-  //                   ? 'after:content-[""] after:absolute after:left-0 after:right-0 after:h-0.5 after:bg-[#1B4E8D] after:-bottom-[0.5rem] z-10'
-  //                   : ''
-  //               }`}
-  //               onClick={(e) => handleNavClick(item, e)}
-  //             >
-  //               {item.toUpperCase()}
-  //             </a>
-  //           ))}
-  //         </div>
+          <div className="space-x-8 text-[0.82rem] font-bold text-[#333333] relative font-['Manrope'] flex items-center">
+            {['blogs', 'docs', 'tutorial', 'playground'].map(item => (
+              <a
+                key={item}
+                href={getNavLink(item)}
+                className={`text-black hover:text-blue-500 px-2 py-2 relative ${
+                  activeNavItem === item
+                    ? 'after:content-[""] after:absolute after:left-0 after:right-0 after:h-0.5 after:bg-[#1B4E8D] after:-bottom-[0.5rem] z-10'
+                    : ''
+                }`}
+                onClick={(e) => handleNavClick(item, e)}
+              >
+                {item.toUpperCase()}
+              </a>
+            ))}
+          </div>
           
-  //         <div className="flex items-center">
-  //           <button
-  //             onClick={() => {
-  //               handleExport();
-  //               if (!wasChecked) {
-  //                 setShowExportDialog(true);
-  //               }
-  //             }}
-  //             className="flex items-center px-4 py-1.5 bg-white rounded border-none focus:outline-none group hover:text-blue-500 -ml-3"
-  //           >
-  //             <img
-  //               src="/cloud-upload-Hover.svg"
-  //               alt="SnapLogic Logo"
-  //               className="mr-2 text-gray-700 group-hover:text-blue-500 text-gray-500 h-4 w-4"
-  //             />
-  //             <span className="text-gray-700 font-['Manrope'] group-hover:text-blue-500 text-[0.9rem] tracking-[0.09em] font-['Manrope'] font-normal">Export</span>
-  //           </button>
+          <div className="flex items-center">
+            <button
+              onClick={() => {
+                handleExport();
+                if (!wasChecked) {
+                  setShowExportDialog(true);
+                }
+              }}
+              className="flex items-center px-4 py-1.5 bg-white rounded border-none focus:outline-none group hover:text-blue-500 -ml-3"
+            >
+              <img
+                src="/cloud-upload-Hover.svg"
+                alt="SnapLogic Logo"
+                className="mr-2 text-gray-700 group-hover:text-blue-500 text-gray-500 h-4 w-4"
+              />
+              <span className="text-gray-700 font-['Manrope'] group-hover:text-blue-500 text-[0.9rem] tracking-[0.09em] font-['Manrope'] font-normal">Export</span>
+            </button>
             
-  //           <button
-  //             onClick={() => {setShowImportDialog(true); setSelectedFile(null);}} 
-  //             className="flex items-center px-4 py-1.5 bg-white rounded border-none focus:outline-none group hover:text-blue-500 -ml-4"
-  //           >
-  //             <img
-  //               src="/cloud-download-Hover.svg"
-  //               alt="SnapLogic Logo"
-  //               className="mr-2 group-hover:text-blue-500 text-gray-500 h-4 w-4"
-  //             />
-  //             <span className="text-gray-700 group-hover:text-blue-500 text-[0.9rem] font-['Manrope'] tracking-[0.09em] font-normal">Import</span>
-  //           </button>
+            <button
+              onClick={() => {setShowImportDialog(true); setSelectedFile(null);}} 
+              className="flex items-center px-4 py-1.5 bg-white rounded border-none focus:outline-none group hover:text-blue-500 -ml-4"
+            >
+              <img
+                src="/cloud-download-Hover.svg"
+                alt="SnapLogic Logo"
+                className="mr-2 group-hover:text-blue-500 text-gray-500 h-4 w-4"
+              />
+              <span className="text-gray-700 group-hover:text-blue-500 text-[0.9rem] font-['Manrope'] tracking-[0.09em] font-normal">Import</span>
+            </button>
 
-  //           <div className="h-6 w-[1px] bg-gray-500 mx-4"></div>
-  //         </div>
-  //       </div>
+            <div className="h-6 w-[1px] bg-gray-500 mx-4"></div>
+          </div>
+        </div>
 
-  //       <Documentation onBack={() => {
-  //         setShowDocumentation(false);
-  //         setActiveNavItem('playground');
-  //       }} />
-  //     </div>
-  //   );
-  // }
+        <Documentation onBack={() => {
+          setShowDocumentation(false);
+          setActiveNavItem('playground');
+        }} />
+      </div>
+    );
+  }
 
 
   return (
@@ -1320,31 +1310,21 @@ const monacoStyles = `
 
 
           <div className="space-x-8 text-[0.82rem] font-bold text-[#333333] relative font-['Manrope'] flex items-center">
-          {['blogs', 'docs', 'tutorial', 'playground'].map(item => (
-              <Link
-              key={item}
-              to={getNavLink(item)}
-              className={`text-black hover:text-blue-500 px-2 py-2 relative ${
+            {['blogs', 'docs', 'tutorial', 'playground'].map(item => (
+              <a
+                key={item}
+                href={getNavLink(item)}
+                className={`text-black hover:text-blue-500 px-2 py-2 relative ${
                   activeNavItem === item
                     ? 'after:content-[""] after:absolute after:left-0 after:right-0 after:h-0.5 after:bg-[#1B4E8D] after:-bottom-[0.5rem] z-10'
                     : ''
                 }`}
-              target={"_blank"} 
-              rel={getNavLink(item).startsWith('http') ? 'noopener noreferrer' : undefined}
-              onClick={(e) => {
-                if (getNavLink(item).startsWith('http')) {
-                  e.preventDefault();  // Prevent React Router navigation for external links
-                  window.open(getNavLink(item), '_blank');
-                }
-              }}
-            >
-              {item.toUpperCase()}
-            </Link>
-            
-            
+                onClick={(e) => handleNavClick(item, e)}
+              >
+                {item.toUpperCase()}
+              </a>
             ))}
           </div>
-
         </div>
       </div>
 {/* main content */}
@@ -1906,25 +1886,25 @@ const monacoStyles = `
       {/* SnapLogic Playground – Redefining Integration.
     </span> */}
     <div className="font-['Manrope'] text-[0.69rem] text-gray-300 absolute left-[calc(45%+0px)] tracking-[0.04em] flex items-center h-full z-10 gap-2.5 font-medium">
-  <span className="text-gray-500">Made</span>
-  {/* <div className="inline-flex items-center gap-2.5"> */}
+  <span className="text-gray-500">Made with</span>
+  <div className="inline-flex items-center gap-2.5">
     {/* Tea Icon */}
-    {/* <div className="relative w-[18px] h-[18px] animate-pulse transition-transform hover:scale-110">
+    <div className="relative w-[18px] h-[18px] animate-pulse transition-transform hover:scale-110">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M2 19h18v2H2v-2zm2-8v5c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2zm15 0v5H5v-5h14zm-6.75-7L15 8H9l2.75-4z" fill="#374151"/>
         <path d="M19 10h2c0-2.21-1.79-4-4-4h-2l2 4z" fill="#374151"/>
       </svg>
-    </div> */}
-    {/* <span className="text-gray-500 font-semibold">&</span> */}
+    </div>
+    <span className="text-gray-500 font-semibold">&</span>
     {/* Beer Icon */}
-    {/* <div className="relative w-[18px] h-[18px] animate-bounce transition-transform hover:scale-110">
+    <div className="relative w-[18px] h-[18px] animate-bounce transition-transform hover:scale-110">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M7 3h10v2h-10z" fill="#D97706"/>
         <path d="M18 8c-0.4-2.3-2.4-4-4.8-4h-2.4c-2.4 0-4.4 1.7-4.8 4h-1v12h14v-12h-1zM8 18v-8h8v8h-8z" fill="#D97706"/>
         <path d="M10 11h4v3h-4z" fill="#ffffff"/>
       </svg>
-    </div> */}
-  {/* </div> */}
+    </div>
+  </div>
   <span className="text-gray-500">in</span>
   <div className="flex items-center gap-1">
     <span className="text-gray-500 font-semibold hover:text-blue-800  cursor-pointer transition-colors">
@@ -1951,10 +1931,7 @@ const monacoStyles = `
   >
     Mulecraft
   </a>
-{/* Support Button (Bottom Right) */}
-<div className="absolute bottom-2 right-2">
-    <SupportButton />
-  </div>
+
   <style jsx>{`
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
     
