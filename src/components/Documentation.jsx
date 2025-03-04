@@ -912,18 +912,18 @@ export function Documentation({ onBack }) {
             <input
               ref={searchInputRef}
               type="text"
-              placeholder="Search documentation... "
-              className="w-full bg-[#333333] rounded-lg border border-gray-700 py-2 pl-10 pr-10 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm group-focus-within:shadow-md"
+              placeholder="Search documentation... (Ctrl+K)"
+              className="w-full bg-[#333333] rounded-lg border border-gray-700 py-2 pl-10 pr-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm group-focus-within:shadow-md"
               value={searchQuery}
               onChange={handleSearchChange}
               onFocus={() => setIsSearching(true)}
             />
             {searchQuery && (
               <button
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center justify-center h-6 w-6 text-gray-400 hover:text-gray-300"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-300"
                 onClick={() => setSearchQuery('')}
               >
-                x
+                <X className="h-4 w-4" />
               </button>
             )}
           </div>
@@ -942,31 +942,31 @@ export function Documentation({ onBack }) {
         </div>
         
         <div className="flex-1 p-4">
-        {bookmarkedSections.length > 0 && !isSearching && (
-  <div className="mb-5">
-    <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">BOOKMARKS</h3>
-    {bookmarkedSections.map((id) => {
-      const section = allSections.find(s => s.id === id);
-      if (!section) return null;
-      
-      return (
-        <button
-          key={`bookmark-${id}`}
-          className={`w-full text-left px-3 py-2 rounded-lg mb-1 text-sm flex items-center justify-between ${
-            activeSection === id 
-              ? 'bg-[#1e3a8a] text-white font-medium shadow-sm border border-blue-500' 
-              : 'text-white bg-[#232323] hover:bg-[#2d2d2d]'  // Added dark background here
-          }`}
-          onClick={() => setActiveSection(id)}
-        >
-          <span className="truncate">{section.title}</span>
-          <BookmarkCheck className={`h-4 w-4 text-white flex-shrink-0`} />
-        </button>
-      );
-    })}
-    <div className="border-t border-gray-700 my-3"></div>
-  </div>
-)}
+          {bookmarkedSections.length > 0 && !isSearching && (
+            <div className="mb-5">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">BOOKMARKS</h3>
+              {bookmarkedSections.map((id) => {
+                const section = allSections.find(s => s.id === id);
+                if (!section) return null;
+                
+                return (
+                  <button
+                    key={`bookmark-${id}`}
+                    className={`w-full text-left px-3 py-2 rounded-lg mb-1 text-sm flex items-center justify-between ${
+                      activeSection === id 
+                        ? 'bg-[#1e3a8a] text-white font-medium shadow-sm border border-blue-500' 
+                        : 'text-white hover:bg-[#2d2d2d]'
+                    }`}
+                    onClick={() => setActiveSection(id)}
+                  >
+                    <span className="truncate">{section.title}</span>
+                    <BookmarkCheck className={`h-4 w-4 text-white flex-shrink-0`} />
+                  </button>
+                );
+              })}
+              <div className="border-t border-gray-700 my-3"></div>
+            </div>
+          )}
           
           {isSearching && searchResults.length > 0 && (
             <div className="mb-5 mt-2">
@@ -1016,39 +1016,35 @@ export function Documentation({ onBack }) {
                 </div>
               ) : (
                 <div className="space-y-1">
-                
-
-{filteredSections.map((section) => (
-  <button
-    key={section.id}
-    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-150 flex items-center justify-between group ${
-      activeSection === section.id 
-        ? 'bg-[#1e3a8a] text-white font-medium shadow-sm border border-blue-500' 
-        : 'text-white bg-[#232323] hover:bg-[#2d2d2d]'  // Changed this line to add dark background
-    } ${section.level === 1 ? 'font-medium' : 'pl-6 text-sm'}`}
-    onClick={() => setActiveSection(section.id)}
-  >
-    <span className={`truncate ${section.level === 1 ? '' : 'opacity-90'}`}>
-      {section.title}
-    </span>
-    
-    <button
-      className={`opacity-0 group-hover:opacity-100 hover:text-blue-400 transition-opacity duration-200 ${
-        bookmarkedSections.includes(section.id) ? 'text-white' : 'text-gray-400'
-      }`}
-      onClick={(e) => {
-        e.stopPropagation();
-        toggleBookmark(section.id);
-      }}
-    >
-      {bookmarkedSections.includes(section.id) ? (
-        <BookmarkCheck className="h-3.5 w-3.5" />
-      ) : (
-        <Bookmark className="h-3.5 w-3.5" />
-      )}
-    </button>
-  </button>
-))}
+                  {filteredSections.map((section) => (
+                    <button
+                      key={section.id}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-150 flex items-center justify-between group ${
+                        activeSection === section.id 
+                          ? 'bg-[#1e3a8a] text-white font-medium shadow-sm border border-blue-500' 
+                          : 'text-white hover:bg-[#2d2d2d]'
+                      } ${section.level === 1 ? 'font-medium' : 'pl-6 text-sm'}`}
+                      onClick={() => setActiveSection(section.id)}
+                    >
+                      <span className={`truncate ${section.level === 1 ? '' : 'opacity-90'}`}>{section.title}</span>
+                      
+                      <button 
+                        className={`opacity-0 group-hover:opacity-100 hover:text-blue-400 transition-opacity duration-200 ${
+                          bookmarkedSections.includes(section.id) ? 'text-white' : 'text-gray-400'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBookmark(section.id);
+                        }}
+                      >
+                        {bookmarkedSections.includes(section.id) ? (
+                          <BookmarkCheck className="h-3.5 w-3.5" />
+                        ) : (
+                          <Bookmark className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
