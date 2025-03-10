@@ -392,35 +392,52 @@ class SnapLogicFunctionsHandler {
       now: () => new Date(),
       parse: (args, data) => {
         try {
-          // Handle nested array structure
+          // Handle array of objects
           if (Array.isArray(data)) {
-            // Extract only EffectiveMoment dates from the nested structure
-            return data.flatMap(group => 
-              group.employee?.map(emp => {
-                if (args.startsWith('$')) {
-                  const varName = args.substring(1);
-                  const dateStr = emp[varName];
-                  if (!dateStr) {
-                    console.warn(`No date value found for: ${varName} in employee:`, emp);
-                    return null;
+            return data.map(item => {
+              // Check if it's the nested employee structure
+              if (item.employee) {
+                return item.employee.map(emp => {
+                  if (args.startsWith('$')) {
+                    const varName = args.substring(1);
+                    const dateStr = emp[varName];
+                    if (!dateStr) {
+                      console.warn(`No date value found for: ${varName} in employee:`, emp);
+                      return null;
+                    }
+                    const timestamp = new Date(dateStr).getTime();
+                    return isNaN(timestamp) ? null : timestamp;
                   }
-                  return new Date(dateStr);
+                  return null;
+                }).filter(date => date !== null);
+              }
+              
+              // Handle simple object in array
+              if (args.startsWith('$')) {
+                const varName = args.substring(1);
+                const dateStr = item[varName];
+                if (!dateStr) {
+                  console.warn(`No date value found for: ${varName} in item:`, item);
+                  return null;
                 }
-                return null;
-              }) || []
-            ).filter(date => date !== null); // Remove any null values
+                const timestamp = new Date(dateStr).getTime();
+                return isNaN(timestamp) ? null : timestamp;
+              }
+              return null;
+            }).filter(date => date !== null);
           }
-  
+    
           // Handle single object case
           if (typeof data === 'object' && data !== null) {
             if (args.startsWith('$')) {
               const varName = args.substring(1);
               const dateStr = data[varName];
               if (!dateStr) return null;
-              return new Date(dateStr);
+              const timestamp = new Date(dateStr).getTime();
+              return isNaN(timestamp) ? null : timestamp;
             }
           }
-  
+    
           return null;
         } catch (error) {
           console.error('Error in Date.parse:', error);
@@ -2283,23 +2300,24 @@ if (script.startsWith('$') && !script.includes('(')) {
   return this.handleJSONPath(`$.${script.slice(1)}`, data);
 }
        // Handle typeof directly 
-      if (script.startsWith('typeof ')) { 
-        const valueExpr = script.slice(7); // Remove 'typeof ' 
-        let value; 
-        
+       if (script.trim().startsWith('typeof')) { 
+        // Remove 'typeof' and trim any extra spaces
+        const valueExpr = script.trim().slice(6).trim();
+        let value;
+      
         if (valueExpr.startsWith('$.')) { 
-          value = this.handleJSONPath(valueExpr, data); 
+          value = this.handleJSONPath(valueExpr.trim(), data); 
         } else if (valueExpr.startsWith('$')) { 
-          value = data[valueExpr.slice(1)]; 
+          value = data[valueExpr.slice(1).trim()]; 
         } else { 
-          value = this.evaluateValue(valueExpr); 
+          value = this.evaluateValue(valueExpr.trim()); 
         } 
-        
+      
         return this.globalFunctions.typeof(value); 
       } 
  
       // Handle eval 
-      if (script.startsWith('eval(')) { 
+      if (script.trim().startsWith('eval(')) { 
         const match = script.match(/eval\((.*)\)/); 
         if (match) { 
           const expression = match[1].trim().replace(/^["']|["']$/g, ''); 
@@ -2307,25 +2325,29 @@ if (script.startsWith('$') && !script.includes('(')) {
         } 
       } 
        // Handle global functions 
-       if (script.includes('(')) { 
-        const functionMatch = script.match(/^(\w+)\((.*)\)$/); 
-        if (functionMatch) { 
-          const [, funcName, args] = functionMatch; 
-          if (this.globalFunctions[funcName]) { 
-            const evaluatedArgs = args.split(',').map(arg => { 
-              arg = arg.trim(); 
-              if (arg.startsWith('$')) { 
-                return this.handleJSONPath(arg, data); 
-              } 
-              if (arg.startsWith('"') || arg.startsWith("'")) { 
-                return arg.slice(1, -1); 
-              } 
-              return arg; 
-            }); 
-            return this.globalFunctions[funcName](...evaluatedArgs); 
-          } 
+       // Handle global functions 
+if (script.includes('(')) { 
+  // Use a more flexible regex pattern that handles trailing spaces
+  const functionMatch = script.trim().match(/^(\w+)\s*\((.*?)\)\s*$/);
+  if (functionMatch) { 
+    const [, funcName, args] = functionMatch; 
+    if (this.globalFunctions[funcName]) { 
+      const evaluatedArgs = args.split(',').map(arg => { 
+        // Trim each argument and handle path expressions
+        const trimmedArg = arg.trim();
+        if (trimmedArg.startsWith('$')) { 
+          // Handle JSONPath with potential spaces
+          return this.handleJSONPath(trimmedArg, data); 
         } 
-      } 
+        if (trimmedArg.startsWith('"') || trimmedArg.startsWith("'")) { 
+          return trimmedArg.slice(1, -1); 
+        } 
+        return trimmedArg; 
+      }); 
+      return this.globalFunctions[funcName](...evaluatedArgs); 
+    } 
+  } 
+} 
  
        // Handle match expressions 
     

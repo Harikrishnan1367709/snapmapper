@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { MessageCircle, X } from "lucide-react";
-
+import { MdFeedback } from "react-icons/md";
 // Initialize Supabase client with environment variables
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -52,71 +52,82 @@ const SupportButton = () => {
     <div>
       {/* Support Button (Bottom-Right) */}
       <button
-        className="fixed bottom-8 right-4 bg-[#1B4E8D] text-white p-2.5 rounded-full shadow-md hover:bg-blue-700 transition-all"
+        className="fixed bottom-8 right-4 bg-[#1B4E8D] text-white p-2.5 rounded-full shadow-md hover:bg-[#1B4E8D] transition-all"
         onClick={() => setShowDialog(true)}
       >
-        <MessageCircle size={20} />
+        {/* <MessageCircle size={20} /> */}
+        <MdFeedback size={16}/>
       </button>
 
       {/* Feedback Dialog */}
       {showDialog && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
-            {/* Close Button */}
-            <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-red-600"
-              onClick={() => setShowDialog(false)}
-            >
-              <X size={22} />
-            </button>
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="bg-white p-6 shadow-lg w-100 relative"> {/* Removed rounded-lg */}
+      {/* Close Button */}
+      <button
+        className="absolute top-2 right-2 text-gray-500 hover:text-red-600 hover:outline-none hover:border-none focus:border-none focus:outline-none"
+        onClick={() => setShowDialog(false)}
+      >
+        <X size={22} />
+      </button>
 
-            {/* Centered Heading */}
-            <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">
-              ✨ Submit Feedback
-            </h2>
+      {/* Centered Heading */}
+      <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">
+        ✨ Submit Feedback
+      </h2>
 
-            {/* Input 1: Updates Needed */}
-            <label className="block mb-2 text-sm font-medium text-gray-700">
-              What updates do you need in the next version?
-            </label>
-            <textarea
-              className="w-full p-2 border rounded mb-3 text-gray-800 bg-gray-50 focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your feature requests..."
-              value={updateRequest}
-              onChange={(e) => setUpdateRequest(e.target.value)}
-            />
+      {/* Input 1: Updates Needed */}
+      <label className="block mb-2 text-sm font-medium text-gray-700">
+      How can we enhance your experience?
+      </label>
+      <textarea
+  className="w-full p-2 border mb-3 text-gray-800 bg-gray-50 focus:ring-2 focus:ring-blue-500 resize-none"
+  placeholder="Enter your feature requests..."
+  value={updateRequest}
+  onChange={(e) => setUpdateRequest(e.target.value)}
+  rows="1"
+  onKeyDown={(e) => {
+    if (e.key === "Enter") e.preventDefault();
+  }}
+/>
 
-            {/* Input 2: Problems Faced */}
-            <label className="block mb-2 text-sm font-medium text-gray-700">
-              What problems are you facing in the current version?
-            </label>
-            <textarea
-              className="w-full p-2 border rounded mb-4 text-gray-800 bg-gray-50 focus:ring-2 focus:ring-blue-500"
-              placeholder="Describe any issues..."
-              value={problemFeedback}
-              onChange={(e) => setProblemFeedback(e.target.value)}
-            />
 
-            {/* Error Message */}
-            {errorMessage && (
-              <p className="text-red-600 text-sm mb-2 font-medium">{errorMessage}</p>
-            )}
-            {/* Success Message */}
-            {successMessage && (
-              <p className="text-green-600 text-sm mb-2 font-medium">{successMessage}</p>
-            )}
+      {/* Input 2: Problems Faced */}
+      <label className="block mb-2 text-sm font-medium text-gray-700">
+      What challenges are you facing while using this?
+      </label>
+      <textarea
+  className="w-full p-2 border mb-4 text-gray-800 bg-gray-50 focus:ring-2 focus:ring-blue-500 resize-none"
+  placeholder="Describe any issues..."
+  value={problemFeedback}
+  onChange={(e) => setProblemFeedback(e.target.value)}
+  rows="1"
+  onKeyDown={(e) => {
+    if (e.key === "Enter") e.preventDefault();
+  }}
+/>
 
-            {/* Submit Button */}
-            <button
-              className="w-full bg-[#1B4E8D] text-white py-2 rounded hover:bg-[#1B4E8D] transition-all font-medium"
-              onClick={handleSubmit}
-              disabled={loading}
-            >
-              {loading ? "Submitting..." : "Submit Feedback"}
-            </button>
-          </div>
-        </div>
+      {/* Error Message */}
+      {errorMessage && (
+        <p className="text-red-600 text-sm mb-2 font-medium">{errorMessage}</p>
       )}
+      {/* Success Message */}
+      {successMessage && (
+        <p className="text-green-600 text-sm mb-2 font-medium">{successMessage}</p>
+      )}
+
+      {/* Submit Button */}
+      <button
+        className="w-full bg-[#1B4E8D] text-white py-2 hover:bg-[#1B4E8D] transition-all font-medium"
+        onClick={handleSubmit}
+        disabled={loading}
+      >
+        {loading ? "Submitting..." : "Submit Feedback"}
+      </button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

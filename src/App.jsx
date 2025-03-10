@@ -1,8 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-// import UpdatedCode from './UpdatedCode';
-
 import UpdatedCode from './UpdatedCode';
-import { Documentation } from './components/Documentation';
+import { Documentation } from './components/ui/Documentation';
 
 function App() {
   return (

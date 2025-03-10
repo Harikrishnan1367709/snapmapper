@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
 const ThemeProviderContext = createContext()
@@ -49,3 +48,4 @@ export const useTheme = () => {
     throw new Error('useTheme must be used within a ThemeProvider')
   return context
 }
+

@@ -11,7 +11,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: transparent;
+  background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -21,11 +21,11 @@
 
 a {
   font-weight: 500;
-  color: #7c64e8;
+  color: #646cff;
   text-decoration: inherit;
 }
 a:hover {
-  color: #5a3fd6;
+  color: #535bf2;
 }
 
 body {
@@ -35,7 +35,6 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-color: transparent;
 }
 
 h1 {
@@ -55,7 +54,7 @@ button {
   transition: border-color 0.25s, background-color 0.25s;
 }
 button:hover {
-  border-color: #7c64e8;
+  border-color: #646cff;
 }
 button:focus,
 button:focus-visible {
@@ -65,10 +64,10 @@ button:focus-visible {
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
-    background-color: transparent;
+    background-color: #ffffff;
   }
   a:hover {
-    color: #5a3fd6;
+    color: #747bff;
   }
   button {
     background-color: #f9f9f9;
@@ -83,51 +82,51 @@ button:focus-visible {
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 255 70% 65%;
+    --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 260 60% 95%;
-    --secondary-foreground: 255 50% 45%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
-    --accent: 255 70% 90%;
-    --accent-foreground: 255 50% 45%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 255 70% 65%;
-    --chart-1: 255 85% 75%;
-    --chart-2: 225 70% 75%;
-    --chart-3: 197 80% 75%;
-    --chart-4: 180 75% 66%;
-    --chart-5: 270 75% 67%;
+    --ring: 240 10% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
   .dark {
-    --background: 220 15% 16%;
+    --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
-    --card: 220 15% 16%;
+    --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
-    --popover: 220 15% 16%;
+    --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 255 70% 70%;
-    --primary-foreground: 255 10% 97%;
-    --secondary: 220 30% 25%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 220 30% 25%;
+    --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
-    --accent: 255 50% 30%;
+    --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 25%;
-    --input: 240 3.7% 25%;
-    --ring: 255 70% 70%;
-    --chart-1: 255 85% 65%;
-    --chart-2: 225 70% 60%;
-    --chart-3: 197 80% 60%;
-    --chart-4: 180 75% 55%;
-    --chart-5: 270 75% 60%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 
@@ -136,7 +135,7 @@ button:focus-visible {
     @apply border-border;
   }
   body {
-    @apply bg-transparent text-foreground;
+    @apply bg-background text-foreground;
   }
 }
 
@@ -191,7 +190,7 @@ button:focus-visible {
 
 .hover-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(124, 100, 232, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Custom scrollbar styles */
@@ -205,12 +204,12 @@ button:focus-visible {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(124, 100, 232, 0.3);
+  background: #ddd;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(124, 100, 232, 0.5);
+  background: #bbb;
 }
 
 /* Panel styling */
@@ -228,32 +227,57 @@ button:focus-visible {
   border-top: 1px solid rgba(229, 231, 235, 0.8);
 }
 
-/* Glass morphism effects */
-.glass-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+.prose pre {
+  margin: 0;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.375rem;
 }
 
-.dark .glass-card {
-  background: rgba(30, 30, 46, 0.7);
-  border: 1px solid rgba(79, 79, 105, 0.3);
+.prose code {
+  color: #1f2937;
+  font-size: 0.875rem;
 }
 
-/* New gradients */
-.gradient-purple {
-  background: linear-gradient(135deg, #9b87f5 0%, #7c64e8 100%);
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-.gradient-blue {
-  background: linear-gradient(135deg, #6ea8fe 0%, #4f46e5 100%);
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
 }
 
-.gradient-subtle {
-  background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+button:focus {
+  outline: none !important;
+  border-color: transparent !important;
 }
 
-.dark .gradient-subtle {
-  background: linear-gradient(135deg, rgba(30, 30, 46, 0.9) 0%, rgba(44, 44, 57, 0.9) 100%);
+button:focus-visible {
+  outline: none !important;
+  border-color: transparent !important;
+}
+pre, code {
+  user-select: text;
+}
+/* Add this to your CSS file */
+.react-joyride__tooltip {
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.react-joyride__beacon {
+  display: none !important;
+}
+
+.react-joyride__overlay {
+  z-index: 999 !important;
 }

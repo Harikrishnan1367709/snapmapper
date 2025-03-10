@@ -4,7 +4,10 @@ import Editor from '@monaco-editor/react';
 const HighlightedScript = ({ content, onChange, activeLineIndex, payload }) => {
   const editorRef = useRef(null);
   const completionProviderRef = useRef(null);
-
+  console.log("Payload received in HighlightedScript:", payload);
+ 
+  console.log("Payload Type:", typeof payload);
+  
   useEffect(() => {
     if (editorRef.current && completionProviderRef.current) {
       updateCompletionProvider(payload);
@@ -28,21 +31,48 @@ const HighlightedScript = ({ content, onChange, activeLineIndex, payload }) => {
 
   const createSuggestions = (jsonData, position, wordUntilPosition, monaco, type = 'keys') => {
     if (type === 'functions') {
-      const methods = [
-        'concat', 'map', 'filter', 'reduce', 'forEach', 'find', 'some', 'every',
-        'includes', 'indexOf', 'join', 'slice', 'splice', 'sort', 'reverse',
-        'push', 'pop', 'shift', 'unshift', 'toString', 'valueOf', 'length',
-        'toLowerCase', 'toUpperCase', 'trim', 'replace', 'split', 'substring'
-      ];
+      // Create a Map to ensure unique functions with their details
+      const methodMap = new Map([
+        ['concat', { type: 'Array/String' }],
+        ['map', { type: 'Array' }],
+        ['filter', { type: 'Array' }],
+        ['reduce', { type: 'Array' }],
+        ['forEach', { type: 'Array' }],
+        ['find', { type: 'Array' }],
+        ['some', { type: 'Array' }],
+        ['every', { type: 'Array' }],
+        ['includes', { type: 'Array/String' }],
+        ['indexOf', { type: 'Array/String' }],
+        ['join', { type: 'Array' }],
+        ['slice', { type: 'Array/String' }],
+        ['splice', { type: 'Array' }],
+        ['sort', { type: 'Array' }],
+        ['reverse', { type: 'Array' }],
+        ['push', { type: 'Array' }],
+        ['pop', { type: 'Array' }],
+        ['shift', { type: 'Array' }],
+        ['unshift', { type: 'Array' }],
+        ['toString', { type: 'Any' }],
+        ['valueOf', { type: 'Any' }],
+        ['length', { type: 'Array/String' }],
+        ['toLowerCase', { type: 'String' }],
+        ['toUpperCase', { type: 'String' }],
+        ['trim', { type: 'String' }],
+        ['replace', { type: 'String' }],
+        ['split', { type: 'String' }],
+        ['substring', { type: 'String' }]
+      ]);
   
-      return methods.map(method => ({
+      // Convert Map to suggestions array
+      return Array.from(methodMap.entries()).map(([method, details]) => ({
         label: method,
         kind: monaco.languages.CompletionItemKind.Method,
         insertText: method,
-        detail: `Array/String method: ${method}()`,
+        detail: `${details.type} method: ${method}()`,
         documentation: {
-          value: `Common ${method} method for arrays and strings`
+          value: `${details.type} method: ${method}`
         },
+        sortText: '2-' + method, // Functions appear after keys
         range: {
           startLineNumber: position.lineNumber,
           endLineNumber: position.lineNumber,
@@ -52,22 +82,19 @@ const HighlightedScript = ({ content, onChange, activeLineIndex, payload }) => {
       }));
     }
   
-    let keys = [];
+    // Handle keys with Set for uniqueness
+    const keySet = new Set();
     if (Array.isArray(jsonData)) {
-      const keySet = new Set();
       jsonData.forEach(item => {
         if (item && typeof item === 'object') {
           Object.keys(item).forEach(key => keySet.add(key));
         }
       });
-      keys = Array.from(keySet);
     } else if (jsonData && typeof jsonData === 'object') {
-      keys = Object.keys(jsonData);
+      Object.keys(jsonData).forEach(key => keySet.add(key));
     }
-    
-    console.log('Generated keys:', keys);
   
-    return keys.map(key => ({
+    return Array.from(keySet).map(key => ({
       label: key,
       kind: monaco.languages.CompletionItemKind.Field,
       insertText: key,
@@ -79,6 +106,7 @@ const HighlightedScript = ({ content, onChange, activeLineIndex, payload }) => {
           ? `Field present in array items`
           : `Type: ${typeof jsonData[key]}\nValue: ${JSON.stringify(jsonData[key], null, 2)}`
       },
+      sortText: '1-' + key, // Keys appear before functions
       range: {
         startLineNumber: position.lineNumber,
         endLineNumber: position.lineNumber,
@@ -87,41 +115,46 @@ const HighlightedScript = ({ content, onChange, activeLineIndex, payload }) => {
       }
     }));
   };
-
+  
   const updateCompletionProvider = (currentPayload) => {
     const editor = editorRef.current;
     const monaco = window.monaco;
-
+  
     if (!editor || !monaco) return;
-
+  
+    // Ensure proper disposal of existing provider
     if (completionProviderRef.current) {
       completionProviderRef.current.dispose();
+      completionProviderRef.current = null;
     }
-
+  
+    // Register new provider
     completionProviderRef.current = monaco.languages.registerCompletionItemProvider('javascript', {
       provideCompletionItems: (model, position) => {
         const wordUntilPosition = model.getWordUntilPosition(position);
         const lineContent = model.getLineContent(position.lineNumber);
         const lastChar = lineContent.charAt(wordUntilPosition.startColumn - 2);
-        
-        console.log('Line content:', lineContent);
-        console.log('Last char:', lastChar);
-        console.log('Current payload:', currentPayload);
-
+  
         try {
           const jsonData = validatePayload(currentPayload);
-
+  
           // For $ trigger
           if (lineContent.trim() === '$' || lineContent.endsWith('$')) {
             console.log('$ trigger detected');
             const keySuggestions = createSuggestions(jsonData, position, wordUntilPosition, monaco, 'keys');
             const functionSuggestions = createSuggestions(jsonData, position, wordUntilPosition, monaco, 'functions');
-            console.log('Key suggestions:', keySuggestions);
+            
+            // Combine and deduplicate suggestions
+            const allSuggestions = [...keySuggestions, ...functionSuggestions];
+            const uniqueSuggestions = Array.from(
+              new Map(allSuggestions.map(item => [item.label, item])).values()
+            );
+            
             return { 
-              suggestions: [...keySuggestions, ...functionSuggestions]
+              suggestions: uniqueSuggestions
             };
           }
-
+  
           // For dot after $ trigger
           if (lineContent.includes('$') && lastChar === '.') {
             console.log('Dot after $ detected');
@@ -129,7 +162,7 @@ const HighlightedScript = ({ content, onChange, activeLineIndex, payload }) => {
             const path = lineContent
               .substring(lineContent.indexOf('$') + 1, lineContent.length - 1)
               .trim();
-
+  
             if (path) {
               const parts = path.split('.');
               for (const part of parts) {
@@ -138,33 +171,54 @@ const HighlightedScript = ({ content, onChange, activeLineIndex, payload }) => {
                 }
               }
             }
-
+  
             const keySuggestions = currentObj ? 
               createSuggestions(currentObj, position, wordUntilPosition, monaco, 'keys') : 
               [];
             const functionSuggestions = createSuggestions(null, position, wordUntilPosition, monaco, 'functions');
             
+            // Combine and deduplicate suggestions
+            const allSuggestions = [...keySuggestions, ...functionSuggestions];
+            const uniqueSuggestions = Array.from(
+              new Map(allSuggestions.map(item => [item.label, item])).values()
+            );
+            
             return { 
-              suggestions: [...keySuggestions, ...functionSuggestions]
+              suggestions: uniqueSuggestions
             };
           }
-
+  
           // For regular dot trigger
           if (lastChar === '.') {
+            const functionSuggestions = createSuggestions(null, position, wordUntilPosition, monaco, 'functions');
+            const uniqueSuggestions = Array.from(
+              new Map(functionSuggestions.map(item => [item.label, item])).values()
+            );
+            
             return { 
-              suggestions: createSuggestions(null, position, wordUntilPosition, monaco, 'functions')
+              suggestions: uniqueSuggestions
             };
           }
-
+  
         } catch (error) {
           console.error('Error in suggestion provider:', error);
         }
-
+  
         return { suggestions: [] };
       },
       triggerCharacters: ['$', '.']
     });
   };
+  
+  // Add cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (completionProviderRef.current) {
+        completionProviderRef.current.dispose();
+        completionProviderRef.current = null;
+      }
+    };
+  }, []);
   const handleEditorDidMount = (editor, monaco) => {
     editorRef.current = editor;
     window.monaco = monaco;
@@ -294,73 +348,72 @@ const HighlightedScript = ({ content, onChange, activeLineIndex, payload }) => {
           .currentLineDecoration {
       background-color: #F7F7F7;
     }
+
     .monaco-editor .margin {
       background-color: #FFFFFF !important;
     }
+
     .monaco-editor {
       padding-top: 4px;
     }
+
     .monaco-editor .comment {
       color: #008800 !important;
     }
+
     .monaco-editor .mtk1.comment,
     .monaco-editor .mtk1.comment.js,
     .monaco-editor .mtk1.comment.multi.js {
       color: #008800 !important;
     }
 
-    /* Updated styles to remove blue line */
+    /* Remove only the top border while keeping layout intact */
     .monaco-editor .overflow-guard {
       border-top: none !important;
     }
-    
+
+    /* Ensure scroll functionality is not broken */
     .monaco-editor .editor-scrollable {
       border-top: none !important;
+      overflow: visible !important;
     }
 
-    /* Remove any borders from parent elements */
-    .monaco-editor,
-    .monaco-editor-background,
-    .monaco-scrollable-element {
-      border: none !important;
-    }
-
-    /* Keep canvas visible but remove top border */
+    /* Keep decorations ruler visible */
     .decorationsOverviewRuler,
     canvas.decorationsOverviewRuler {
-      position: absolute !important;
       width: 14px !important;
-      height: calc(100% - 8px) !important;
+      height: 100% !important;
       right: 0px !important;
-      top: 8px !important;
+      top: 0 !important;
       display: block !important;
       visibility: visible !important;
+    }
+
+    /* Keep canvas and panels visible while removing the blue line */
+    .monaco-editor .overflow-guard > div {
+      background-color: transparent !important;
+    }
+
+    /* Allow the left and right panels to remain functional */
+    .monaco-editor-background {
+      background-color: #FFFFFF !important;
       border-top: none !important;
     }
 
-    /* Target and remove the specific blue line */
-    .monaco-editor .overflow-guard > div[style*="background-color"] {
-      display: none !important;
-    }
-
-    /* Additional specific selectors */
-    .monaco-scrollable-element {
-      border-top: none !important;
-    }
-
+    /* Ensure layout consistency without breaking interactions */
+    .monaco-editor,
     .editor-container {
       border-top: none !important;
     }
 
-    /* Remove any possible outline or shadow */
+    /* Remove any unwanted outlines without breaking UI elements */
     * {
       outline: none !important;
-      box-shadow: none !important;
     }
 
-    /* Force remove any absolute positioned elements at the top */
-    .monaco-editor > div[style*="position: absolute"][style*="top: 0"] {
-      display: none !important;
+    /* Avoid removing other absolute positioned elements */
+    .monaco-editor > div[style*="top: 0"] {
+      background-color: transparent !important;
     }
 
         `
