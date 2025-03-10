@@ -161,7 +161,7 @@ export function Documentation({ onBack }) {
   };
 
   const CodeBlock = ({ code, language = 'javascript', sectionId }) => (
-    <div className="relative mt-4 mb-6 group w-full">
+    <div className="relative mt-4 mb-6 group">
       <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <Button 
           variant="ghost" 
@@ -368,12 +368,11 @@ export function Documentation({ onBack }) {
             <p className="mb-6 text-gray-700 leading-relaxed">
               SnapLogic supports a comprehensive range of operations for data transformation, organized into the following categories:
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-
+            <div className="grid md:grid-cols-2 gap-6">
               {['string-operations', 'array-operations', 'object-functions', 'math-functions', 'number-functions', 'date-functions'].map(functionType => (
                 <div 
                   key={functionType} 
-                  className="bg-white rounded-lg shadow-md p-5 border border-gray-200 flex flex-col w-full"
+                  className="bg-white rounded-lg shadow-md p-5 border border-gray-200 hover:shadow-lg transition-all duration-200 hover:border-blue-300 cursor-pointer"
                   onClick={() => setActiveSection(functionType)}
                 >
                   <h3 className="font-semibold text-blue-700 mb-2 flex items-center justify-between">
@@ -389,56 +388,34 @@ export function Documentation({ onBack }) {
           </div>
         );
       
-      // Update the function display boxes in getContentForSection
-case 'string-operations':
-  // (and similar for other function categories)
-  return (
-    <div w-full>
-      {/* Function List Box - Made wider and taller */}
-      <div className="bg-blue-50 rounded-lg p-6 mb-8 border-l-4 border-blue-500 w-full">
-        <h3 className="text-xl font-semibold mb-4 text-blue-700">Available String Functions</h3>
-        <ul className="grid grid-cols-3 gap-4 text-gray-700 mb-4 w-full">
-          <li className="flex items-center text-lg"><span className="h-2 w-2 bg-blue-500 rounded-full mr-3"></span>camelCase</li>
-          <li className="flex items-center text-lg"><span className="h-2 w-2 bg-blue-500 rounded-full mr-3"></span>capitalize</li>
-          <li className="flex items-center text-lg"><span className="h-2 w-2 bg-blue-500 rounded-full mr-3"></span>toLowerCase</li>
-          <li className="flex items-center text-lg"><span className="h-2 w-2 bg-blue-500 rounded-full mr-3"></span>toUpperCase</li>
-          <li className="flex items-center text-lg"><span className="h-2 w-2 bg-blue-500 rounded-full mr-3"></span>split</li>
-          <li className="flex items-center text-lg"><span className="h-2 w-2 bg-blue-500 rounded-full mr-3"></span>replace</li>
-          <li className="flex items-center text-lg"><span className="h-2 w-2 bg-blue-500 rounded-full mr-3"></span>trim</li>
-          <li className="flex items-center text-lg"><span className="h-2 w-2 bg-blue-500 rounded-full mr-3"></span>charAt</li>
-          <li className="flex items-center text-lg"><span className="h-2 w-2 bg-blue-500 rounded-full mr-3"></span>contains</li>
-        </ul>
-      </div>
-  
-      {/* Code Example Box - Made wider and taller */}
-      <div className="w-full bg-[#1a1a1a] rounded-lg overflow-hidden shadow-lg mb-8">
-        <div className="p-6">
-          <CodeBlock 
-            code={`// Examples of string operations
-  $text.toUpperCase()
-  $text.toLowerCase()
-  $text.length()
-  $text.trim()
-  $kebab.camelCase()
-  $mixed.kebabCase()
-  $snakeCase.camelCase()
-  $text.upperFirst()
-  $text.lowerFirst()
-  $text.charAt(0)
-  $text.charCodeAt(0)
-  $email.contains("@")
-  $email.endsWith(".com")`}
-            sectionId="string-operations-example"
-            className="min-h-[300px] w-full" // Increased height
-          />
-        </div>
-      </div>
-    </div>
-  );
+      case 'string-operations':
+        return (
+          <div>
+            <div className="bg-blue-50 rounded-lg p-4 mb-6 border-l-4 border-blue-500">
+              <h3 className="text-lg font-semibold mb-3 text-blue-700">Available String Functions</h3>
+              <ul className="grid grid-cols-2 md:grid-cols-3 gap-2 text-gray-700 mb-4">
+                <li className="flex items-center"><span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>camelCase</li>
+                <li className="flex items-center"><span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>capitalize</li>
+                <li className="flex items-center"><span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>toLowerCase</li>
+                <li className="flex items-center"><span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>toUpperCase</li>
+                <li className="flex items-center"><span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>split</li>
+                <li className="flex items-center"><span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>replace</li>
+                <li className="flex items-center"><span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>trim</li>
+                <li className="flex items-center"><span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>charAt</li>
+                <li className="flex items-center"><span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>contains</li>
+              </ul>
+            </div>
+            
+            <CodeBlock 
+              code={`// Examples of string operations\n$text.toUpperCase()\n$text.toLowerCase()\n$text.length()\n$text.trim()\n$kebab.camelCase()\n$mixed.kebabCase()\n$snakeCase.camelCase()\n$text.upperFirst()\n$text.lowerFirst()\n$text.charAt(0)\n$text.charCodeAt(0)\n$email.contains("@")\n$email.endsWith(".com")`}
+              sectionId="string-operations-example"
+            />
+          </div>
+        );
       
       case 'array-operations':
         return (
-          <div w-full>
+          <div>
             <div className="bg-blue-50 rounded-lg p-4 mb-6 border-l-4 border-blue-500">
               <h3 className="text-lg font-semibold mb-3 text-blue-700">Available Array Functions</h3>
               <ul className="grid grid-cols-2 md:grid-cols-3 gap-2 text-gray-700 mb-4">
@@ -462,7 +439,7 @@ case 'string-operations':
       
       case 'object-functions':
         return (
-          <div w-full >
+          <div>
             <div className="bg-blue-50 rounded-lg p-4 mb-6 border-l-4 border-blue-500">
               <h3 className="text-lg font-semibold mb-3 text-blue-700">Available Object Functions</h3>
               <ul className="grid grid-cols-2 md:grid-cols-3 gap-2 text-gray-700 mb-4">
@@ -485,7 +462,7 @@ case 'string-operations':
       
       case 'math-functions':
         return (
-          <div w-full>
+          <div>
             <div className="bg-blue-50 rounded-lg p-4 mb-6 border-l-4 border-blue-500">
               <h3 className="text-lg font-semibold mb-3 text-blue-700">Available Math Functions</h3>
               <ul className="grid grid-cols-2 md:grid-cols-3 gap-2 text-gray-700 mb-4">
@@ -510,7 +487,7 @@ case 'string-operations':
       
       case 'number-functions':
         return (
-          <div w-full>
+          <div>
             <div className="bg-blue-50 rounded-lg p-4 mb-6 border-l-4 border-blue-500">
               <h3 className="text-lg font-semibold mb-3 text-blue-700">Available Number Functions</h3>
               <ul className="grid grid-cols-2 md:grid-cols-3 gap-2 text-gray-700 mb-4">
@@ -529,7 +506,7 @@ case 'string-operations':
       
       case 'date-functions':
         return (
-          <div w-full>
+          <div>
             <div className="bg-blue-50 rounded-lg p-4 mb-6 border-l-4 border-blue-500">
               <h3 className="text-lg font-semibold mb-3 text-blue-700">Available Date Functions</h3>
               <ul className="grid grid-cols-2 md:grid-cols-3 gap-2 text-gray-700 mb-4">
@@ -552,7 +529,7 @@ case 'string-operations':
       
       case 'json-path':
         return (
-          <div w-full>
+          <div>
             <p className="mb-6 text-gray-700 leading-relaxed">
               JSON Path provides efficient navigation and access to nested data, with capabilities for conditional filtering within arrays.
             </p>
@@ -588,7 +565,7 @@ case 'string-operations':
       
       case 'match-operator':
         return (
-          <div w-full>
+          <div>
             <p className="mb-6 text-gray-700 leading-relaxed">
               The match operator provides a concise way to perform pattern matching and conditional checks, similar to switch statements but with more powerful pattern matching capabilities.
             </p>
@@ -624,7 +601,7 @@ case 'string-operations':
       
       case 'global-operations':
         return (
-          <div w-full>
+          <div>
             <p className="mb-6 text-gray-700 leading-relaxed">
               Global operations provide utility functions for handling common tasks like encoding/decoding, type checking, and evaluation.
             </p>
@@ -672,7 +649,7 @@ case 'string-operations':
       
       case 'advanced-features':
         return (
-          <div w-full>
+          <div>
             <p className="mb-6 text-gray-700 leading-relaxed">
               SnapLogic Playground includes additional tools to enhance productivity and collaboration:
             </p>
@@ -716,7 +693,7 @@ case 'string-operations':
       
       case 'benefits':
         return (
-          <div w-full>
+          <div>
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               <div className="bg-white rounded-lg shadow-md p-5 border-t-4 border-green-500 hover:shadow-lg transition-shadow duration-200">
                 <h3 className="text-lg font-semibold mb-4 text-green-700">Development Efficiency</h3>
@@ -899,231 +876,283 @@ case 'string-operations':
   };
 
   return (
-    
-      <div className="flex h-screen overflow-hidden">
-        {/* Mobile menu button */}
-        <button
-          className="fixed top-20 left-4 z-50 md:hidden bg-white p-2 rounded-full shadow-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
-          onClick={toggleMobileSidebar}
-        >
-          {showMobileSidebar ? (
-            <X className="h-5 w-5 text-blue-600" />
-          ) : (
-            <ChevronRight className="h-5 w-5 text-blue-600" />
-          )}
-        </button>
-    
-        {/* Sidebar */}
-        <aside className={`w-72 bg-[#1a1a1a] h-screen overflow-y-auto flex flex-col fixed left-0 transition-all duration-300 ease-in-out shadow-lg doc-scrollbar
-          ${showMobileSidebar ? 'translate-x-0' : '-translate-x-full'} 
-          md:translate-x-0`}
-        >
-          <div className="sticky top-0 z-10 bg-[#232323] border-b border-gray-700 p-4">
-            <div className="relative mt-2 group">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-400" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search documentation... "
-                className="w-full bg-[#333333] rounded-lg border border-gray-700 py-2 pl-10 pr-10 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm group-focus-within:shadow-md"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                onFocus={() => setIsSearching(true)}
-              />
-              {searchQuery && (
-                <button
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center justify-center h-6 w-6 text-gray-400 hover:text-gray-300"
-                  onClick={() => setSearchQuery('')}
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-    
+    <div className="flex h-full bg-gradient-to-br from-gray-50 to-blue-50/30 relative">
+      {/* Mobile menu button - only visible on small screens */}
+      <button
+        className="fixed top-20 left-4 z-50 md:hidden bg-white p-2 rounded-full shadow-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+        onClick={toggleMobileSidebar}
+      >
+        {showMobileSidebar ? (
+          <X className="h-5 w-5 text-blue-600" />
+        ) : (
+          <ChevronRight className="h-5 w-5 text-blue-600" />
+        )}
+      </button>
+
+      {/* Sidebar - enhanced with better styling */}
+      <div className={`w-72 bg-[#1a1a1a] overflow-y-auto flex flex-col h-full transition-all duration-300 ease-in-out shadow-lg rounded-r-xl doc-scrollbar
+        ${showMobileSidebar ? 'translate-x-0' : '-translate-x-full'} 
+        md:translate-x-0 md:static fixed left-0 top-0 bottom-0 z-40`}
+      >
+        <div className="sticky top-0 z-10 bg-[#232323] border-b border-gray-700 p-4">
+          <div className="flex items-center justify-between mb-4">
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="flex items-center justify-center px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 border-none transition-colors duration-200 shadow-md w-full font-medium"
+              onClick={onBack}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Playground
+            </Button>
+          </div>
+          
+          <div className="relative mt-4 group">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-400" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search documentation... (Ctrl+K)"
+              className="w-full bg-[#333333] rounded-lg border border-gray-700 py-2 pl-10 pr-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm group-focus-within:shadow-md"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onFocus={() => setIsSearching(true)}
+            />
             {searchQuery && (
-              <div className="text-xs text-gray-400 mt-2 flex justify-between items-center">
-                <span>{filteredSections.length} result{filteredSections.length !== 1 ? 's' : ''}</span>
-                <button 
-                  className="text-blue-400 hover:text-blue-300 text-xs"
-                  onClick={() => setSearchQuery('')}
-                >
-                  Clear
-                </button>
-              </div>
+              <button
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-300"
+                onClick={() => setSearchQuery('')}
+              >
+                <X className="h-4 w-4" />
+              </button>
             )}
           </div>
-          <div className="flex-1 p-4">
-            {bookmarkedSections.length > 0 && !isSearching && (
-              <div className="mb-5">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">BOOKMARKS</h3>
-                {bookmarkedSections.map((id) => {
-                  const section = allSections.find(s => s.id === id);
-                  if (!section) return null;
-                  
-                  return (
+
+          {searchQuery && (
+            <div className="text-xs text-gray-400 mt-2 flex justify-between items-center">
+              <span>{filteredSections.length} result{filteredSections.length !== 1 ? 's' : ''}</span>
+              <button 
+                className="text-blue-400 hover:text-blue-300 text-xs"
+                onClick={() => setSearchQuery('')}
+              >
+                Clear
+              </button>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex-1 p-4">
+          {bookmarkedSections.length > 0 && !isSearching && (
+            <div className="mb-5">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">BOOKMARKS</h3>
+              {bookmarkedSections.map((id) => {
+                const section = allSections.find(s => s.id === id);
+                if (!section) return null;
+                
+                return (
+                  <button
+                    key={`bookmark-${id}`}
+                    className={`w-full text-left px-3 py-2 rounded-lg mb-1 text-sm flex items-center justify-between ${
+                      activeSection === id 
+                        ? 'bg-[#1e3a8a] text-white font-medium shadow-sm border border-blue-500' 
+                        : 'text-white hover:bg-[#2d2d2d]'
+                    }`}
+                    onClick={() => setActiveSection(id)}
+                  >
+                    <span className="truncate">{section.title}</span>
+                    <BookmarkCheck className={`h-4 w-4 text-white flex-shrink-0`} />
+                  </button>
+                );
+              })}
+              <div className="border-t border-gray-700 my-3"></div>
+            </div>
+          )}
+          
+          {isSearching && searchResults.length > 0 && (
+            <div className="mb-5 mt-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">Search Results</h3>
+              <div className="space-y-3">
+                {searchResults.map((result, index) => (
+                  <div key={`result-${index}`} className="bg-[#252525] rounded-lg shadow-sm border border-gray-700 overflow-hidden">
                     <button
-                      key={`bookmark-${id}`}
-                      className={`w-full text-left px-3 py-2 rounded-lg mb-1 text-sm flex items-center justify-between ${
-                        activeSection === id 
-                          ? 'bg-[#1e3a8a] text-white font-medium shadow-sm border border-blue-500' 
-                          : 'text-white bg-[#232323] hover:bg-[#2d2d2d]'
+                      className={`w-full text-left p-3 ${
+                        activeSection === result.section.id 
+                          ? 'bg-[#1e3a8a] border-l-4 border-blue-500 text-white' 
+                          : 'hover:bg-[#2d2d2d] text-white'
                       }`}
-                      onClick={() => setActiveSection(id)}
+                      onClick={() => {
+                        setActiveSection(result.section.id);
+                        setIsSearching(false);
+                      }}
                     >
-                      <span className="truncate">{section.title}</span>
-                      <BookmarkCheck className="h-4 w-4 text-white flex-shrink-0" />
+                      <h4 className={`font-medium text-white mb-1`}>{result.section.title}</h4>
+                      <p 
+                        className={`text-xs text-gray-300 line-clamp-2`}
+                        dangerouslySetInnerHTML={{ __html: result.snippet }}
+                      ></p>
                     </button>
-                  );
-                })}
-                <div className="border-t border-gray-700 my-3"></div>
+                  </div>
+                ))}
               </div>
-            )}
-            
-            {isSearching && searchResults.length > 0 && (
-              <div className="mb-5 mt-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">Search Results</h3>
-                <div className="space-y-3">
-                  {searchResults.map((result, index) => (
-                    <div key={`result-${index}`} className="bg-[#252525] rounded-lg shadow-sm border border-gray-700 overflow-hidden">
-                      <button
-                        className={`w-full text-left p-3 ${
-                          activeSection === result.section.id 
-                            ? 'bg-[#1e3a8a] border-l-4 border-blue-500 text-white' 
-                            : 'hover:bg-[#2d2d2d] text-white'
+              <button
+                className="w-full mt-4 text-center text-sm text-blue-400 hover:text-blue-300 py-2"
+                onClick={() => setIsSearching(false)}
+              >
+                Show all sections
+              </button>
+            </div>
+          )}
+          
+          {(!isSearching || (isSearching && searchResults.length === 0 && searchQuery === '')) && (
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">CONTENT</h3>
+              {filteredSections.length === 0 && searchQuery !== '' ? (
+                <div className="text-center py-8">
+                  <div className="text-gray-500 mb-2">
+                    <Search className="h-8 w-8 mx-auto" />
+                  </div>
+                  <h3 className="text-lg font-medium text-white mb-2">No results found</h3>
+                  <p className="text-gray-400">Try searching with different keywords</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {filteredSections.map((section) => (
+                    <button
+                      key={section.id}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-150 flex items-center justify-between group ${
+                        activeSection === section.id 
+                          ? 'bg-[#1e3a8a] text-white font-medium shadow-sm border border-blue-500' 
+                          : 'text-white hover:bg-[#2d2d2d]'
+                      } ${section.level === 1 ? 'font-medium' : 'pl-6 text-sm'}`}
+                      onClick={() => setActiveSection(section.id)}
+                    >
+                      <span className={`truncate ${section.level === 1 ? '' : 'opacity-90'}`}>{section.title}</span>
+                      
+                      <button 
+                        className={`opacity-0 group-hover:opacity-100 hover:text-blue-400 transition-opacity duration-200 ${
+                          bookmarkedSections.includes(section.id) ? 'text-white' : 'text-gray-400'
                         }`}
-                        onClick={() => {
-                          setActiveSection(result.section.id);
-                          setIsSearching(false);
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBookmark(section.id);
                         }}
                       >
-                        <h4 className="font-medium text-white mb-1">{result.section.title}</h4>
-                        <p 
-                          className="text-xs text-gray-300 line-clamp-2"
-                          dangerouslySetInnerHTML={{ __html: result.snippet }}
-                        ></p>
+                        {bookmarkedSections.includes(section.id) ? (
+                          <BookmarkCheck className="h-3.5 w-3.5" />
+                        ) : (
+                          <Bookmark className="h-3.5 w-3.5" />
+                        )}
                       </button>
-                    </div>
+                    </button>
                   ))}
                 </div>
-                <button
-                  className="w-full mt-4 text-center text-sm text-blue-400 hover:text-blue-300 py-2"
-                  onClick={() => setIsSearching(false)}
-                >
-                  Show all sections
-                </button>
-              </div>
-            )}
-            
-            {(!isSearching || (isSearching && searchResults.length === 0 && searchQuery === '')) && (
-              <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 px-2">CONTENT</h3>
-                {filteredSections.length === 0 && searchQuery !== '' ? (
-                  <div className="text-center py-8">
-                    <div className="text-gray-500 mb-2">
-                      <Search className="h-8 w-8 mx-auto" />
-                    </div>
-                    <h3 className="text-lg font-medium text-white mb-2">No results found</h3>
-                    <p className="text-gray-400">Try searching with different keywords</p>
-                  </div>
-                ) : (
-                  <div className="space-y-1">
-                    {filteredSections.map((section) => (
-                      <button
-                        key={section.id}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-150 flex items-center justify-between group ${
-                          activeSection === section.id 
-                            ? 'bg-[#1e3a8a] text-white font-medium shadow-sm border border-blue-500' 
-                            : 'text-white bg-[#232323] hover:bg-[#2d2d2d]'
-                        } ${section.level === 1 ? 'font-medium' : 'pl-6 text-sm'}`}
-                        onClick={() => setActiveSection(section.id)}
-                      >
-                        <span className={`truncate ${section.level === 1 ? '' : 'opacity-90'}`}>
-                          {section.title}
-                        </span>
-                        
-                        <button
-                          className={`opacity-0 group-hover:opacity-100 hover:text-blue-400 transition-opacity duration-200 ${
-                            bookmarkedSections.includes(section.id) ? 'text-white' : 'text-gray-400'
-                          }`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleBookmark(section.id);
-                          }}
-                        >
-                          {bookmarkedSections.includes(section.id) ? (
-                            <BookmarkCheck className="h-3.5 w-3.5" />
-                          ) : (
-                            <Bookmark className="h-3.5 w-3.5" />
-                          )}
-                        </button>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          <div className="sticky bottom-0 p-4 border-t border-gray-700 bg-[#232323] mt-auto">
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-gray-400">
-                SnapLogic Playground Docs v1.0
-              </p>
-              <div className="flex space-x-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="p-1 h-7 w-7 rounded-full bg-transparent hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
-                  onClick={() => setActiveSection('introduction')}
-                  title="Home"
-                >
-                  <Home className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="p-1 h-7 w-7 rounded-full bg-transparent hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
-                  onClick={focusSearch}
-                  title="Search (Ctrl+K)"
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
-              </div>
+              )}
+            </div>
+          )}
+        </div>
+        
+        <div className="p-4 border-t border-gray-700 bg-[#232323]">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-gray-400">
+              SnapLogic Playground Docs v1.0
+            </p>
+            <div className="flex space-x-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-1 h-7 w-7 rounded-full hover:bg-gray-700 text-white"
+                onClick={() => setActiveSection('introduction')}
+                title="Home"
+              >
+                <Home className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-1 h-7 w-7 rounded-full hover:bg-gray-700 text-white"
+                onClick={focusSearch}
+                title="Search (Ctrl+K)"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
             </div>
           </div>
-        </aside>
-    
-        {/* Main content */}
-
-<main className="flex-1 h-screen overflow-x-hidden bg-white ml-0 md:ml-72"> {/* Removed w-full */}
-  <div className="h-full overflow-y-auto"> {/* Added wrapper for scrollbar */}
-    <div className="w-full px-8 py-8"> {/* Content container */}
-      <header className="mb-8">
-        <div className="flex items-center mb-2">
-          {bookmarkedSections.includes(activeSection) ? (
-            <BookmarkCheck 
-              className="h-5 w-5 text-blue-500 mr-2 cursor-pointer" 
-              onClick={() => toggleBookmark(activeSection)}
-            />
-          ) : (
-            <Bookmark 
-              className="h-5 w-5 text-gray-400 mr-2 cursor-pointer hover:text-blue-500 transition-colors duration-200" 
-              onClick={() => toggleBookmark(activeSection)}
-            />
-          )}
-          <h1 className="text-3xl font-bold text-gray-900">
-            {allSections.find(s => s.id === activeSection)?.title || 'Documentation'}
-          </h1>
         </div>
-        <div className="w-32 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>
-      </header>
-
-      <section className="prose prose-blue w-full max-w-none">
-        {getContentForSection(activeSection)}
-      </section>
-    </div>
-  </div>
-</main>
       </div>
-    
+      
+      {/* Main content - with improved styling */}
+      <div className="flex-1 overflow-y-auto bg-white doc-scrollbar" ref={contentRef}>
+        <div className="max-w-4xl mx-auto px-6 py-8 bg-white shadow-sm rounded-lg m-4 min-h-[calc(100%-2rem)]">
+          <div className="mb-8 flex justify-between items-start">
+            <div>
+              <div className="flex items-center mb-2">
+                {bookmarkedSections.includes(activeSection) ? (
+                  <BookmarkCheck 
+                    className="h-5 w-5 text-blue-500 mr-2 cursor-pointer" 
+                    onClick={() => toggleBookmark(activeSection)}
+                  />
+                ) : (
+                  <Bookmark 
+                    className="h-5 w-5 text-gray-400 mr-2 cursor-pointer hover:text-blue-500 transition-colors duration-200" 
+                    onClick={() => toggleBookmark(activeSection)}
+                  />
+                )}
+                <h1 className="text-3xl font-bold text-gray-900">
+                  {allSections.find(s => s.id === activeSection)?.title || 'Documentation'}
+                </h1>
+              </div>
+              <div className="w-32 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              className="md:hidden bg-white text-blue-600 border-blue-200 shadow-sm hover:bg-blue-50 hover:border-blue-300"
+              onClick={toggleMobileSidebar}
+            >
+              Contents
+            </Button>
+          </div>
+          
+          <div className="prose prose-blue max-w-none">
+            {getContentForSection(activeSection)}
+          </div>
+          
+          <div className="mt-12 pt-6 border-t border-gray-200">
+            <div className="flex justify-between items-center">
+              <button 
+                className={`flex items-center px-3 py-2 text-blue-600 hover:text-blue-800 transition-colors rounded-lg hover:bg-blue-50 ${
+                  allSections.findIndex(s => s.id === activeSection) === 0 ? 'invisible' : ''
+                }`}
+                onClick={() => {
+                  const currentIndex = allSections.findIndex(s => s.id === activeSection);
+                  if (currentIndex > 0) {
+                    setActiveSection(allSections[currentIndex - 1].id);
+                  }
+                }}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Previous
+              </button>
+              
+              <button 
+                className={`flex items-center px-3 py-2 text-blue-600 hover:text-blue-800 transition-colors rounded-lg hover:bg-blue-50 ${
+                  allSections.findIndex(s => s.id === activeSection) === allSections.length - 1 ? 'invisible' : ''
+                }`}
+                onClick={() => {
+                  const currentIndex = allSections.findIndex(s => s.id === activeSection);
+                  if (currentIndex < allSections.length - 1) {
+                    setActiveSection(allSections[currentIndex + 1].id);
+                  }
+                }}
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
