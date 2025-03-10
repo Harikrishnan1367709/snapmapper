@@ -7,6 +7,7 @@ import { FormatDropdown } from './FormatDropdown';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Coffee, Beer, UploadCloud, DownloadCloud } from "lucide-react";
 import { Documentation } from './Documentation';
+import { transformData } from '../utils/transformer';
 
 export default function UpdatedCode() {
   const resizeTimeoutRef = useRef(null);
@@ -27,6 +28,13 @@ export default function UpdatedCode() {
     importDialogOpen: false,
     activePage: 'playground',
     showDocumentation: false,
+    showTutorial: false,
+    inputValue: '{}',
+    scriptValue: '',
+    tutorialExercise: {
+      input: '{"data": [1, 2, 3, 4, 5]}',
+      script: 'function transform(data) {\n  return data.data.map(num => num * 2);\n}'
+    },
   });
 
   // Debounced resize handler
@@ -87,7 +95,7 @@ export default function UpdatedCode() {
   };
   
   const handleScriptDialogClose = () => {
-    setState(prev => ({ ...prev, isScriptDialogOpen: false }));
+    setState(prev => ({ ...prev, isScriptDialogClose: false }));
   };
 
   const openImportDialog = () => {
@@ -98,6 +106,53 @@ export default function UpdatedCode() {
     setState(prev => ({ ...prev, importDialogOpen: false }));
   };
 
+  const handleInputChange = (value) => {
+    setState(prev => ({ ...prev, inputValue: value }));
+  };
+
+  const handleScriptContentChange = (value) => {
+    setState(prev => ({ ...prev, scriptValue: value }));
+    
+    try {
+      // Process the script differently based on whether we're in tutorial mode or regular mode
+      if (prev.showTutorial) {
+        // In tutorial mode, use the exercise input from the middle panel
+        const result = transformData(prev.tutorialExercise.input, value);
+        setState(prev => ({ ...prev, actualOutput: JSON.stringify(result, null, 2) }));
+      } else {
+        // In regular mode, use the inputValue
+        if (prev.inputValue && value) {
+          const result = transformData(prev.inputValue, value);
+          setState(prev => ({ ...prev, actualOutput: JSON.stringify(result, null, 2) }));
+        }
+      }
+    } catch (error) {
+      console.error("Error transforming data:", error);
+      setState(prev => ({ ...prev, actualOutput: JSON.stringify({ error: error.message }, null, 2) }));
+    }
+  };
+
+  const handleTutorialInputChange = (value) => {
+    setState(prev => ({
+      ...prev,
+      tutorialExercise: {
+        ...prev.tutorialExercise,
+        input: value
+      }
+    }));
+    
+    // When tutorial input changes, also process the script to update the output
+    try {
+      if (state.scriptValue) {
+        const result = transformData(value, state.scriptValue);
+        setState(prev => ({ ...prev, actualOutput: JSON.stringify(result, null, 2) }));
+      }
+    } catch (error) {
+      console.error("Error transforming tutorial data:", error);
+      setState(prev => ({ ...prev, actualOutput: JSON.stringify({ error: error.message }, null, 2) }));
+    }
+  };
+
   const handleNavigation = (page, e) => {
     // Prevent default browser navigation behavior
     if (e) {
@@ -105,9 +160,11 @@ export default function UpdatedCode() {
     }
     
     if (page === 'docs') {
-      setState(prev => ({ ...prev, showDocumentation: true, activePage: 'docs' }));
+      setState(prev => ({ ...prev, showDocumentation: true, showTutorial: false, activePage: 'docs' }));
+    } else if (page === 'tutorial') {
+      setState(prev => ({ ...prev, showTutorial: true, showDocumentation: false, activePage: 'tutorial' }));
     } else {
-      setState(prev => ({ ...prev, activePage: page, showDocumentation: false }));
+      setState(prev => ({ ...prev, activePage: page, showDocumentation: false, showTutorial: false }));
     }
   };
 
@@ -316,13 +373,13 @@ export default function UpdatedCode() {
           </button>
           <button 
             onClick={(e) => handleNavigation('tutorial', e)}
-            className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'tutorial' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+            className={`px-2 py-1 text-sm font-medium transition-colors ${state.showTutorial ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
           >
             TUTORIAL
           </button>
           <button 
             onClick={(e) => handleNavigation('playground', e)}
-            className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'playground' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
+            className={`px-2 py-1 text-sm font-medium transition-colors ${state.activePage === 'playground' && !state.showDocumentation && !state.showTutorial ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600'}`}
           >
             PLAYGROUND
           </button>
@@ -348,212 +405,320 @@ export default function UpdatedCode() {
         </div>
       </div>
 
-      <div className="flex-1 flex mx-4 my-4 rounded-md overflow-hidden shadow-xl">
-        {/* Left Panel */}
-        <div
-          style={{
-            width: `${dimensions.leftWidth}px`,
-            minWidth: '250px',
-            borderRight: '1px solid #e5e7eb'
-          }}
-          className="overflow-y-auto bg-white/95 backdrop-blur-sm"
-        >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Inputs</h2>
-            <Button 
-              variant="outline" 
-              onClick={handleInputDialogOpen}
-              className="bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm h-8 px-3 py-1 text-xs"
-            >
-              Add
-            </Button>
-          </div>
-          
-          {/* Input items would go here */}
-          <div className="p-2">
-            <div className="p-2 hover:bg-blue-50/60 cursor-pointer rounded-sm transition-colors duration-150 border border-transparent hover:border-blue-100">
-              <div className="flex items-center">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                <span className="text-sm text-gray-700">input.json</span>
-              </div>
-            </div>
-          </div>
-          
-          {/* Input dialog would appear here */}
-          {state.isInputDialogOpen && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40">
-              <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4 transform transition-all duration-200 opacity-100 scale-100">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Add Input</h2>
-                <div className="mb-4">
-                  <Label htmlFor="inputName" className="block text-sm font-medium text-gray-700 mb-1">Input Name</Label>
-                  <input
-                    id="inputName"
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="Enter input name"
-                  />
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    variant="outline"
-                    onClick={handleInputDialogClose}
-                    className="border-gray-300 hover:bg-gray-100 text-gray-700"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleInputDialogClose}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    Add
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Middle Panel */}
-        <div
-          style={{
-            width: `${dimensions.middleWidth}px`,
-            minWidth: '250px',
-            borderRight: '1px solid #e5e7eb'
-          }}
-          className="flex flex-col bg-white/95 backdrop-blur-sm"
-        >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Script</h2>
-            <div className="flex items-center space-x-4">
-              <FormatDropdown onFormatChange={handleFormatChange} />
+      {state.showDocumentation ? (
+        <Documentation onBack={() => setState(prev => ({ ...prev, showDocumentation: false, activePage: 'playground' }))} />
+      ) : (
+        <div className="flex-1 flex mx-4 my-4 rounded-md overflow-hidden shadow-xl">
+          {/* Left Panel */}
+          <div
+            style={{
+              width: `${dimensions.leftWidth}px`,
+              minWidth: '250px',
+              borderRight: '1px solid #e5e7eb'
+            }}
+            className="overflow-y-auto bg-white/95 backdrop-blur-sm"
+          >
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Inputs</h2>
               <Button 
                 variant="outline" 
-                onClick={handleScriptDialogOpen}
+                onClick={handleInputDialogOpen}
                 className="bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm h-8 px-3 py-1 text-xs"
               >
                 Add
               </Button>
             </div>
-          </div>
-          
-          {/* Script content area */}
-          <div className="flex-1 p-4">
-            <div className="bg-white border border-gray-200 rounded-sm h-full shadow-sm hover:shadow-md transition-shadow duration-300">
-              <Editor
-                height="100%"
-                language={state.scriptFormat}
-                theme="light"
-                value=""
-                options={{
-                  minimap: { enabled: false },
-                  scrollBeyondLastLine: false,
-                  fontFamily: "'Manrope', 'Monaco', monospace",
-                  fontSize: 13,
-                  padding: { top: 12, bottom: 12 }
-                }}
-              />
-            </div>
-          </div>
-          
-          {/* Script dialog would appear here */}
-          {state.isScriptDialogOpen && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40">
-              <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4 transform transition-all duration-200 opacity-100 scale-100">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Add Script</h2>
-                <div className="mb-4">
-                  <Label htmlFor="scriptName" className="block text-sm font-medium text-gray-700 mb-1">Script Name</Label>
-                  <input
-                    id="scriptName"
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="Enter script name"
-                  />
+            
+            {/* Input items would go here */}
+            <div className="p-2">
+              <div className="p-2 hover:bg-blue-50/60 cursor-pointer rounded-sm transition-colors duration-150 border border-transparent hover:border-blue-100">
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                  <span className="text-sm text-gray-700">input.json</span>
                 </div>
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    variant="outline"
-                    onClick={handleScriptDialogClose}
-                    className="border-gray-300 hover:bg-gray-100 text-gray-700"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleScriptDialogClose}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+              </div>
+            </div>
+            
+            {/* Input dialog would appear here */}
+            {state.isInputDialogOpen && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40">
+                <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4 transform transition-all duration-200 opacity-100 scale-100">
+                  <h2 className="text-xl font-bold text-gray-800 mb-4">Add Input</h2>
+                  <div className="mb-4">
+                    <Label htmlFor="inputName" className="block text-sm font-medium text-gray-700 mb-1">Input Name</Label>
+                    <input
+                      id="inputName"
+                      type="text"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      placeholder="Enter input name"
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      onClick={handleInputDialogClose}
+                      className="border-gray-300 hover:bg-gray-100 text-gray-700"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleInputDialogClose}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Add
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Middle Panel */}
+          <div
+            style={{
+              width: `${dimensions.middleWidth}px`,
+              minWidth: '250px',
+              borderRight: '1px solid #e5e7eb'
+            }}
+            className="flex flex-col bg-white/95 backdrop-blur-sm"
+          >
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">
+                {state.showTutorial ? "Exercise" : "Script"}
+              </h2>
+              {!state.showTutorial && (
+                <div className="flex items-center space-x-4">
+                  <FormatDropdown onFormatChange={handleFormatChange} />
+                  <Button 
+                    variant="outline" 
+                    onClick={handleScriptDialogOpen}
+                    className="bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-400 text-gray-700 hover:text-blue-600 transition-all duration-200 rounded-sm h-8 px-3 py-1 text-xs"
                   >
                     Add
                   </Button>
                 </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Right Panel */}
-        <div
-          style={{
-            width: `${dimensions.rightWidth}px`,
-            minWidth: '250px'
-          }}
-          className="flex flex-col bg-white/95 backdrop-blur-sm"
-        >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Output</h2>
-          </div>
-          <div className="flex-1 overflow-y-auto p-4">
-            <Label htmlFor="actualOutput" className="block text-sm font-medium text-gray-700 mb-2">
-              Actual Output
-            </Label>
-            <div className="rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white">
-              <Editor
-                height="30vh"
-                width="100%"
-                language="json"
-                theme="light"
-                value={state.actualOutput}
-                onChange={(value) => setState(prev => ({ ...prev, actualOutput: value }))}
-                options={{
-                  minimap: { enabled: false },
-                  scrollBeyondLastLine: false,
-                  wordWrap: 'on',
-                  wrappingIndent: 'indent',
-                  automaticLayout: true,
-                  fontSize: 13,
-                  fontFamily: "'Manrope', 'Monaco', monospace",
-                  padding: { top: 12, bottom: 12 }
-                }}
-                className="font-mono"
-              />
+              )}
             </div>
             
-            <div className="mt-6">
-              <Label htmlFor="expectedOutput" className="block text-sm font-medium text-gray-700 mb-2">
-                Expected Output
-              </Label>
-              <div className="rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white">
-                <Editor
-                  height="20vh"
-                  width="100%"
-                  language="json"
-                  theme="light"
-                  value=""
-                  options={{
-                    minimap: { enabled: false },
-                    scrollBeyondLastLine: false,
-                    wordWrap: 'on',
-                    wrappingIndent: 'indent',
-                    automaticLayout: true,
-                    fontSize: 13,
-                    fontFamily: "'Manrope', 'Monaco', monospace",
-                    padding: { top: 12, bottom: 12 }
-                  }}
-                  className="font-mono"
-                />
-              </div>
+            {/* Script content area */}
+            <div className="flex-1 p-4">
+              {state.showTutorial ? (
+                <div className="h-full flex flex-col space-y-4">
+                  <div className="flex-1">
+                    <Label className="block text-sm font-medium text-gray-700 mb-2">
+                      Exercise Input
+                    </Label>
+                    <div className="bg-white border border-gray-200 rounded-sm shadow-sm hover:shadow-md transition-shadow duration-300 h-1/2">
+                      <Editor
+                        height="100%"
+                        language="json"
+                        theme="light"
+                        value={state.tutorialExercise.input}
+                        onChange={handleTutorialInputChange}
+                        options={{
+                          minimap: { enabled: false },
+                          scrollBeyondLastLine: false,
+                          fontFamily: "'Manrope', 'Monaco', monospace",
+                          fontSize: 13,
+                          padding: { top: 12, bottom: 12 }
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <Label className="block text-sm font-medium text-gray-700 mb-2">
+                      Exercise Description
+                    </Label>
+                    <div className="bg-white border border-gray-200 p-4 rounded-sm shadow-sm h-1/2 overflow-y-auto">
+                      <h3 className="text-lg font-semibold mb-2">Array Transformation</h3>
+                      <p className="mb-4">
+                        In this exercise, you'll learn how to transform an array of numbers by multiplying each number by 2.
+                      </p>
+                      <h4 className="font-medium mb-1">Instructions:</h4>
+                      <ol className="list-decimal pl-5 space-y-1">
+                        <li>Modify the script in the right panel to transform the array</li>
+                        <li>Use the .map() function to multiply each number by 2</li>
+                        <li>Check the output to verify your transformation worked</li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white border border-gray-200 rounded-sm h-full shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <Editor
+                    height="100%"
+                    language={state.scriptFormat}
+                    theme="light"
+                    value={state.scriptValue}
+                    onChange={handleScriptContentChange}
+                    options={{
+                      minimap: { enabled: false },
+                      scrollBeyondLastLine: false,
+                      fontFamily: "'Manrope', 'Monaco', monospace",
+                      fontSize: 13,
+                      padding: { top: 12, bottom: 12 }
+                    }}
+                  />
+                </div>
+              )}
             </div>
+            
+            {/* Script dialog would appear here */}
+            {state.isScriptDialogOpen && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40">
+                <div className="bg-white rounded-md shadow-lg p-6 max-w-md w-full mx-4 transform transition-all duration-200 opacity-100 scale-100">
+                  <h2 className="text-xl font-bold text-gray-800 mb-4">Add Script</h2>
+                  <div className="mb-4">
+                    <Label htmlFor="scriptName" className="block text-sm font-medium text-gray-700 mb-1">Script Name</Label>
+                    <input
+                      id="scriptName"
+                      type="text"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      placeholder="Enter script name"
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      onClick={handleScriptDialogClose}
+                      className="border-gray-300 hover:bg-gray-100 text-gray-700"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleScriptDialogClose}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Add
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Panel */}
+          <div
+            style={{
+              width: `${dimensions.rightWidth}px`,
+              minWidth: '250px'
+            }}
+            className="flex flex-col bg-white/95 backdrop-blur-sm"
+          >
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">
+                {state.showTutorial ? "Solution" : "Output"}
+              </h2>
+            </div>
+            
+            {state.showTutorial ? (
+              <div className="flex-1 overflow-y-auto p-4 flex flex-col space-y-4">
+                <div className="flex-1">
+                  <Label className="block text-sm font-medium text-gray-700 mb-2">
+                    Script
+                  </Label>
+                  <div className="bg-white border border-gray-200 rounded-sm shadow-sm hover:shadow-md transition-shadow duration-300 h-1/2">
+                    <Editor
+                      height="100%"
+                      language="javascript"
+                      theme="light"
+                      value={state.scriptValue || state.tutorialExercise.script}
+                      onChange={handleScriptContentChange}
+                      options={{
+                        minimap: { enabled: false },
+                        scrollBeyondLastLine: false,
+                        fontFamily: "'Manrope', 'Monaco', monospace",
+                        fontSize: 13,
+                        padding: { top: 12, bottom: 12 }
+                      }}
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex-1">
+                  <Label className="block text-sm font-medium text-gray-700 mb-2">
+                    Output
+                  </Label>
+                  <div className="bg-white border border-gray-200 rounded-sm shadow-sm hover:shadow-md transition-shadow duration-300 h-1/2">
+                    <Editor
+                      height="100%"
+                      width="100%"
+                      language="json"
+                      theme="light"
+                      value={state.actualOutput}
+                      options={{
+                        minimap: { enabled: false },
+                        scrollBeyondLastLine: false,
+                        wordWrap: 'on',
+                        wrappingIndent: 'indent',
+                        automaticLayout: true,
+                        fontSize: 13,
+                        fontFamily: "'Manrope', 'Monaco', monospace",
+                        padding: { top: 12, bottom: 12 },
+                        readOnly: true
+                      }}
+                      className="font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto p-4">
+                <Label htmlFor="actualOutput" className="block text-sm font-medium text-gray-700 mb-2">
+                  Actual Output
+                </Label>
+                <div className="rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white">
+                  <Editor
+                    height="30vh"
+                    width="100%"
+                    language="json"
+                    theme="light"
+                    value={state.actualOutput}
+                    options={{
+                      minimap: { enabled: false },
+                      scrollBeyondLastLine: false,
+                      wordWrap: 'on',
+                      wrappingIndent: 'indent',
+                      automaticLayout: true,
+                      fontSize: 13,
+                      fontFamily: "'Manrope', 'Monaco', monospace",
+                      padding: { top: 12, bottom: 12 },
+                      readOnly: true
+                    }}
+                    className="font-mono"
+                  />
+                </div>
+                
+                <div className="mt-6">
+                  <Label htmlFor="expectedOutput" className="block text-sm font-medium text-gray-700 mb-2">
+                    Expected Output
+                  </Label>
+                  <div className="rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white">
+                    <Editor
+                      height="20vh"
+                      width="100%"
+                      language="json"
+                      theme="light"
+                      value=""
+                      options={{
+                        minimap: { enabled: false },
+                        scrollBeyondLastLine: false,
+                        wordWrap: 'on',
+                        wrappingIndent: 'indent',
+                        automaticLayout: true,
+                        fontSize: 13,
+                        fontFamily: "'Manrope', 'Monaco', monospace",
+                        padding: { top: 12, bottom: 12 }
+                      }}
+                      className="font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      )}
       
       {/* Footer - Updated with new design and custom icons */}
       <div className="border-t border-gray-200 py-3 px-6 text-sm text-gray-700 bg-white/90 shadow-sm relative backdrop-blur-sm">
