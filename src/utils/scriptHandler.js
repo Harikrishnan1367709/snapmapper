@@ -1,216 +1,161 @@
-import { JsonPathEvaluator } from './jsonPathEvaluator';
-import { snaplogicHelpers } from './snaplogicHelpers';
 
-export class ScriptHandler {
-  constructor(data) {
-    this.data = data;
-    this.jsonPathEvaluator = new JsonPathEvaluator(data);
+// Function to evaluate script expressions against JSON payload
+export const evaluateScriptExpression = (script, jsonData) => {
+  if (!script || script.trim() === '') {
+    return null;
   }
 
-  evaluate(script) {
-    if (!script?.trim()) {
-      return { message: "Enter an expression" };
-    }
-
-    try {
-      return this.parseScript(script.trim());
-    } catch (error) {
-      throw new Error(`Script evaluation failed: ${error.message}`);
-    }
+  // Handle the special $ reference to the entire object
+  if (script.trim() === '$') {
+    return jsonData;
   }
 
-  parseScript(script) {
-    // Handle JSONPath expressions
-    if (script.startsWith('$.')) {
-      return this.jsonPathEvaluator.evaluate(script);
+  try {
+    // Simple property access expressions ($.property or $['property'])
+    if (script.startsWith('$.') || script.startsWith('$[')) {
+      return evaluateJsonPathExpression(script, jsonData);
     }
 
-    // Handle helper function calls
-    if (script.startsWith('$')) {
-      return this.evaluateHelper(script);
+    // For Date.parse expressions (custom handling)
+    if (script.includes('Date.parse') || script.includes('$Event') || script.includes('$') && (script.includes('==') || script.includes('&&') || script.includes('||'))) {
+      return evaluateOperatorExpression(script, jsonData);
     }
 
-    // Handle object literals
-    if (script.startsWith('{')) {
-      return this.parseObject(script);
+    // For JavaScript expressions that don't start with $
+    if (!script.includes('$')) {
+      // Execute the script as JavaScript code
+      return evaluateJavaScriptExpression(script);
     }
 
-    // Handle array literals
-    if (script.startsWith('[')) {
-      return this.parseArray(script);
-    }
-
-    // Handle primitive values
-    return this.parsePrimitive(script);
+    // Default: try to execute as a standard script
+    return evaluateStandardExpression(script, jsonData);
+  } catch (error) {
+    console.error("Script evaluation error:", error);
+    throw new Error(`Error evaluating script: ${error.message}`);
   }
+};
 
-  evaluateHelper(expr) {
-    const match = expr.match(/\$(\w+)\.(\w+)\((.*)\)/s);
-    if (!match) {
-      throw new Error(`Invalid helper expression: ${expr}`);
+// Handle JSONPath-like expressions
+const evaluateJsonPathExpression = (expression, jsonData) => {
+  // Remove the $ at the beginning
+  const path = expression.slice(1);
+  
+  // Simple implementation to navigate object using path
+  let result = jsonData;
+  
+  // Handle both dot notation and bracket notation
+  const segments = path.split(/\.|\[['"]?|['"]?\]/g).filter(Boolean);
+  
+  for (const segment of segments) {
+    if (result === undefined || result === null) {
+      return undefined;
     }
-
-    const [, category, method, argsString] = match;
-    const helper = snaplogicHelpers[category]?.[method];
     
-    if (!helper) {
-      throw new Error(`Unknown helper method: ${category}.${method}`);
+    const cleanSegment = segment.trim();
+    if (cleanSegment) {
+      result = result[cleanSegment];
     }
-
-    const args = this.parseArguments(argsString);
-    return helper(...args);
   }
+  
+  return result;
+};
 
-  parseArguments(argsString) {
-    if (!argsString.trim()) return [];
-
-    const args = [];
-    let currentArg = '';
-    let depth = 0;
-    let inString = false;
-    let stringChar = '';
-
-    for (let i = 0; i < argsString.length; i++) {
-      const char = argsString[i];
-
-      if ((char === '"' || char === "'") && argsString[i - 1] !== '\\') {
-        if (!inString) {
-          inString = true;
-          stringChar = char;
-        } else if (char === stringChar) {
-          inString = false;
-        }
-      }
-
-      if (!inString) {
-        if (char === '{' || char === '[') depth++;
-        if (char === '}' || char === ']') depth--;
-      }
-
-      if (char === ',' && depth === 0 && !inString) {
-        args.push(this.parseScript(currentArg.trim()));
-        currentArg = '';
-        continue;
-      }
-
-      currentArg += char;
-    }
-
-    if (currentArg.trim()) {
-      args.push(this.parseScript(currentArg.trim()));
-    }
-
-    return args;
+// Handle expressions with operators (==, !=, &&, ||, etc.)
+const evaluateOperatorExpression = (expression, jsonData) => {
+  // Replace JSONPath expressions with actual values
+  let processedExpression = expression;
+  
+  // Handle Date.parse($EffectiveMoment) style expressions
+  if (expression.includes('Date.parse($EffectiveMoment)')) {
+    const effectiveMoment = jsonData.EffectiveMoment || new Date().toISOString();
+    processedExpression = processedExpression.replace(/Date\.parse\(\$EffectiveMoment\)/g, `Date.parse('${effectiveMoment}')`);
   }
-
-  parseObject(script) {
-    const content = script.slice(1, -1).trim();
-    if (!content) return {};
-
-    const result = {};
-    let currentKey = '';
-    let currentValue = '';
-    let depth = 0;
-    let inString = false;
-    let stringChar = '';
-    let collectingKey = true;
-
-    for (let i = 0; i < content.length; i++) {
-      const char = content[i];
-
-      if ((char === '"' || char === "'") && content[i - 1] !== '\\') {
-        if (!inString) {
-          inString = true;
-          stringChar = char;
-        } else if (char === stringChar) {
-          inString = false;
-        }
-      }
-
-      if (!inString) {
-        if (char === '{' || char === '[') depth++;
-        if (char === '}' || char === ']') depth--;
-      }
-
-      if (char === ':' && depth === 0 && !inString && collectingKey) {
-        collectingKey = false;
-        continue;
-      }
-
-      if (char === ',' && depth === 0 && !inString) {
-        result[currentKey.trim()] = this.parseScript(currentValue.trim());
-        currentKey = '';
-        currentValue = '';
-        collectingKey = true;
-        continue;
-      }
-
-      if (collectingKey) {
-        currentKey += char;
-      } else {
-        currentValue += char;
-      }
+  
+  // Handle Date.now() expressions
+  if (expression.includes('Date.now()')) {
+    processedExpression = processedExpression.replace(/Date\.now\(\)/g, Date.now().toString());
+  }
+  
+  // Handle $EventLiteTypeID == "Time Off Entry" style expressions
+  if (expression.includes('$EventLiteTypeID') || expression.includes('$Event')) {
+    const eventLiteTypeID = jsonData.EventLiteTypeID || '';
+    processedExpression = processedExpression.replace(/\$EventLiteTypeID/g, `"${eventLiteTypeID}"`);
+    
+    const event = jsonData.Event || '';
+    processedExpression = processedExpression.replace(/\$Event/g, `"${event}"`);
+  }
+  
+  // Handle script like Date.parse($EffectiveMoment) <= Date.now() && ($EventLiteTypeID == "Time Off Entry" || $EventLiteTypeID == "Request Time Off" || $EventLiteTypeID == "Timesheet Review Event" || $EventLiteTypeID == "Correct Time Off" || $Event == "Time Off Entry" || $Event == "Request Time Off" || $Event == "Timesheet Review Event" || $Event == "Correct Time Off")
+  if (expression.includes('$EffectiveMoment') && (expression.includes('$EventLiteTypeID') || expression.includes('$Event'))) {
+    // Replace $EffectiveMoment with its value
+    const effectiveMoment = jsonData.EffectiveMoment || new Date().toISOString();
+    processedExpression = processedExpression.replace(/\$EffectiveMoment/g, `'${effectiveMoment}'`);
+    
+    // Replace $EventLiteTypeID with its value
+    const eventLiteTypeID = jsonData.EventLiteTypeID || '';
+    processedExpression = processedExpression.replace(/\$EventLiteTypeID/g, `"${eventLiteTypeID}"`);
+    
+    // Replace $Event with its value
+    const event = jsonData.Event || '';
+    processedExpression = processedExpression.replace(/\$Event/g, `"${event}"`);
+  }
+  
+  // Handle other $ references to jsonData properties
+  const dollarRefs = processedExpression.match(/\$[a-zA-Z0-9_.]*/g) || [];
+  for (const ref of dollarRefs) {
+    if (ref === '$') continue; // Skip lone $ symbols
+    
+    const path = ref.substring(1); // Remove the $ prefix
+    let value = jsonData;
+    
+    // Navigate the object path
+    const pathParts = path.split('.');
+    for (const part of pathParts) {
+      value = value && typeof value === 'object' ? value[part] : undefined;
     }
-
-    if (currentKey) {
-      result[currentKey.trim()] = this.parseScript(currentValue.trim());
+    
+    // Replace with the actual value, handling different types appropriately
+    if (value === undefined) {
+      processedExpression = processedExpression.replace(new RegExp('\\' + ref, 'g'), 'undefined');
+    } else if (typeof value === 'string') {
+      processedExpression = processedExpression.replace(new RegExp('\\' + ref, 'g'), `"${value}"`);
+    } else if (typeof value === 'object') {
+      processedExpression = processedExpression.replace(new RegExp('\\' + ref, 'g'), JSON.stringify(value));
+    } else {
+      processedExpression = processedExpression.replace(new RegExp('\\' + ref, 'g'), value);
     }
-
+  }
+  
+  // Evaluate the processed expression
+  try {
+    // Use Function constructor to evaluate expression safely
+    const result = new Function(`return ${processedExpression}`)();
     return result;
+  } catch (error) {
+    console.error("Error evaluating operator expression:", error);
+    throw new Error(`Invalid expression: ${expression}`);
   }
+};
 
-  parseArray(script) {
-    const content = script.slice(1, -1).trim();
-    if (!content) return [];
-
-    const result = [];
-    let currentValue = '';
-    let depth = 0;
-    let inString = false;
-    let stringChar = '';
-
-    for (let i = 0; i < content.length; i++) {
-      const char = content[i];
-
-      if ((char === '"' || char === "'") && content[i - 1] !== '\\') {
-        if (!inString) {
-          inString = true;
-          stringChar = char;
-        } else if (char === stringChar) {
-          inString = false;
-        }
-      }
-
-      if (!inString) {
-        if (char === '{' || char === '[') depth++;
-        if (char === '}' || char === ']') depth--;
-      }
-
-      if (char === ',' && depth === 0 && !inString) {
-        result.push(this.parseScript(currentValue.trim()));
-        currentValue = '';
-        continue;
-      }
-
-      currentValue += char;
-    }
-
-    if (currentValue.trim()) {
-      result.push(this.parseScript(currentValue.trim()));
-    }
-
-    return result;
+// Handle standard JavaScript expressions
+const evaluateJavaScriptExpression = (expression) => {
+  try {
+    // Use Function constructor to evaluate the JavaScript expression
+    return new Function(`return ${expression}`)();
+  } catch (error) {
+    console.error("Error evaluating JavaScript expression:", error);
+    throw new Error(`Invalid JavaScript expression: ${expression}`);
   }
+};
 
-  parsePrimitive(value) {
-    if (value === 'true') return true;
-    if (value === 'false') return false;
-    if (value === 'null') return null;
-    if (value === 'undefined') return undefined;
-    if (!isNaN(Number(value))) return Number(value);
-    if (value.startsWith('"') || value.startsWith("'")) {
-      return value.slice(1, -1);
-    }
-    return value;
+// Handle standard expressions that may include custom functions
+const evaluateStandardExpression = (expression, jsonData) => {
+  try {
+    // Create a function that has access to jsonData through the $ variable
+    const func = new Function('$', `return ${expression}`);
+    return func(jsonData);
+  } catch (error) {
+    console.error("Error evaluating standard expression:", error);
+    throw new Error(`Invalid expression: ${expression}`);
   }
-}
+};
