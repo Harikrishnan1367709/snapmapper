@@ -211,6 +211,68 @@ export class ScriptHandler {
     if (value.startsWith('"') || value.startsWith("'")) {
       return value.slice(1, -1);
     }
+    
+    if (value.includes('Date.parse') || value.includes('Date.now')) {
+      try {
+        const evalContext = {
+          Date: Date,
+          $EffectiveMoment: new Date().toISOString(),
+          $EventLiteTypeID: '',
+          $Event: '',
+        };
+        
+        let evalScript = value;
+        Object.keys(evalContext).forEach(key => {
+          if (key !== 'Date') {
+            evalScript = evalScript.replace(new RegExp('\\' + key, 'g'), 
+              typeof evalContext[key] === 'string' ? `"${evalContext[key]}"` : evalContext[key]);
+          }
+        });
+        
+        return this.evaluateOperatorExpression(value, evalContext);
+      } catch (error) {
+        console.error("Date evaluation error:", error);
+        return value;
+      }
+    }
+    
     return value;
+  }
+  
+  evaluateOperatorExpression(expr, context = {}) {
+    const variables = {};
+    Object.keys(this.data).forEach(key => {
+      variables['$' + key] = this.data[key];
+    });
+    
+    const evalContext = {...variables, ...context};
+    
+    try {
+      if (expr.includes('Date.parse') || expr.includes('Date.now')) {
+        if (expr.includes('$EffectiveMoment') && 
+            (expr.includes('$EventLiteTypeID') || expr.includes('$Event'))) {
+          
+          const dateExpr = expr.includes('<=') ? 
+            expr.split('&&')[0].trim() : 
+            expr;
+          
+          const dateEval = new Function(...Object.keys(evalContext), 
+            `return ${dateExpr};`);
+          
+          return dateEval(...Object.values(evalContext));
+        } else {
+          const safeEval = new Function(...Object.keys(evalContext), 
+            `return ${expr};`);
+          return safeEval(...Object.values(evalContext));
+        }
+      }
+      
+      const safeEval = new Function(...Object.keys(evalContext), 
+        `return ${expr};`);
+      return safeEval(...Object.values(evalContext));
+    } catch (error) {
+      console.error("Expression evaluation error:", error);
+      return expr;
+    }
   }
 }
