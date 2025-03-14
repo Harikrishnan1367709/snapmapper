@@ -4,13 +4,16 @@ import Editor from '@monaco-editor/react';
 const HighlightedScript = ({ content, onChange, activeLineIndex, payload }) => {
   const editorRef = useRef(null);
   const completionProviderRef = useRef(null);
-  console.log("Payload received in HighlightedScript:", payload);
- 
-  console.log("Payload Type:", typeof payload);
   
   useEffect(() => {
-    if (editorRef.current && completionProviderRef.current) {
-      updateCompletionProvider(payload);
+    if (editorRef.current && payload) {
+      try {
+        // Ensure payload is parsed as JSON for auto-completion
+        const parsedPayload = typeof payload === 'string' ? JSON.parse(payload) : payload;
+        updateCompletionProvider(parsedPayload);
+      } catch (error) {
+        console.error('Error parsing payload for auto-completion:', error);
+      }
     }
   }, [payload]);
 
@@ -224,7 +227,14 @@ const HighlightedScript = ({ content, onChange, activeLineIndex, payload }) => {
     window.monaco = monaco;
 
     // Initial setup of completion provider
-    updateCompletionProvider(payload);
+    if (payload) {
+      try {
+        const parsedPayload = typeof payload === 'string' ? JSON.parse(payload) : payload;
+        updateCompletionProvider(parsedPayload);
+      } catch (error) {
+        console.error('Error parsing initial payload:', error);
+      }
+    }
 
     // Theme definition
     monaco.editor.defineTheme('scriptTheme', {

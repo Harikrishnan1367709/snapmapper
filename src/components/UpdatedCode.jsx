@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button"
@@ -7,6 +6,8 @@ import { FormatDropdown } from './FormatDropdown';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Coffee, Beer, UploadCloud, DownloadCloud } from "lucide-react";
 import { Documentation } from './Documentation';
+import { executeScript } from '@/utils/apiService';
+import HighlightedScript from '@/utils/HighlightedScript';
 
 export default function UpdatedCode() {
   const resizeTimeoutRef = useRef(null);
@@ -27,9 +28,16 @@ export default function UpdatedCode() {
     importDialogOpen: false,
     activePage: 'playground',
     showDocumentation: false,
+    inputData: '{\n  "Message": "Hello World!"\n}',
+    scriptContent: '',
+    isLoading: false,
+    actualOutput: '',
+    showDocumentation: false,
   });
 
-  // Debounced resize handler
+  // Debounced execution of script
+  const executionTimeoutRef = useRef(null);
+  
   const handleResize = useCallback(() => {
     if (resizeTimeoutRef.current) {
       window.cancelAnimationFrame(resizeTimeoutRef.current);
@@ -65,6 +73,69 @@ export default function UpdatedCode() {
       }
     };
   }, [handleResize]);
+
+  // Auto-execute when script content changes
+  useEffect(() => {
+    // Clear any pending execution
+    if (executionTimeoutRef.current) {
+      clearTimeout(executionTimeoutRef.current);
+    }
+
+    // Skip execution if script is empty
+    if (!state.scriptContent.trim()) {
+      return;
+    }
+
+    // Debounce execution to prevent too many API calls
+    executionTimeoutRef.current = setTimeout(async () => {
+      try {
+        setState(prev => ({ ...prev, isLoading: true }));
+        
+        let inputDataObj;
+        try {
+          inputDataObj = JSON.parse(state.inputData);
+        } catch (error) {
+          console.error('Invalid input JSON:', error);
+          setState(prev => ({ 
+            ...prev, 
+            isLoading: false,
+            actualOutput: JSON.stringify({ error: 'Invalid input JSON' }, null, 2)
+          }));
+          return;
+        }
+        
+        const result = await executeScript(inputDataObj, state.scriptContent);
+        
+        if (result.success) {
+          setState(prev => ({ 
+            ...prev, 
+            isLoading: false,
+            actualOutput: JSON.stringify(result.data, null, 2)
+          }));
+        } else {
+          setState(prev => ({ 
+            ...prev, 
+            isLoading: false,
+            actualOutput: JSON.stringify({ error: result.error }, null, 2)
+          }));
+        }
+      } catch (error) {
+        console.error('Execution error:', error);
+        setState(prev => ({ 
+          ...prev, 
+          isLoading: false,
+          actualOutput: JSON.stringify({ error: 'Execution failed' }, null, 2)
+        }));
+      }
+    }, 1000); // 1 second debounce
+
+    // Cleanup on unmount
+    return () => {
+      if (executionTimeoutRef.current) {
+        clearTimeout(executionTimeoutRef.current);
+      }
+    };
+  }, [state.scriptContent, state.inputData]);
 
   const handleFormatChange = useCallback((format) => {
     setState(prev => ({ ...prev, scriptFormat: format }));
@@ -109,6 +180,14 @@ export default function UpdatedCode() {
     } else {
       setState(prev => ({ ...prev, activePage: page, showDocumentation: false }));
     }
+  };
+
+  const handleInputChange = (value) => {
+    setState(prev => ({ ...prev, inputData: value }));
+  };
+
+  const handleScriptChange = (value) => {
+    setState(prev => ({ ...prev, scriptContent: value }));
   };
 
   if (state.showDocumentation) {
@@ -232,7 +311,7 @@ export default function UpdatedCode() {
             <span className="mx-2.5 text-gray-400">|</span>
             <span className="text-gray-500">Powered by</span>
             <a 
-              href="https://www.mulecraft.in/" 
+              href="https://www.mulecraft.in/", 
               target="_blank" 
               rel="noopener noreferrer" 
               className="text-blue-500 font-semibold hover:text-blue-800 transition-colors relative group"
@@ -369,13 +448,30 @@ export default function UpdatedCode() {
             </Button>
           </div>
           
-          {/* Input items would go here */}
-          <div className="p-2">
-            <div className="p-2 hover:bg-blue-50/60 cursor-pointer rounded-sm transition-colors duration-150 border border-transparent hover:border-blue-100">
-              <div className="flex items-center">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                <span className="text-sm text-gray-700">input.json</span>
-              </div>
+          {/* Input editor */}
+          <div className="p-4">
+            <Label htmlFor="inputData" className="block text-sm font-medium text-gray-700 mb-2">
+              Input JSON
+            </Label>
+            <div className="rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white">
+              <Editor
+                height="30vh"
+                width="100%"
+                language="json"
+                theme="light"
+                value={state.inputData}
+                onChange={handleInputChange}
+                options={{
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  wrappingIndent: 'indent',
+                  automaticLayout: true,
+                  fontSize: 13,
+                  fontFamily: "'Manrope', 'Monaco', monospace",
+                  padding: { top: 12, bottom: 12 }
+                }}
+              />
             </div>
           </div>
           
@@ -436,21 +532,13 @@ export default function UpdatedCode() {
             </div>
           </div>
           
-          {/* Script content area */}
+          {/* Script editor */}
           <div className="flex-1 p-4">
             <div className="bg-white border border-gray-200 rounded-sm h-full shadow-sm hover:shadow-md transition-shadow duration-300">
-              <Editor
-                height="100%"
-                language={state.scriptFormat}
-                theme="light"
-                value=""
-                options={{
-                  minimap: { enabled: false },
-                  scrollBeyondLastLine: false,
-                  fontFamily: "'Manrope', 'Monaco', monospace",
-                  fontSize: 13,
-                  padding: { top: 12, bottom: 12 }
-                }}
+              <HighlightedScript
+                content={state.scriptContent}
+                onChange={handleScriptChange}
+                payload={state.inputData}
               />
             </div>
           </div>
@@ -499,6 +587,9 @@ export default function UpdatedCode() {
         >
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Output</h2>
+            {state.isLoading && (
+              <div className="text-sm text-blue-600 animate-pulse">Processing...</div>
+            )}
           </div>
           <div className="flex-1 overflow-y-auto p-4">
             <Label htmlFor="actualOutput" className="block text-sm font-medium text-gray-700 mb-2">
@@ -511,13 +602,13 @@ export default function UpdatedCode() {
                 language="json"
                 theme="light"
                 value={state.actualOutput}
-                onChange={(value) => setState(prev => ({ ...prev, actualOutput: value }))}
                 options={{
                   minimap: { enabled: false },
                   scrollBeyondLastLine: false,
                   wordWrap: 'on',
                   wrappingIndent: 'indent',
                   automaticLayout: true,
+                  readOnly: true,
                   fontSize: 13,
                   fontFamily: "'Manrope', 'Monaco', monospace",
                   padding: { top: 12, bottom: 12 }
@@ -581,90 +672,4 @@ export default function UpdatedCode() {
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7 3h10v2h-10z" fill="#D97706"/>
                 <path d="M18 8c-0.4-2.3-2.4-4-4.8-4h-2.4c-2.4 0-4.4 1.7-4.8 4h-1v12h14v-12h-1zM8 18v-8h8v8h-8z" fill="#D97706"/>
-                <path d="M10 11h4v3h-4z" fill="#ffffff"/>
-              </svg>
-            </div>
-          </div>
-          <span className="text-gray-500">in</span>
-          <span className="text-gray-500 font-semibold hover:text-blue-800 cursor-pointer transition-colors">
-            Tamil Nadu, India
-          </span>
-          <span className="mx-2.5 text-gray-400">|</span>
-          <span className="text-gray-500">Powered by</span>
-          <a 
-            href="https://www.mulecraft.in/" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="text-blue-500 font-semibold hover:text-blue-800 transition-colors relative group"
-          >
-            Mulecraft
-          </a>
-        </div>
-        
-        <style jsx>{`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-          
-          .animate-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-          }
-          
-          .animate-bounce {
-            animation: bounce 1s infinite;
-          }
-          
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-          }
-          
-          @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-25%); }
-          }
-        `}</style>
-      </div>
-
-      {/* Import Project Dialog - Completely redesigned */}
-      <Dialog open={state.importDialogOpen} onOpenChange={closeImportDialog}>
-        <DialogContent className="sm:max-w-md w-full max-h-[90vh] bg-white p-0 rounded-none overflow-hidden border border-gray-300 shadow-xl">
-          <DialogHeader className="px-6 pt-6 pb-2 border-b border-gray-200">
-            <DialogTitle className="text-2xl font-bold text-gray-800">Import project</DialogTitle>
-          </DialogHeader>
-          
-          <div className="p-6">
-            <div className="border-2 border-dashed border-gray-300 rounded-none p-10 flex flex-col items-center justify-center text-center hover:border-gray-400 transition-colors duration-200 cursor-pointer">
-              <div className="mb-4 text-blue-500">
-                <UploadCloud className="mx-auto h-14 w-14 text-blue-500 opacity-80" />
-              </div>
-              <p className="text-base font-medium text-gray-600 mb-1">
-                Drop project zip here or click to upload
-              </p>
-              <p className="text-sm text-gray-500">
-                Supported format: .zip
-              </p>
-            </div>
-            
-            <div className="mt-6">
-              <p className="text-center text-sm text-red-500 mb-1">
-                Upload functionality is only intended for playground exported projects
-              </p>
-              <p className="text-center text-sm text-gray-500">
-                Importing modified files may yield an invalid project.
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex justify-end p-4 border-t border-gray-200 bg-gray-50">
-            <Button 
-              variant="outline" 
-              onClick={closeImportDialog} 
-              className="px-5 py-2 text-sm rounded-none bg-white border border-gray-300 hover:bg-gray-100 text-gray-700"
-            >
-              Cancel
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
+                <path d="M10
