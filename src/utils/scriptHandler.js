@@ -1,278 +1,92 @@
-import { JsonPathEvaluator } from './jsonPathEvaluator';
-import { snaplogicHelpers } from './snaplogicHelpers';
-
-export class ScriptHandler {
-  constructor(data) {
-    this.data = data;
-    this.jsonPathEvaluator = new JsonPathEvaluator(data);
-  }
-
-  evaluate(script) {
-    if (!script?.trim()) {
-      return { message: "Enter an expression" };
-    }
-
-    try {
-      return this.parseScript(script.trim());
-    } catch (error) {
-      throw new Error(`Script evaluation failed: ${error.message}`);
-    }
-  }
-
-  parseScript(script) {
-    // Handle JSONPath expressions
-    if (script.startsWith('$.')) {
-      return this.jsonPathEvaluator.evaluate(script);
-    }
-
-    // Handle helper function calls
-    if (script.startsWith('$')) {
-      return this.evaluateHelper(script);
-    }
-
-    // Handle object literals
-    if (script.startsWith('{')) {
-      return this.parseObject(script);
-    }
-
-    // Handle array literals
-    if (script.startsWith('[')) {
-      return this.parseArray(script);
-    }
-
-    // Handle primitive values
-    return this.parsePrimitive(script);
-  }
-
-  evaluateHelper(expr) {
-    const match = expr.match(/\$(\w+)\.(\w+)\((.*)\)/s);
-    if (!match) {
-      throw new Error(`Invalid helper expression: ${expr}`);
-    }
-
-    const [, category, method, argsString] = match;
-    const helper = snaplogicHelpers[category]?.[method];
-    
-    if (!helper) {
-      throw new Error(`Unknown helper method: ${category}.${method}`);
-    }
-
-    const args = this.parseArguments(argsString);
-    return helper(...args);
-  }
-
-  parseArguments(argsString) {
-    if (!argsString.trim()) return [];
-
-    const args = [];
-    let currentArg = '';
-    let depth = 0;
-    let inString = false;
-    let stringChar = '';
-
-    for (let i = 0; i < argsString.length; i++) {
-      const char = argsString[i];
-
-      if ((char === '"' || char === "'") && argsString[i - 1] !== '\\') {
-        if (!inString) {
-          inString = true;
-          stringChar = char;
-        } else if (char === stringChar) {
-          inString = false;
+export const evaluateOperatorExpression = (expression, data) => {
+  try {
+    // Handle special case for Date operations
+    if (expression.includes('Date.parse') || expression.includes('Date.now')) {
+      // Replace Date.parse with a safe parsing function
+      expression = expression.replace(/Date\.parse\(\$([a-zA-Z0-9_]+)\)/g, (match, prop) => {
+        const value = getPropValue(data, prop);
+        if (!value) return 'null';
+        try {
+          return Date.parse(value);
+        } catch (e) {
+          console.error(`Error parsing date: ${value}`, e);
+          return 'null';
         }
-      }
+      });
+      
+      // Replace Date.now() with current timestamp
+      expression = expression.replace(/Date\.now\(\)/g, Date.now());
 
-      if (!inString) {
-        if (char === '{' || char === '[') depth++;
-        if (char === '}' || char === ']') depth--;
-      }
-
-      if (char === ',' && depth === 0 && !inString) {
-        args.push(this.parseScript(currentArg.trim()));
-        currentArg = '';
-        continue;
-      }
-
-      currentArg += char;
-    }
-
-    if (currentArg.trim()) {
-      args.push(this.parseScript(currentArg.trim()));
-    }
-
-    return args;
-  }
-
-  parseObject(script) {
-    const content = script.slice(1, -1).trim();
-    if (!content) return {};
-
-    const result = {};
-    let currentKey = '';
-    let currentValue = '';
-    let depth = 0;
-    let inString = false;
-    let stringChar = '';
-    let collectingKey = true;
-
-    for (let i = 0; i < content.length; i++) {
-      const char = content[i];
-
-      if ((char === '"' || char === "'") && content[i - 1] !== '\\') {
-        if (!inString) {
-          inString = true;
-          stringChar = char;
-        } else if (char === stringChar) {
-          inString = false;
-        }
-      }
-
-      if (!inString) {
-        if (char === '{' || char === '[') depth++;
-        if (char === '}' || char === ']') depth--;
-      }
-
-      if (char === ':' && depth === 0 && !inString && collectingKey) {
-        collectingKey = false;
-        continue;
-      }
-
-      if (char === ',' && depth === 0 && !inString) {
-        result[currentKey.trim()] = this.parseScript(currentValue.trim());
-        currentKey = '';
-        currentValue = '';
-        collectingKey = true;
-        continue;
-      }
-
-      if (collectingKey) {
-        currentKey += char;
-      } else {
-        currentValue += char;
-      }
-    }
-
-    if (currentKey) {
-      result[currentKey.trim()] = this.parseScript(currentValue.trim());
-    }
-
-    return result;
-  }
-
-  parseArray(script) {
-    const content = script.slice(1, -1).trim();
-    if (!content) return [];
-
-    const result = [];
-    let currentValue = '';
-    let depth = 0;
-    let inString = false;
-    let stringChar = '';
-
-    for (let i = 0; i < content.length; i++) {
-      const char = content[i];
-
-      if ((char === '"' || char === "'") && content[i - 1] !== '\\') {
-        if (!inString) {
-          inString = true;
-          stringChar = char;
-        } else if (char === stringChar) {
-          inString = false;
-        }
-      }
-
-      if (!inString) {
-        if (char === '{' || char === '[') depth++;
-        if (char === '}' || char === ']') depth--;
-      }
-
-      if (char === ',' && depth === 0 && !inString) {
-        result.push(this.parseScript(currentValue.trim()));
-        currentValue = '';
-        continue;
-      }
-
-      currentValue += char;
-    }
-
-    if (currentValue.trim()) {
-      result.push(this.parseScript(currentValue.trim()));
-    }
-
-    return result;
-  }
-
-  parsePrimitive(value) {
-    if (value === 'true') return true;
-    if (value === 'false') return false;
-    if (value === 'null') return null;
-    if (value === 'undefined') return undefined;
-    if (!isNaN(Number(value))) return Number(value);
-    if (value.startsWith('"') || value.startsWith("'")) {
-      return value.slice(1, -1);
-    }
-    
-    if (value.includes('Date.parse') || value.includes('Date.now')) {
-      try {
-        const evalContext = {
-          Date: Date,
-          $EffectiveMoment: new Date().toISOString(),
-          $EventLiteTypeID: '',
-          $Event: '',
-        };
+      // Handle time-off entries and event types
+      if (expression.includes('$EventLiteTypeID') || expression.includes('$Event')) {
+        // Define the set of time-off related event types
+        const timeOffEvents = [
+          "Time Off Entry", 
+          "Request Time Off", 
+          "Timesheet Review Event", 
+          "Correct Time Off"
+        ];
         
-        let evalScript = value;
-        Object.keys(evalContext).forEach(key => {
-          if (key !== 'Date') {
-            evalScript = evalScript.replace(new RegExp('\\' + key, 'g'), 
-              typeof evalContext[key] === 'string' ? `"${evalContext[key]}"` : evalContext[key]);
-          }
+        // Replace $EventLiteTypeID comparisons
+        expression = expression.replace(/\$EventLiteTypeID\s*==\s*"([^"]+)"/g, (match, eventType) => {
+          const eventValue = getPropValue(data, 'EventLiteTypeID');
+          return eventValue === eventType ? 'true' : 'false';
         });
         
-        return this.evaluateOperatorExpression(value, evalContext);
-      } catch (error) {
-        console.error("Date evaluation error:", error);
-        return value;
+        // Replace $Event comparisons
+        expression = expression.replace(/\$Event\s*==\s*"([^"]+)"/g, (match, eventType) => {
+          const eventValue = getPropValue(data, 'Event');
+          return eventValue === eventType ? 'true' : 'false';
+        });
       }
     }
     
-    return value;
-  }
-  
-  evaluateOperatorExpression(expr, context = {}) {
-    const variables = {};
-    Object.keys(this.data).forEach(key => {
-      variables['$' + key] = this.data[key];
-    });
+    // Continue with regular expression evaluation
+    const transformExpression = (expr) => {
+      let transformed = expr;
+      if (!data) {
+        return transformed;
+      }
     
-    const evalContext = {...variables, ...context};
+      Object.keys(data).forEach(key => {
+        const placeholder = `\\$${key.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}`;
+        const regex = new RegExp(placeholder, 'g');
+        let value = data[key];
     
-    try {
-      if (expr.includes('Date.parse') || expr.includes('Date.now')) {
-        if (expr.includes('$EffectiveMoment') && 
-            (expr.includes('$EventLiteTypeID') || expr.includes('$Event'))) {
-          
-          const dateExpr = expr.includes('<=') ? 
-            expr.split('&&')[0].trim() : 
-            expr;
-          
-          const dateEval = new Function(...Object.keys(evalContext), 
-            `return ${dateExpr};`);
-          
-          return dateEval(...Object.values(evalContext));
-        } else {
-          const safeEval = new Function(...Object.keys(evalContext), 
-            `return ${expr};`);
-          return safeEval(...Object.values(evalContext));
+        if (typeof value === 'string') {
+          value = `'${value.replace(/'/g, "\\'")}'`;
+        } else if (typeof value === 'object') {
+          value = JSON.stringify(value);
         }
-      }
-      
-      const safeEval = new Function(...Object.keys(evalContext), 
-        `return ${expr};`);
-      return safeEval(...Object.values(evalContext));
-    } catch (error) {
-      console.error("Expression evaluation error:", error);
-      return expr;
-    }
+    
+        transformed = transformed.replace(regex, value);
+      });
+    
+      return transformed;
+    };
+    
+    expression = transformExpression(expression);
+    
+    return evaluateExpression(expression);
+  } catch (error) {
+    console.error('Error evaluating expression:', error);
+    return { error: `Error evaluating expression: ${error.message}` };
+  }
+};
+
+// Helper function to get property value from data object
+function getPropValue(data, propName) {
+  return data[propName];
+}
+
+// Helper function to evaluate JavaScript expressions safely
+function evaluateExpression(expr) {
+  try {
+    // Use Function constructor instead of eval for better security
+    const func = new Function('return ' + expr);
+    return func();
+  } catch (error) {
+    console.error('Error evaluating expression:', error);
+    return { error: `Invalid expression: ${error.message}` };
   }
 }
